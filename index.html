@@ -191,6 +191,7 @@ details{margin:8px 0}
   <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
   <button class="btn" id="btnTheme">🌙 Sombre</button>
 </header>
+<div id="bandeauLancement" hidden style="background:linear-gradient(90deg,#0d3a6e,#0a7ea4);color:#fff;padding:8px 14px;text-align:center;font-size:.85rem"></div>
 
 <nav>
   <button data-vue="dashboard" class="actif">Tableau de bord</button>
@@ -1506,6 +1507,19 @@ function basculerTheme(){
   try{localStorage.setItem('cmm-theme',sombre?'clair':'sombre');}catch(e){}
   appliquerTheme();
 }
+/* ===================== Lancement officiel ===================== */
+var LANCEMENT_OFFICIEL='2026-11-16T11:00:00Z';
+function avantLancement(){return Date.now()<Date.parse(LANCEMENT_OFFICIEL);}
+function majBandeau(){
+  var b=document.getElementById('bandeauLancement');
+  if(!b)return;
+  if(!avantLancement()){b.hidden=true;return;}
+  var ms=Date.parse(LANCEMENT_OFFICIEL)-Date.now();
+  var j=Math.floor(ms/86400000),h=Math.floor(ms/3600000)%24,m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60;
+  b.hidden=false;
+  b.innerHTML='🚀 <b>Lancement officiel : lundi 16 novembre à 7 h</b> (heure Martinique) — dans <b>'+
+    (j>0?j+' j ':'')+(h<10?'0':'')+h+' h '+(m<10?'0':'')+m+' min '+(s<10?'0':'')+s+' s</b> · en attendant, entra\u00eenez-vous sur le <b>mode démo</b> (bouton 🧪) !';
+}
 /* ===================== Synchronisation en ligne (Supabase) ===================== */
 var SUPABASE_URL='https://gjbglgegjlfhwkeniaal.supabase.co';
 var SUPABASE_KEY='sb_publishable_qZoScyZFhv39QMRZn4mnMw_iYVnCR2g';
@@ -1531,6 +1545,7 @@ function headersSync(){
   return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Mission-Code':c,'Content-Type':'application/json'};
 }
 function tirerSaisies(){
+  if(estDemo()){syncIndic('🧪 Démo — synchro au lancement');return Promise.resolve(false);}
   var h=headersSync();
   if(!h)return Promise.resolve(false);
   syncIndic('📡 Synchronisation…');
@@ -1568,6 +1583,7 @@ function tirerSaisies(){
   });
 }
 function pousserSaisie(no){
+  if(estDemo())return;
   var h=headersSync();
   if(!h)return;
   var e=etat.entries[no];
@@ -1671,7 +1687,10 @@ function init(){
     etat.profils=etat.profils||{};
     majBoutonProfil();
     if(estDemo()&&typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length>20){
-      if(confirm('Ce poste est encore en mode d\u00e9monstration (20 fiches fictives).\nRevenir maintenant \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?')){
+      if(avantLancement()){
+        toutRendre();
+        toast('🧪 Mode démo jusqu\'au lancement officiel (lundi 16 novembre, 7 h). Cliquez sur « ♻️ Base CMM » si vous voulez voir la vraie base.');
+      }else if(confirm('Ce poste est encore en mode d\u00e9monstration (20 fiches fictives).\nRevenir maintenant \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?')){
         rechargerBaseCMM(true);
         document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
         toast('\u267b\ufe0f Retour \u00e0 la base du CMM : '+fiches.length+' fiches.');
@@ -1685,15 +1704,23 @@ function init(){
     document.getElementById('saveIndicator').textContent='💾 Travail local restauré ('+new Date(etat.savedAt).toLocaleString('fr-FR')+')';
     toast('Bienvenue ! Votre travail sauvegardé a été restauré : '+fiches.length+' fiches.');
   }else if(typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length){
-    etat={base:BASE_EMBARQUEE,entries:{},profils:{},savedAt:null};
-    construireFiches();toutRendre();
-    document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
-    toast('Bienvenue ! La base des '+fiches.length+' fiches du CMM est d\u00e9j\u00e0 int\u00e9gr\u00e9e : vous pouvez travailler imm\u00e9diatement, sans rien importer.');
+    if(avantLancement()){
+      activerDemo();
+      document.getElementById('saveIndicator').textContent='🧪 Démo — lancement le 16 nov';
+      toast('🚀 Bienvenue ! Entraîne-toi sur le mode démo jusqu\'au lancement officiel : lundi 16 novembre, 7 h (heure Martinique).');
+    }else{
+      etat={base:BASE_EMBARQUEE,entries:{},profils:{},savedAt:null};
+      construireFiches();toutRendre();
+      document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
+      toast('Bienvenue ! La base des '+fiches.length+' fiches du CMM est d\u00e9j\u00e0 int\u00e9gr\u00e9e : vous pouvez travailler imm\u00e9diatement, sans rien importer.');
+    }
   }else{
     etat={base:null,entries:{},savedAt:null};
     overlay.hidden=false;
   }
   demarrerSync();
+  majBandeau();
+  setInterval(majBandeau,1000);
 }
 function traiterFichier(file){
   toast('⏳ Lecture du fichier…');
