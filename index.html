@@ -175,6 +175,7 @@ details{margin:8px 0}
     <h1>⚓ Qualification de la base — Filière maritime de Martinique</h1>
     <div class="sous">Cluster Maritime de Martinique × Lycée Pro Raymond Néris (Le Marin) · Mission annuaire professionnel</div>
   </div>
+  <div id="syncIndicator" style="font-size:.75rem;opacity:.9;white-space:nowrap;cursor:pointer" title="Cliquez pour changer le code mission">📡 …</div>
   <div id="saveIndicator">—</div>
   <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
   <button class="btn primary" id="btnExport">📤 Export complet</button>
@@ -1356,7 +1357,7 @@ function enregistrerFiche(f,passerSuivante){
   e.auteur=profil.pseudo;e.emoji=profil.emoji;
   var scoreAvant=calculerScore();
   var avant=pointsFiche(f);
-  construireFiches(); majStreak(); sauvegarder();
+  construireFiches(); majStreak(); sauvegarder(); pousserSaisie(f.no);
   var fApres=null;
   for(var i=0;i<fiches.length;i++)if(fiches[i].no===f.no){fApres=fiches[i];break;}
   var delta=fApres?(pointsFiche(fApres)-avant):0;
@@ -1418,7 +1419,8 @@ function rendreGuide(){
   '<li>Vérifiez l\'existence, recoupez les coordonnées, saisissez, choisissez la source, mettez la date.</li>'+
   '<li>Passez le statut à <b>Vérifié</b> et enregistrez. La sauvegarde est automatique dans le navigateur.</li>'+
   '<li>En fin de séance : <b>Export ma sélection</b> (votre plage de fiches) ou <b>Export complet</b>, et transmettez le fichier au CMM / au poste suivant.</li></ol>'+
-  '<h3>5️⃣ Règles absolues</h3><ul>'+
+  '<h3>5️⃣ Synchronisation en ligne 📡</h3><p>Au premier lancement, entrez le <b>code mission</b> donné par votre enseignant. Ensuite, chaque fiche enregistrée est <b>envoyée instantanément</b> au serveur du CMM, et le travail des autres groupes arrive automatiquement toutes les 20 secondes (indicateur 📡 en haut à droite). Aucun compte à créer — l\'export Excel reste disponible en secours.</p>'+
+  '<h3>6️⃣ Règles absolues</h3><ul>'+
   '<li>⛔ <b>Jamais de suppression ni création de fiche</b> : doublons et introuvables se notent en Observations, décision finale au CMM.</li>'+
   '<li>🔒 Les colonnes du CMM (identité, activité, commune, priorité, coordonnées pré-remplies) sont <b>en lecture seule</b> : toute correction se note en Observations.</li>'+
   '<li>🧷 Bouton « Signaler un doublon » : indiquez le n° de l\'autre fiche, la mention s\'écrit automatiquement en Observations.</li></ul>'+
@@ -1499,6 +1501,93 @@ function basculerTheme(){
   var sombre=document.documentElement.getAttribute('data-theme')==='sombre';
   try{localStorage.setItem('cmm-theme',sombre?'clair':'sombre');}catch(e){}
   appliquerTheme();
+}
+/* ===================== Synchronisation en ligne (Supabase) ===================== */
+var SUPABASE_URL='https://gjbglgegjlfhwkeniaal.supabase.co';
+var SUPABASE_KEY='sb_publishable_qZoScyZFhv39QMRZn4mnMw_iYVnCR2g';
+var LS_CODE='cmm-code-mission';
+function lireCodeMission(){
+  var c=null;
+  try{c=localStorage.getItem(LS_CODE);}catch(err){}
+  while(!(c&&c.trim())){
+    c=prompt('🔑 Code de la mission (donné par votre enseignant) :');
+    if(c===null)return null;
+    c=(c||'').trim();
+  }
+  try{localStorage.setItem(LS_CODE,c);}catch(err){}
+  return c;
+}
+function syncIndic(txt){
+  var el=document.getElementById('syncIndicator');
+  if(el)el.textContent=txt;
+}
+function headersSync(){
+  var c=lireCodeMission();
+  if(!c){syncIndic('📴 Hors ligne');return null;}
+  return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Mission-Code':c,'Content-Type':'application/json'};
+}
+function tirerSaisies(){
+  var h=headersSync();
+  if(!h)return Promise.resolve(false);
+  syncIndic('📡 Synchronisation…');
+  return fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
+    if(r.status===401||r.status===403){throw new Error('code');}
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  }).then(function(liste){
+    if(!Array.isArray(liste))throw new Error('reponse');
+    var nouvelles=0,i,e,s;
+    var connus={};
+    for(i=0;i<liste.length;i++)connus[liste[i].no_fiche]=true;
+    for(i=0;i<liste.length;i++){
+      s=liste[i];
+      e=etat.entries[s.no_fiche];
+      if(!e){e=etat.entries[s.no_fiche]={};nouvelles++;}
+      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||'';e.emoji=s.emoji||'';
+    }
+    for(var no in etat.entries){
+      if(!connus[no])pousserSaisie(no);
+    }
+    construireFiches();rendreCompteurs();rendreFiches();rendreCarte();
+    if(nouvelles>0){sauvegarder();toast('📡 '+nouvelles+' saisie(s) récupérée(s) du serveur.');}
+    syncIndic('📡 En ligne · '+liste.length+' saisies');
+    return true;
+  }).catch(function(err){
+    if(String((err&&err.message)||err).indexOf('code')>=0){
+      try{localStorage.removeItem(LS_CODE);}catch(e2){}
+      syncIndic('🔑 Code invalide');
+      alert('⛔ Code mission invalide. Redemandez le bon code à votre enseignant, puis cliquez ici.');
+      return false;
+    }
+    syncIndic('📴 Hors ligne (réessai auto)');
+    return false;
+  });
+}
+function pousserSaisie(no){
+  var h=headersSync();
+  if(!h)return;
+  var e=etat.entries[no];
+  if(!e)return;
+  h['Prefer']='resolution=merge-duplicates';
+  fetch(SUPABASE_URL+'/rest/v1/saisies',{
+    method:'POST',headers:h,
+    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||''})
+  }).then(function(r){
+    if(!r.ok)throw new Error('http '+r.status);
+    syncIndic('📡 En ligne · synchronisé');
+  }).catch(function(){
+    syncIndic('📴 Envoi en attente (réessai auto)');
+  });
+}
+function demarrerSync(){
+  if(typeof fetch==='undefined'){syncIndic('📴 Navigateur ancien');return;}
+  var el=document.getElementById('syncIndicator');
+  if(el)el.addEventListener('click',function(){
+    try{localStorage.removeItem(LS_CODE);}catch(err){}
+    tirerSaisies();
+  });
+  tirerSaisies();
+  setInterval(tirerSaisies,20000);
 }
 function init(){
   appliquerTheme();
@@ -1600,6 +1689,7 @@ function init(){
     etat={base:null,entries:{},savedAt:null};
     overlay.hidden=false;
   }
+  demarrerSync();
 }
 function traiterFichier(file){
   toast('⏳ Lecture du fichier…');
