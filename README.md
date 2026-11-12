@@ -38,3 +38,14 @@ Les données saisies restent dans le navigateur de chaque élève, même en vers
 - Validation des formats : téléphone (+596/0596/0696…), email (minuscules, avertissement sur adresses personnelles), site (https:// ajouté automatiquement).
 - Signalement de doublons noté en Observations, sans fusion ni suppression.
 - Export strictement conforme à la structure importée (21 colonnes, feuille « Base à qualifier »).
+
+## 🧭 CRM du Cluster Maritime (usage CMM)
+
+Le fichier **`crm-cmm.html`** est un CRM complet, hors ligne, destiné au CMM (pas aux élèves). Il s'appuie sur la base qualifiée :
+
+1. Ouvrez `crm-cmm.html` (ou `https://avenirocean.github.io/annuaire-maritime-cmm/crm-cmm.html`).
+2. Importez le fichier Excel **qualifié par les élèves** (structure « Base à qualifier ») : les 1 291 organisations deviennent les fiches du CRM (priorité 1 → « Cotisant », structures introuvables → « Inactif », autres → « Prospect »).
+3. Gérez chaque organisation : pipeline de prospection (Prospect / À contacter / En discussion / Cotisant / Inactif), cotisations (année, montant), contacts nominatifs, historique des interactions (appels, emails, rendez-vous…), relances planifiées, étiquettes et notes.
+4. Tableau de bord : compteurs, répartition du pipeline, relances en retard/sous 7 jours, dernières interactions.
+
+**Sauvegardes** : automatique dans le navigateur ; « Sauvegarde complète (JSON) » pour tout emporter d'un poste à l'autre (« Restaurer une sauvegarde ») ; « Export Excel » produit la base (21 colonnes) enrichie de 9 colonnes CRM. Ré-importer une nouvelle version de la base conserve tout le travail CRM (fusion par n° de fiche).

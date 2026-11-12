@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM — Cluster Maritime de Martinique</title>
+<style>
+:root{
+  --bleu:#0b3d5c; --bleu2:#0e7490; --vert:#15803d; --ambre:#b45309; --rouge:#be123c;
+  --gris:#6b7280; --grisclair:#f3f4f6; --bord:#d1d5db; --fond:#eef2f6; --carte:#ffffff; --violet:#6d28d9;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:var(--fond);color:#1f2937;font-size:15px}
+button{font-family:inherit}
+header{background:var(--bleu);color:#fff;padding:10px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+header h1{font-size:1.15rem;margin:0;font-weight:600}
+header .sous{font-size:.75rem;opacity:.85}
+#saveIndicator{font-size:.75rem;opacity:.9;margin-left:auto;white-space:nowrap}
+.btn{background:#fff;color:var(--bleu);border:none;border-radius:6px;padding:7px 12px;font-size:.82rem;cursor:pointer;font-weight:600}
+.btn:hover{background:#dbeafe}
+.btn.primary{background:var(--bleu2);color:#fff}
+.btn.primary:hover{background:#155e75}
+.btn.small{padding:4px 9px;font-size:.75rem}
+.btn.danger{color:var(--rouge)}
+nav{background:#0a2f49;display:flex;flex-wrap:wrap;gap:2px;padding:0 12px}
+nav button{background:transparent;color:#cbd5e1;border:none;padding:10px 16px;font-size:.9rem;cursor:pointer;border-bottom:3px solid transparent}
+nav button.actif{color:#fff;border-bottom-color:#38bdf8;background:rgba(56,189,248,.08);font-weight:600}
+main{padding:14px 16px 60px;max-width:1400px;margin:0 auto}
+section.vue{display:none}
+section.vue.active{display:block}
+.compteurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.cpt{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:10px 12px}
+.cpt .n{font-size:1.7rem;font-weight:700;line-height:1.1}
+.cpt .l{font-size:.75rem;color:var(--gris)}
+.cpt.vert .n{color:var(--vert)} .cpt.bleu .n{color:var(--bleu2)} .cpt.ambr .n{color:var(--ambre)}
+.cpt.roug .n{color:var(--rouge)} .cpt.gris .n{color:var(--gris)}
+.progressWrap{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:14px;margin-bottom:12px}
+.progressWrap h3{margin:0 0 8px;font-size:.95rem}
+.toolbar{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.toolbar label{font-size:.75rem;color:var(--gris);display:block;margin-bottom:2px}
+.toolbar input[type=search],.toolbar select{border:1px solid var(--bord);border-radius:6px;padding:6px 8px;font-size:.85rem;background:#fff}
+.toolbar .groupe{display:flex;flex-direction:column}
+.toolbar .chk{display:flex;align-items:center;gap:6px;font-size:.83rem;align-self:end;padding-bottom:6px}
+table.tbl{width:100%;border-collapse:collapse;background:var(--carte);border:1px solid var(--bord);border-radius:8px;overflow:hidden;font-size:.85rem}
+.tbl th{background:var(--bleu);color:#fff;text-align:left;padding:8px 10px;font-size:.78rem;white-space:nowrap}
+.tbl td{padding:7px 10px;border-top:1px solid var(--grisclair);vertical-align:middle}
+.tbl tr:hover td{background:#f0f9ff;cursor:pointer}
+.chip{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap}
+.p-Prospect{background:var(--gris)} .p-Contacter{background:var(--ambre)} .p-Discussion{background:var(--bleu2)}
+.p-Cotisant{background:var(--vert)} .p-Inactif{background:#374151}
+.badgeC{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.68rem;font-weight:700;color:#fff;margin-right:3px;white-space:nowrap;background:var(--violet)}
+.b-fermee{background:var(--rouge)}
+#drawer{position:fixed;top:0;right:-560px;width:540px;max-width:96vw;height:100vh;background:#fff;z-index:50;box-shadow:-6px 0 24px rgba(0,0,0,.25);transition:right .25s;display:flex;flex-direction:column}
+#drawer.ouvert{right:0}
+#drawer .entete{background:var(--bleu);color:#fff;padding:12px 16px;display:flex;align-items:flex-start;gap:10px}
+#drawer .entete h2{margin:0;font-size:1rem;flex:1}
+#drawer .entete .fermer{background:transparent;border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1}
+#drawer .corps{padding:14px 18px;overflow-y:auto;flex:1}
+.champ{margin-bottom:12px}
+.champ label{display:block;font-size:.78rem;font-weight:600;color:var(--bleu);margin-bottom:3px}
+.champ .ro{font-size:.72rem;color:var(--gris);font-weight:400}
+.champ input,.champ select,.champ textarea{width:100%;border:1px solid var(--bord);border-radius:6px;padding:8px 10px;font-size:.9rem;font-family:inherit}
+.champ textarea{resize:vertical;min-height:60px}
+.lecture{background:var(--grisclair);border-radius:6px;padding:6px 10px;font-size:.85rem;min-height:32px}
+.groupeChamps{border:1px solid var(--grisclair);border-radius:8px;padding:12px;margin-bottom:14px}
+.groupeChamps h3{margin:0 0 10px;font-size:.85rem;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
+.ligneItem{border:1px solid var(--grisclair);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:.83rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ligneItem .txt{flex:1;min-width:150px}
+.ligneItem .date{font-size:.72rem;color:var(--gris);white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.formLigne{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.formLigne input,.formLigne select{border:1px solid var(--bord);border-radius:6px;padding:6px 8px;font-size:.82rem;flex:1;min-width:110px}
+#overlay{position:fixed;inset:0;background:rgba(2,20,35,.82);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+#overlay[hidden]{display:none}
+#overlay .panneau{background:#fff;border-radius:12px;max-width:640px;width:100%;padding:28px;text-align:center}
+#overlay h2{margin:0 0 6px;color:var(--bleu)}
+#overlay p{font-size:.9rem;color:#4b5563}
+#dropZone{border:2px dashed var(--bleu2);border-radius:10px;padding:34px 16px;margin:16px 0;color:var(--bleu2);font-weight:600;cursor:pointer;background:#f0f9ff}
+#dropZone.survol{background:#dbeafe}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:8px;padding:10px 18px;font-size:.85rem;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,.35);max-width:90vw;text-align:center}
+.enRetard{color:var(--rouge);font-weight:700}
+.bientot{color:var(--ambre);font-weight:700}
+@media (max-width:760px){#drawer{width:100vw;right:-100vw}header h1{font-size:1rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧭 CRM — Cluster Maritime de Martinique</h1>
+    <div class="sous">Gestion des organisations de la filière maritime · données 100 % locales (hors ligne)</div>
+  </div>
+  <div id="saveIndicator">—</div>
+  <button class="btn" id="btnImport">📥 Importer / mettre à jour la base</button>
+  <button class="btn primary" id="btnExportExcel">📤 Export Excel</button>
+  <button class="btn" id="btnExportJson">💾 Sauvegarde complète (JSON)</button>
+  <button class="btn" id="btnImportJson">📂 Restaurer une sauvegarde</button>
+</header>
+
+<nav>
+  <button data-vue="dashboard" class="actif">Tableau de bord</button>
+  <button data-vue="organisations">Organisations</button>
+  <button data-vue="relances">Relances</button>
+  <button data-vue="aide">Aide</button>
+</nav>
+
+<main>
+  <section id="vue-dashboard" class="vue active">
+    <div class="compteurs" id="compteurs"></div>
+    <div class="progressWrap"><h3>Pipeline de prospection</h3><div id="pipelineDash"></div></div>
+    <div class="progressWrap"><h3>Relances à venir</h3><div id="relancesDash"></div></div>
+    <div class="progressWrap"><h3>Dernières interactions</h3><div id="interactionsDash"></div></div>
+  </section>
+
+  <section id="vue-organisations" class="vue">
+    <div class="toolbar">
+      <div class="groupe"><label>Recherche</label><input type="search" id="fRecherche" placeholder="nom, commune, contact…" style="min-width:200px"></div>
+      <div class="groupe"><label>Secteur</label><select id="fSecteur"></select></div>
+      <div class="groupe"><label>Commune</label><select id="fCommune"></select></div>
+      <div class="groupe"><label>Pipeline</label><select id="fPipeline"></select></div>
+      <label class="chk"><input type="checkbox" id="fCotisants"> cotisants seulement</label>
+      <label class="chk"><input type="checkbox" id="fActives"> actives seulement</label>
+      <button class="btn small danger" id="fReset">✖ Réinitialiser</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="tbl">
+      <thead><tr><th>N° fiche</th><th>Organisation</th><th>Commune</th><th>Secteur</th><th>Pipeline</th><th>Cotisant</th><th>Dernière interaction</th><th>Prochaine relance</th></tr></thead>
+      <tbody id="tbodyOrgs"></tbody>
+    </table>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:10px" id="pagination"></div>
+  </section>
+
+  <section id="vue-relances" class="vue">
+    <div class="progressWrap"><h3>Relances planifiées (les plus urgentes en premier)</h3><div id="listeRelances"></div></div>
+  </section>
+
+  <section id="vue-aide" class="vue">
+    <div class="progressWrap" id="aideContent" style="line-height:1.55;font-size:.9rem"></div>
+  </section>
+</main>
+
+<div id="drawer" aria-hidden="true">
+  <div class="entete">
+    <h2 id="drawerTitre">Fiche</h2>
+    <button class="fermer" id="btnFermerDrawer" title="Fermer">✕</button>
+  </div>
+  <div class="corps" id="drawerCorps"></div>
+</div>
+
+<div id="overlay" hidden>
+  <div class="panneau">
+    <h2>🧭 Bienvenue dans le CRM du Cluster Maritime</h2>
+    <p>Importez le fichier Excel <b>qualifié par les élèves</b> (1 291 fiches, structure « Base à qualifier ») : les organisations deviennent les fiches du CRM. Vous pourrez ré-importer une version plus récente plus tard sans perdre vos données (fusion par n° de fiche).</p>
+    <div id="dropZone">
+      Glissez-déposez ici le fichier <b>.xlsx</b> ou <b>.csv</b><br>
+      <span style="font-weight:400">(ou cliquez pour choisir le fichier)</span>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" hidden>
+    </div>
+    <p class="note" style="font-size:.75rem;color:var(--gris)">Tout reste dans ce navigateur : aucune donnée n'est envoyée sur Internet.<br>Pensez à faire régulièrement une « Sauvegarde complète (JSON) ».</p>
+  </div>
+</div>
+
+<script>
+/*<CORE>*/
+
+"use strict";
+function normaliserTexte(s){return (s==null?'':String(s)).trim();}
+function normaliserCle(s){return normaliserTexte(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/['\u2019\s\-\.]/g,'');}
+function decoderEntites(s){
+  return s.replace(/&(amp|lt|gt|quot|apos|#x?[0-9a-fA-F]+);/g,function(m,e){
+    if(e==='amp')return'&'; if(e==='lt')return'<'; if(e==='gt')return'>';
+    if(e==='quot')return'"'; if(e==='apos')return"'";
+    return String.fromCodePoint(e[1]==='x'||e[1]==='X'?parseInt(e.slice(2),16):parseInt(e.slice(1),10));
+  });
+}
+function echapperXml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ---------- CRC32 / ZIP ---------- */
+var _crcTable=(function(){var t=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u8){var c=0xFFFFFFFF;for(var i=0;i<u8.length;i++)c=_crcTable[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function _pipeStream(data,transformer){
+  var stream=new Blob([data]).stream().pipeThrough(transformer);
+  return new Response(stream).arrayBuffer().then(function(b){return new Uint8Array(b);});
+}
+function deflateRaw(data){return _pipeStream(data,new CompressionStream('deflate-raw'));}
+function inflateRaw(data){return _pipeStream(data,new DecompressionStream('deflate-raw'));}
+function zipWrite(files){
+  var enc=new TextEncoder(); var chunks=[]; var central=[]; var offset=0;
+  var DOS_TIME=(20<<9)|(1<<5)|1, DOS_DATE=((2025-1980)<<9)|(1<<5)|1;
+  var chain=Promise.resolve();
+  files.forEach(function(f){
+    chain=chain.then(function(){
+      var nameB=enc.encode(f.name);
+      var crc=crc32(f.data);
+      var method=0, payload=f.data;
+      var p=Promise.resolve();
+      if(typeof CompressionStream==='function'){
+        p=deflateRaw(f.data).then(function(d){method=8;payload=d;}).catch(function(){payload=f.data;method=0;});
+      }
+      return p.then(function(){
+        var lh=new DataView(new ArrayBuffer(30));
+        lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0,true);
+        lh.setUint16(8,method,true); lh.setUint16(10,DOS_TIME&0xFFFF,true); lh.setUint16(12,DOS_DATE&0xFFFF,true);
+        lh.setUint32(14,crc,true); lh.setUint32(18,payload.length,true); lh.setUint32(22,f.data.length,true);
+        lh.setUint16(26,nameB.length,true); lh.setUint16(28,0,true);
+        chunks.push(new Uint8Array(lh.buffer),nameB,payload);
+        var ch=new DataView(new ArrayBuffer(46));
+        ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true);
+        ch.setUint16(8,0,true); ch.setUint16(10,method,true); ch.setUint16(12,DOS_TIME&0xFFFF,true); ch.setUint16(14,DOS_DATE&0xFFFF,true);
+        ch.setUint32(16,crc,true); ch.setUint32(20,payload.length,true); ch.setUint32(24,f.data.length,true);
+        ch.setUint16(28,nameB.length,true); ch.setUint32(42,offset,true);
+        central.push(new Uint8Array(ch.buffer),nameB);
+        offset+=30+nameB.length+payload.length;
+      });
+    });
+  });
+  return chain.then(function(){
+    var cdSize=central.reduce(function(a,c){return a+c.length;},0);
+    var eo=new DataView(new ArrayBuffer(22));
+    eo.setUint32(0,0x06054b50,true); eo.setUint16(8,files.length,true); eo.setUint16(10,files.length,true);
+    eo.setUint32(12,cdSize,true); eo.setUint32(16,offset,true);
+    var all=chunks.concat(central,[new Uint8Array(eo.buffer)]);
+    var total=all.reduce(function(a,c){return a+c.length;},0);
+    var out=new Uint8Array(total); var p=0;
+    for(var i=0;i<all.length;i++){out.set(all[i],p);p+=all[i].length;}
+    return out;
+  });
+}
+function zipRead(bytes){
+  var dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  var i=bytes.length-22;
+  while(i>=0&&dv.getUint32(i,true)!==0x06054b50)i--;
+  if(i<0)return Promise.reject(new Error("Fichier illisible (ce n'est pas un fichier Excel/ZIP valide)."));
+  var count=dv.getUint16(i+10,true); var off=dv.getUint32(i+16,true);
+  var files={}; var dec=new TextDecoder();
+  var chain=Promise.resolve();
+  var k=0;
+  var next=function(){
+    if(k>=count)return Promise.resolve(files);
+    if(off+46>bytes.length||dv.getUint32(off,true)!==0x02014b50)return Promise.resolve(files);
+    var method=dv.getUint16(off+10,true), csize=dv.getUint32(off+20,true);
+    var nlen=dv.getUint16(off+28,true), elen=dv.getUint16(off+30,true), clen=dv.getUint16(off+32,true);
+    var lho=dv.getUint32(off+42,true);
+    var name=dec.decode(bytes.subarray(off+46,off+46+nlen));
+    var lnlen=dv.getUint16(lho+26,true), lelen=dv.getUint16(lho+28,true);
+    var start=lho+30+lnlen+lelen;
+    var data=bytes.subarray(start,start+csize);
+    off+=46+nlen+elen+clen; k++;
+    var p=(method===8)?inflateRaw(data):Promise.resolve(method===0?data:null);
+    return p.then(function(d){
+      if(d===null)return Promise.reject(new Error("Compression non gérée dans le fichier ("+name+")."));
+      files[name]=d; return next();
+    });
+  };
+  return next();
+}
+
+/* ---------- Lecture XLSX ---------- */
+function colIndex(ref){var n=0;for(var i=0;i<ref.length;i++){var c=ref.charCodeAt(i);if(c>=65&&c<=90)n=n*26+(c-64);else break;}return n-1;}
+function excelSerialVersISO(v){
+  var d=new Date(Math.round((v-25569)*86400000));
+  return d.toISOString().slice(0,10);
+}
+function parseXlsx(bytes){
+  return zipRead(bytes).then(function(files){
+    var dec=new TextDecoder();
+    var wb=dec.decode(files['xl/workbook.xml']||'');
+    var rels=dec.decode(files['xl/_rels/workbook.xml.rels']||'');
+    var sheetTag=(wb.match(/<sheet\b[^>]*\/?>/)||[''])[0];
+    var rid=((sheetTag.match(/r:id="([^"]+)"/)||[])[1])||((sheetTag.match(/r:id='([^']+)'/)||[])[1]);
+    if(!rid)return Promise.reject(new Error('Feuille introuvable dans le fichier Excel.'));
+    var target=null;
+    (rels.match(/<Relationship\b[^>]*\/?>/g)||[]).forEach(function(m){
+      if(m.indexOf('Id="'+rid+'"')>=0){
+        var t=(m.match(/Target="([^"]+)"/)||[])[1];
+        if(t)target=t.replace(/^\//,'').replace(/^xl\//,'');
+      }
+    });
+    if(!target)return Promise.reject(new Error('Feuille introuvable dans le fichier Excel.'));
+    var sheet=dec.decode(files['xl/'+target]);
+    var sstXml=files['xl/sharedStrings.xml']?dec.decode(files['xl/sharedStrings.xml']):'';
+    var sst=[];
+    (sstXml.match(/<si\b[\s\S]*?<\/si>/g)||[]).forEach(function(m){
+      var s='';
+      (m.match(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)||[]).forEach(function(t){s+=decoderEntites(t.replace(/<t(?:\s[^>]*)?>|<\/t>/g,''));});
+      sst.push(s);
+    });
+    var rows=[];
+    var rowRe=/<row\b[^>]*>([\s\S]*?)<\/row>/g, rm;
+    while((rm=rowRe.exec(sheet))){
+      var cells=[];
+      var cRe=/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, cm;
+      while((cm=cRe.exec(rm[1]))){
+        var attrs=cm[1], inner=cm[2]||'';
+        var ref=(attrs.match(/r="([A-Z]+)\d+"/)||[])[1];
+        if(!ref)continue;
+        var t=(attrs.match(/t="([^"]+)"/)||[])[1];
+        var val='';
+        var vm=inner.match(/<v(?:\s[^>]*)?>([\s\S]*?)<\/v>/);
+        if(t==='s'){ if(vm)val=(sst[+decoderEntites(vm[1])]!=null)?sst[+decoderEntites(vm[1])] :''; }
+        else if(t==='inlineStr'){ var s=''; (inner.match(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)||[]).forEach(function(tg){s+=decoderEntites(tg.replace(/<t(?:\s[^>]*)?>|<\/t>/g,''));}); val=s; }
+        else if(t==='b'){ if(vm)val=decoderEntites(vm[1])==='1'?'VRAI':'FAUX'; }
+        else if(vm){ val=decoderEntites(vm[1]); }
+        cells[colIndex(ref)]=val;
+      }
+      rows.push(cells);
+    }
+    return rows;
+  });
+}
+/* ---------- Écriture XLSX ---------- */
+function buildXlsx(headers,rows,sheetName){
+  var enc=new TextEncoder();
+  function refCol(ci){var s='';ci++;while(ci>0){var m=(ci-1)%26;s=String.fromCharCode(65+m)+s;ci=Math.floor((ci-1)/26);}return s;}
+  function cell(ri,ci,v){
+    var ref=refCol(ci)+ri;
+    var s=String(v==null?'':v);
+    if(s==='')return '<c r="'+ref+'"/>';
+    return '<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+echapperXml(s)+'</t></is></c>';
+  }
+  var xml='<?xml version="1.0" encoding="UTF-8"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  xml+='<row r="1">'+headers.map(function(h,ci){return cell(1,ci,h);}).join('')+'</row>';
+  rows.forEach(function(row,ri){
+    xml+='<row r="'+(ri+2)+'">'+headers.map(function(h,ci){return cell(ri+2,ci,row[ci]!=null?row[ci]:'');}).join('')+'</row>';
+  });
+  xml+='</sheetData></worksheet>';
+  var files=[
+    {name:'[Content_Types].xml',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>')},
+    {name:'_rels/.rels',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')},
+    {name:'xl/workbook.xml',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'+echapperXml(sheetName||'Base à qualifier')+'" sheetId="1" r:id="rId1"/></sheets></workbook>')},
+    {name:'xl/_rels/workbook.xml.rels',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>')},
+    {name:'xl/worksheets/sheet1.xml',data:enc.encode(xml)}
+  ];
+  return zipWrite(files);
+}
+/* ---------- CSV ---------- */
+function csvBuild(headers,rows,delim){
+  var d=delim||';';
+  function q(s){s=String(s==null?'':s);return /["\n\r;,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+  return '\ufeff'+[headers.map(q).join(d)].concat(rows.map(function(r){return headers.map(function(h,i){return q(r[i]!=null?r[i]+'':'');}).join(d);})).join('\r\n');
+}
+function csvParse(text){
+  text=text.replace(/^\ufeff/,'');
+  var firstLine=(text.split(/\r?\n/)[0]||'');
+  var delim=(firstLine.split(';').length>firstLine.split(',').length)?';':',';
+  var rows=[],row=[],field='',inQ=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else inQ=false; }
+      else field+=c;
+    }else{
+      if(c==='"')inQ=true;
+      else if(c===delim){row.push(field);field='';}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else if(c==='\r'){}
+      else field+=c;
+    }
+  }
+  if(field!==''||row.length){row.push(field);rows.push(row);}
+  return rows;
+}
+/* ---------- Métier ---------- */
+var SECTEURS=['Activités nautiques','Industrie nautique','Services connexes','Ports et capitaineries','Événements nautiques','Non renseigné'];
+var STATUTS=['Non vérifié','Pré-rempli — à confirmer','Vérifié','À valider','Structure introuvable'];
+var SOURCES=['','Site officiel','Annuaire pro','Registre national','Page professionnelle'];
+var COULEURS_SECTEUR={'Activités nautiques':'#0e7490','Industrie nautique':'#b45309','Services connexes':'#6d28d9','Ports et capitaineries':'#15803d','Événements nautiques':'#be123c','Non renseigné':'#6b7280'};
+var COMMUNES_MQ=[
+  ["Grand'Rivière",96,18],['Macouba',300,30],['Basse-Pointe',283,62],['Le Marigot',296,84],
+  ['Le Lorrain',252,96],['Ajoupa-Bouillon',226,118],['Sainte-Marie',268,132],['Le Morne-Rouge',172,108],
+  ['Le Prêcheur',82,72],['Le Carbet',104,108],['Saint-Pierre',92,140],['Le Morne-Vert',72,148],
+  ['Bellefontaine',72,176],['Case-Pilote',84,196],['Schoelcher',96,214],['Fonds-Saint-Denis',188,142],
+  ['Saint-Joseph',172,198],['Fort-de-France',108,244],['Le Lamentin',162,242],['Gros-Morne',202,172],
+  ['La Trinité',272,172],['Le Robert',246,244],['Le Ducos',176,284],['Rivière-Salée',150,300],
+  ['Saint-Esprit',186,314],['Le François',232,298],['Le Vauclin',258,342],['Sainte-Luce',136,340],
+  ["Les Trois-Îlets",112,300],["Les Anses-d'Arlet",62,290],['Le Diamant',104,382],['Rivière-Pilote',150,386],
+  ['Le Marin',176,392],['Sainte-Anne',198,428]
+];
+var CLE_COMMUNE_MQ={};COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
+var CLE_SECTEUR={'activitesnautiques':'Activités nautiques','industrienautique':'Industrie nautique','servicesconnexes':'Services connexes','portsetcapitaineries':'Ports et capitaineries','evenementsnautiques':'Événements nautiques'};
+function normaliserCommune(raw){
+  var s=normaliserTexte(raw);
+  if(!s)return 'Commune non renseignée';
+  var k=normaliserCle(s);
+  if(CLE_COMMUNE_MQ[k])return CLE_COMMUNE_MQ[k];
+  if(k==='leducos'||k==='ducos')return 'Le Ducos';
+  if(k==='lajoupabouillon'||k==='ajoupabouillon')return 'Ajoupa-Bouillon';
+  if(k==='schœlcher'||k==='schoelcher')return 'Schoelcher';
+  if(k==='fondssaintdenis')return 'Fonds-Saint-Denis';
+  return s;
+}
+function estCommuneMartinique(raw){
+  var k=normaliserCle(raw);
+  return Object.prototype.hasOwnProperty.call(CLE_COMMUNE_MQ,k)||k==='leducos'||k==='ducos'||k==='lajoupabouillon'||k==='ajoupabouillon'||k==='fondssaintdenis';
+}
+function normaliserSecteur(raw){
+  var s=normaliserTexte(raw);
+  if(!s)return 'Non renseigné';
+  var k=normaliserCle(s);
+  return CLE_SECTEUR[k]||s;
+}
+function validerTelephone(raw){
+  var s=normaliserTexte(raw);
+  if(!s)return {ok:true,msg:''};
+  var d=s.replace(/[\s\.\-\(\)]/g,'');
+  if(!/^\+596\d{9}$/.test(d)&&!/^(?:\+33|0)\d{9}$/.test(d)&&!/^0?59[06]\d{6,9}$/.test(d)&&!/^0?69[06]\d{6,9}$/.test(d))
+    return {ok:false,msg:"Format non reconnu. Formats attendus : +596 696 12 34 56, 0596 12 34 56, 596 696 12 34 56 ou 0690 12 34 56."};
+  return {ok:true,msg:''};
+}
+var DOMAINES_PERSO=['gmail.com','hotmail.fr','hotmail.com','orange.fr','free.fr','yahoo.fr','yahoo.com','laposte.net','wanadoo.fr','sfr.fr','numericable.fr','outlook.fr','outlook.com','icloud.com','live.fr'];
+function validerEmail(raw){
+  var s=normaliserTexte(raw).toLowerCase();
+  if(!s)return {ok:true,msg:'',perso:false};
+  if(!/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(s))
+    return {ok:false,msg:"Adresse invalide : il faut un symbole @ et un domaine (ex. contact@entreprise.fr).",perso:false};
+  var dom=s.split('@')[1];
+  return {ok:true,msg:"Attention : adresse personnelle ("+dom+"). Préférez une adresse professionnelle si l'entreprise en a une.",perso:DOMAINES_PERSO.indexOf(dom)>=0};
+}
+function normaliserSite(raw){
+  var s=normaliserTexte(raw);
+  if(!s||/^aucun(e)?$/i.test(s))return '';
+  if(!/^https?:\/\//i.test(s))s='https://'+s;
+  return s;
+}
+function validerSite(raw){
+  var s=normaliserTexte(raw);
+  if(!s||/^aucun(e)?$/i.test(s))return {ok:true,msg:''};
+  var u=normaliserSite(s);
+  if(!/^https?:\/\/[a-z0-9.\-]+\.[a-z]{2,}(:\d+)?(\/\S*)?$/i.test(u))
+    return {ok:false,msg:"URL incomplète. Exemple attendu : https://www.monentreprise.fr"};
+  return {ok:true,msg:''};
+}
+var CHAMPS_SAISIE=['st','tel','eml','web','dte','src','obs'];
+function fusionnerEntrees(locales,importees){
+  var remplis=0;
+  for(var no in importees){
+    var imp=importees[no];
+    var loc=locales[no]||(locales[no]={});
+    for(var i=0;i<CHAMPS_SAISIE.length;i++){
+      var f=CHAMPS_SAISIE[i];
+      var v=normaliserTexte(imp[f]!=null?imp[f]:'');
+      if(v&&!normaliserTexte(loc[f]!=null?loc[f]:'')){loc[f]=v;remplis++;}
+    }
+  }
+  return remplis;
+}
+function genererDemo(){
+  var communes=['Le Marin','Fort-de-France','Le Lamentin','Sainte-Anne','Le François','Le Robert','La Trinité','Sainte-Luce','Le Diamant','Les Trois-Îlets','Rivière-Pilote','Le Vauclin','Saint-Pierre','Schoelcher','Le Carbet','Basse-Pointe'];
+  var noms=[['AQUA MARIN PLONGÉE','Activités nautiques'],['CARDINAL CHARTER','Activités nautiques'],['CHANTIER NAVAL SUD','Industrie nautique'],['DISTRI MARINE 972','Industrie nautique'],['VOILE AZUR MQ','Activités nautiques'],['SERVICES PORTAIRES FDF','Ports et capitaineries'],['CAPITANERIE DU ROBERT','Ports et capitaineries'],['RÉGATE TROPICALE','Événements nautiques'],['SURF SCHOOL SUD','Activités nautiques'],['MOTEURS CARAÏBES','Industrie nautique'],['ASSURANCE MARITIME ANTILLES','Services connexes'],['TRANSPORT MARITIME EXPRESS','Services connexes'],['KAYAK SAINTE-LUCE','Activités nautiques'],['PÊCHE SPORTIVE 972','Activités nautiques'],['ATELIER VOILE LAMENTIN','Industrie nautique'],['MARINA SERVICES MARTINIQUE','Services connexes'],['PLONGÉE FLEURS DE FOND','Activités nautiques'],['ÉCOLE DE MER NORD ATLANTIQUE','Activités nautiques'],['FABRIC ANTILLES BATEAUX','Industrie nautique'],['FESTIVAL MER & VOILES','Événements nautiques']];
+  var headers=HEADERS_ATTENDUS;
+  var rows=noms.map(function(n,i){
+    var no=i+1, comm=communes[i%communes.length];
+    var prio=i<3?'1 · Cotisant CMM':(i<10?'2 · Cœur de filière vérifié':'3 · Autre');
+    var pre=(i%3===1);
+    var siren=String(300000000+i*137);
+    return [String(no),prio,pre?'Pré-rempli — à confirmer':'Non vérifié',n[0],n[0],siren,'93.29Z',n[1],'Activité de démonstration',comm,i===12?'Fermée':'Active',
+      i<3?('Cotisant CMM '+String(2018+i%5)):'Fiche fictive pour démonstration',
+      pre?('0596 '+(10+i)+' '+(20+i)+' '+(30+i)+' '+(40+i)):'','','','', 'https://annuaire-entreprises.data.gouv.fr/entreprise/'+siren,
+      'https://www.google.com/search?q='+encodeURIComponent('"'+n[0]+'" '+comm),'','',''];
+  });
+  return {headers:headers,rows:rows};
+}
+
+/*</CORE>*/
+
+/* ===================== État CRM ===================== */
+var LS_KEY='cmm-crm-v1';
+var HEADERS_ATTENDUS=['N° fiche','Priorité','Statut','Entreprise','Raison sociale (registre)','SIREN','NAF','Secteur','Sous-secteur','Commune','État au registre','Infos du CMM (déjà connues)','Téléphone','Email','WhatsApp','Site internet (à remplir)','Lien registre national','Recherche express','Date de vérification (à remplir)','Source de vérification (à remplir)','Observations (à remplir)'];
+var PIPELINE=['Prospect','À contacter','En discussion','Cotisant','Inactif'];
+var TYPES_INTER=['Appel','Email','Rendez-vous','Réunion','Salon / événement','Autre'];
+var etat={base:null,orgs:{},savedAt:null};
+var fiches=[];
+var filtres={recherche:'',secteur:'',commune:'',pipeline:'',cotisants:false,actives:false};
+var page=1; var PAR_PAGE=50;
+var ficheOuverte=null;
+
+function idxCol(h){return HEADERS_ATTENDUS.indexOf(h);}
+function echapperHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function dateFr(iso){if(!iso)return '';var p=iso.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
+function aujourdhuiISO(){return new Date().toISOString().slice(0,10);}
+
+function stageInitial(statut,prio){
+  if(statut==='Structure introuvable')return 'Inactif';
+  if(prio.charAt(0)==='1')return 'Cotisant';
+  return 'Prospect';
+}
+function construireFiches(){
+  var I={no:idxCol('N° fiche'),prio:idxCol('Priorité'),statut:idxCol('Statut'),nom:idxCol('Entreprise'),rs:idxCol('Raison sociale (registre)'),siren:idxCol('SIREN'),naf:idxCol('NAF'),sect:idxCol('Secteur'),ssect:idxCol('Sous-secteur'),comm:idxCol('Commune'),etat:idxCol('État au registre'),cmm:idxCol('Infos du CMM (déjà connues)'),tel:idxCol('Téléphone'),eml:idxCol('Email'),wa:idxCol('WhatsApp'),web:idxCol('Site internet (à remplir)'),reg:idxCol('Lien registre national'),rech:idxCol('Recherche express'),dte:idxCol('Date de vérification (à remplir)'),src:idxCol('Source de vérification (à remplir)'),obs:idxCol('Observations (à remplir)')};
+  fiches=etat.base.rows.map(function(r,i){
+    var no=normaliserTexte(r[I.no]);
+    var o=etat.orgs[no];
+    if(!o){o=etat.orgs[no]={stage:stageInitial(normaliserTexte(r[I.statut]),normaliserTexte(r[I.prio])),cotisant:null,tags:[],contacts:[],interactions:[],relances:[],notes:''};}
+    var nom=normaliserTexte(r[I.nom])||normaliserTexte(r[I.rs])||('Fiche '+no);
+    var derniereInter=o.interactions.length?o.interactions[o.interactions.length-1]:null;
+    var prochaineRelance=null;
+    o.relances.forEach(function(rl){if(!rl.fait&&(!prochaineRelance||rl.d<prochaineRelance.d))prochaineRelance=rl;});
+    return {
+      no:no,ligne:i,
+      nom:nom,rs:normaliserTexte(r[I.rs]),siren:normaliserTexte(r[I.siren]),naf:normaliserTexte(r[I.naf]),
+      secteur:normaliserSecteur(r[I.sect]),ssect:normaliserTexte(r[I.ssect]),
+      commune:normaliserCommune(r[I.comm]),etatReg:normaliserTexte(r[I.etat]),
+      prio:normaliserTexte(r[I.prio]),statutVerif:normaliserTexte(r[I.statut]),
+      cmm:normaliserTexte(r[I.cmm]),
+      tel:normaliserTexte(r[I.tel]),eml:normaliserTexte(r[I.eml]),wa:normaliserTexte(r[I.wa]),web:normaliserTexte(r[I.web]),
+      reg:normaliserTexte(r[I.reg]),rech:normaliserTexte(r[I.rech]),
+      dteVerif:normaliserTexte(r[I.dte]),srcVerif:normaliserTexte(r[I.src]),obs:normaliserTexte(r[I.obs]),
+      org:o,stage:o.stage,cotisant:o.cotisant,tags:o.tags,
+      derniereInter:derniereInter,prochaineRelance:prochaineRelance
+    };
+  });
+}
+/* ===================== Persistance ===================== */
+function sauvegarder(){
+  try{
+    etat.savedAt=new Date().toISOString();
+    localStorage.setItem(LS_KEY,JSON.stringify(etat));
+    document.getElementById('saveIndicator').textContent='💾 Sauvegardé à '+new Date().toLocaleTimeString('fr-FR');
+  }catch(err){
+    document.getElementById('saveIndicator').textContent='⚠️ Sauvegarde impossible (espace plein ?)';
+    toast('⚠️ Sauvegarde locale impossible. Faites une « Sauvegarde complète (JSON) » immédiatement.');
+  }
+}
+function charger(){
+  try{
+    var s=localStorage.getItem(LS_KEY);
+    if(!s)return false;
+    var e=JSON.parse(s);
+    if(!e||!e.base||!Array.isArray(e.base.rows))return false;
+    etat=e;
+    return true;
+  }catch(err){return false;}
+}
+/* ===================== Import base ===================== */
+function lireFichierImport(file){
+  var nom=file.name.toLowerCase();
+  var pr;
+  if(nom.endsWith('.xlsx')){
+    pr=file.arrayBuffer().then(function(b){return parseXlsx(new Uint8Array(b));});
+  }else{
+    pr=file.text().then(function(txt){return csvParse(txt);});
+  }
+  return pr.then(function(rows){
+    if(!rows.length)throw new Error('Le fichier ne contient aucune ligne.');
+    var headers=rows[0].map(normaliserTexte);
+    var manquantes=HEADERS_ATTENDUS.filter(function(h){return headers.indexOf(h)<0;});
+    if(manquantes.length)throw new Error('Colonnes manquantes : '+manquantes.join(', ')+". Vérifiez que c'est bien la base qualifiée (structure « Base à qualifier »).");
+    var iNo=headers.indexOf('N° fiche');
+    return rows.slice(1).filter(function(r){return normaliserTexte(r[iNo])!=='';});
+  });
+}
+function importerBase(file){
+  return lireFichierImport(file).then(function(rows){
+    var anciens=etat.orgs||{};
+    etat.base={headers:HEADERS_ATTENDUS,rows:rows};
+    etat.orgs={};
+    construireFiches();
+    var recup=0;
+    for(var no in etat.orgs){if(anciens[no]){etat.orgs[no]=anciens[no];recup++;}}
+    fiches.forEach(function(f,i){f.org=etat.orgs[f.no];f.derniereInter=f.org.interactions.length?f.org.interactions[f.org.interactions.length-1]:null;f.prochaineRelance=null;f.org.relances.forEach(function(rl){if(!rl.fait&&(!f.prochaineRelance||rl.d<f.prochaineRelance.d))f.prochaineRelance=rl;});});
+    sauvegarder();toutRendre();
+    document.getElementById('overlay').hidden=true;
+    toast('✅ '+rows.length+' organisations importées.'+(recup?' ('+recup+' fiches CRM existantes conservées)':''));
+  });
+}
+/* ===================== Exports ===================== */
+function telecharger(blob,nom){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=nom;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+}
+function exporterExcel(){
+  var I={no:idxCol('N° fiche'),st:idxCol('Statut')};
+  var colsCRM=['Pipeline','Cotisant (année)','Cotisant (montant €)','Étiquettes','Contacts','Nb interactions','Dernière interaction','Prochaine relance','Notes CRM'];
+  var headers=HEADERS_ATTENDUS.concat(colsCRM);
+  var rows=fiches.map(function(f){
+    var r=etat.base.rows[f.ligne].slice();
+    r[21]=f.stage;
+    r[22]=f.cotisant?f.cotisant.annee:'';
+    r[23]=f.cotisant?f.cotisant.montant:'';
+    r[24]=f.tags.join(' · ');
+    r[25]=f.org.contacts.map(function(c){return [c.nom,c.role,c.tel,c.email].filter(Boolean).join(' — ');}).join(' | ');
+    r[26]=f.org.interactions.length;
+    r[27]=f.derniereInter?(f.derniereInter.d+' '+f.derniereInter.type):'';
+    r[28]=f.prochaineRelance?f.prochaineRelance.d:'';
+    r[29]=f.org.notes;
+    return r;
+  });
+  return buildXlsx(headers,rows,'CRM CMM').then(function(xlsx){
+    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'crm-cmm-export-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📤 Export Excel : '+rows.length+' organisations (21 colonnes base + 9 colonnes CRM).');
+  }).catch(function(){
+    telecharger(new Blob([csvBuild(headers,rows)],{type:'text/csv;charset=utf-8'}),'crm-cmm-export.csv');
+    toast('📤 Export CSV (secours).');
+  });
+}
+function exporterJson(){
+  var data=JSON.stringify(etat);
+  telecharger(new Blob([data],{type:'application/json'}),'sauvegarde-crm-cmm-'+new Date().toISOString().slice(0,10)+'.json');
+  toast('💾 Sauvegarde complète téléchargée (base + pipeline, contacts, interactions, relances).');
+}
+function importerJson(file){
+  return file.text().then(function(txt){
+    var e=JSON.parse(txt);
+    if(!e||!e.base||!Array.isArray(e.base.rows)||!e.orgs)throw new Error('Fichier de sauvegarde invalide.');
+    if(!confirm('Restaurer cette sauvegarde ? Elle remplacera les données actuelles de ce navigateur.'))return;
+    etat=e;
+    construireFiches();sauvegarder();toutRendre();
+    document.getElementById('overlay').hidden=true;
+    toast('📂 Sauvegarde restaurée : '+fiches.length+' organisations.');
+  });
+}
+/* ===================== Tableau de bord ===================== */
+function rendreCompteurs(){
+  var total=fiches.length,cotisants=0,actives=0,fermees=0;
+  var auj=aujourdhuiISO(),dans7=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  var retard=0,semaine=0,mois=0;
+  var debutMois=auj.slice(0,8)+'01';
+  fiches.forEach(function(f){
+    if(f.cotisant)cotisants++;
+    if(f.etatReg==='Active')actives++;
+    if(f.etatReg==='Fermée')fermees++;
+    if(f.prochaineRelance){
+      if(f.prochaineRelance.d<auj)retard++;
+      else if(f.prochaineRelance.d<=dans7)semaine++;
+    }
+    f.org.interactions.forEach(function(it){if(it.d>=debutMois)mois++;});
+  });
+  var defs=[['Organisations',total,''],['Cotisants',cotisants,'vert'],['Actives au registre',actives,'bleu'],['Fermées',fermees,'roug'],
+    ['Relances en retard',retard,'roug'],['Relances sous 7 jours',semaine,'ambr'],['Interactions ce mois',mois,'']];
+  document.getElementById('compteurs').innerHTML=defs.map(function(x){return '<div class="cpt '+x[2]+'"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';}).join('');
+  var parStage={};
+  PIPELINE.forEach(function(p){parStage[p]=0;});
+  fiches.forEach(function(f){parStage[f.stage]=(parStage[f.stage]||0)+1;});
+  var maxS=Math.max(1,Math.max.apply(null,PIPELINE.map(function(p){return parStage[p];})));
+  document.getElementById('pipelineDash').innerHTML=PIPELINE.map(function(p){
+    return '<div class="ligneItem"><span class="chip p-'+p.replace(' ','')+'">'+p+'</span><div style="flex:1;background:#e5e7eb;border-radius:999px;height:10px;overflow:hidden"><div style="height:10px;width:'+(100*parStage[p]/maxS)+'%;background:#0e7490"></div></div><b>'+parStage[p]+'</b></div>';
+  }).join('');
+  var rels=[];
+  fiches.forEach(function(f){if(f.prochaineRelance)rels.push({f:f,rl:f.prochaineRelance});});
+  rels.sort(function(a,b){return a.rl.d<b.rl.d?-1:1;});
+  document.getElementById('relancesDash').innerHTML=rels.length?rels.slice(0,8).map(function(x){
+    var cls=x.rl.d<auj?'enRetard':(x.rl.d<=dans7?'bientot':'');
+    return '<div class="ligneItem"><span class="date">'+dateFr(x.rl.d)+'</span><span class="txt"><b>'+echapperHtml(x.f.nom)+'</b> — '+echapperHtml(x.rl.objet||'relance')+'</span><button class="btn small" data-ouvrir="'+x.f.no+'">Ouvrir</button></div>';
+  }).join(''):'<p style="font-size:.82rem;color:var(--gris)">Aucune relance planifiée.</p>';
+  brancherOuverture();
+  var inters=[];
+  fiches.forEach(function(f){f.org.interactions.forEach(function(it){inters.push({f:f,it:it});});});
+  inters.sort(function(a,b){return a.it.d<b.it.d?1:-1;});
+  document.getElementById('interactionsDash').innerHTML=inters.length?inters.slice(0,8).map(function(x){
+    return '<div class="ligneItem"><span class="date">'+dateFr(x.it.d)+'</span><span class="chip" style="background:var(--bleu2)">'+x.it.type+'</span><span class="txt"><b>'+echapperHtml(x.f.nom)+'</b> — '+echapperHtml(x.it.note||'')+'</span><button class="btn small" data-ouvrir="'+x.f.no+'">Ouvrir</button></div>';
+  }).join(''):'<p style="font-size:.82rem;color:var(--gris)">Aucune interaction enregistrée pour le moment.</p>';
+  brancherOuverture();
+}
+function brancherOuverture(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ouvrir]'),function(b){
+    b.addEventListener('click',function(){ouvrirFiche(b.getAttribute('data-ouvrir'));});
+  });
+}
+/* ===================== Liste organisations ===================== */
+function fichesFiltrees(){
+  var q=filtres.recherche.toLowerCase();
+  return fiches.filter(function(f){
+    if(q){
+      var hay=(f.nom+' '+f.rs+' '+f.commune+' '+f.org.contacts.map(function(c){return c.nom+' '+c.email;}).join(' ')).toLowerCase();
+      if(hay.indexOf(q)<0)return false;
+    }
+    if(filtres.secteur&&f.secteur!==filtres.secteur)return false;
+    if(filtres.commune&&f.commune!==filtres.commune)return false;
+    if(filtres.pipeline&&f.stage!==filtres.pipeline)return false;
+    if(filtres.cotisants&&!f.cotisant)return false;
+    if(filtres.actives&&f.etatReg==='Fermée')return false;
+    return true;
+  });
+}
+function remplirSelects(){
+  var setSect={},setComm={};
+  fiches.forEach(function(f){setSect[f.secteur]=1;setComm[f.commune]=1;});
+  function fill(id,list,def){document.getElementById(id).innerHTML='<option value="">'+def+'</option>'+Object.keys(list).sort(function(a,b){return a.localeCompare(b,'fr');}).map(function(s){return '<option value="'+echapperHtml(s)+'">'+echapperHtml(s)+'</option>';}).join('');}
+  fill('fSecteur',setSect,'Tous les secteurs');
+  fill('fCommune',setComm,'Toutes les communes');
+  var p={};PIPELINE.forEach(function(x){p[x]=1;});
+  fill('fPipeline',p,'Tout le pipeline');
+}
+function rendreFiches(){
+  var liste=fichesFiltrees();
+  var nbPages=Math.max(1,Math.ceil(liste.length/PAR_PAGE));
+  if(page>nbPages)page=nbPages;
+  var debut=(page-1)*PAR_PAGE;
+  var extrait=liste.slice(debut,debut+PAR_PAGE);
+  var auj=aujourdhuiISO(),dans7=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  document.getElementById('tbodyOrgs').innerHTML=extrait.map(function(f){
+    var relTxt=f.prochaineRelance?('<span class="'+(f.prochaineRelance.d<auj?'enRetard':(f.prochaineRelance.d<=dans7?'bientot':''))+'">'+dateFr(f.prochaineRelance.d)+'</span>'):'—';
+    return '<tr data-no="'+echapperHtml(f.no)+'">'+
+      '<td><b>'+echapperHtml(f.no)+'</b></td>'+
+      '<td>'+(f.etatReg==='Fermée'?'<span class="badgeC b-fermee">FERMÉE</span> ':'')+echapperHtml(f.nom)+(f.tags.length?' <span class="badgeC">'+f.tags.map(echapperHtml).join('</span> <span class="badgeC">')+'</span>':'')+'</td>'+
+      '<td>'+echapperHtml(f.commune)+'</td>'+
+      '<td style="font-size:.75rem">'+echapperHtml(f.secteur)+'</td>'+
+      '<td><span class="chip p-'+f.stage.replace(' ','')+'">'+f.stage+'</span></td>'+
+      '<td>'+(f.cotisant?('✅ '+f.cotisant.annee+(f.cotisant.montant?' · '+f.cotisant.montant+' €':'')):'—')+'</td>'+
+      '<td style="font-size:.78rem">'+(f.derniereInter?(dateFr(f.derniereInter.d)+' ('+f.derniereInter.type+')'):'—')+'</td>'+
+      '<td style="font-size:.78rem">'+relTxt+'</td></tr>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('#tbodyOrgs tr'),function(tr){
+    tr.addEventListener('click',function(){ouvrirFiche(tr.getAttribute('data-no'));});
+  });
+  document.getElementById('pagination').innerHTML=
+    '<button id="pPrev" '+(page<=1?'disabled':'')+'>◀ Précédent</button>'+
+    '<span style="font-size:.8rem;color:var(--gris)">'+(liste.length?('Organisations '+(debut+1)+'–'+Math.min(debut+PAR_PAGE,liste.length)+' sur '+liste.length):'Aucune organisation ne correspond aux filtres')+'</span>'+
+    '<button id="pNext" '+(page>=nbPages?'disabled':'')+'>Suivant ▶</button>';
+  var prev=document.getElementById('pPrev'),next=document.getElementById('pNext');
+  if(prev)prev.addEventListener('click',function(){page--;rendreFiches();});
+  if(next)next.addEventListener('click',function(){page++;rendreFiches();});
+}
+
+/* ===================== Fiche organisation ===================== */
+function ouvrirFiche(no){
+  var f=null;
+  for(var i=0;i<fiches.length;i++)if(fiches[i].no===no){f=fiches[i];break;}
+  if(!f)return;
+  ficheOuverte=f;
+  document.getElementById('drawerTitre').innerHTML='Fiche n° '+echapperHtml(f.no)+' — '+echapperHtml(f.nom);
+  function ro(label,val){return '<div class="champ"><label>'+label+'</label><div class="lecture">'+(val?echapperHtml(val):'<span style="color:#9ca3af">—</span>')+'</div></div>';}
+  function opt(list,sel){return list.map(function(s){return '<option value="'+echapperHtml(s)+'"'+(s===sel?' selected':'')+'>'+echapperHtml(s)+'</option>';}).join('');}
+  var o=f.org;
+  document.getElementById('drawerCorps').innerHTML=
+   '<div class="groupeChamps"><h3>Identité (issue de la base qualifiée — lecture seule)</h3>'+
+   ro('Raison sociale / SIREN / NAF',f.rs+(f.siren?' · SIREN '+f.siren:'')+(f.naf?' · '+f.naf:''))+
+   ro('Secteur',f.secteur+(f.ssect?' · '+f.ssect:''))+
+   ro('Commune / État au registre',f.commune+(f.etatReg?' · '+f.etatReg:''))+
+   ro('Coordonnées vérifiées',(f.tel?'📞 '+f.tel+'  ':'')+(f.eml?'✉ '+f.eml+'  ':'')+(f.web?'🌐 '+f.web:'')||'—')+
+   ro('Statut de vérification',f.statutVerif+(f.dteVerif?' · le '+dateFr(f.dteVerif):'')+(f.srcVerif?' · '+f.srcVerif:''))+
+   (f.obs?ro('Observations (base)',f.obs):'')+
+   (o.notes?ro('Notes CRM',o.notes):'')+
+   '<div class="liens" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">'+
+   (f.rech?'<a href="'+echapperHtml(f.rech)+'" target="_blank" rel="noopener" style="background:#e0f2fe;color:var(--bleu);border-radius:6px;padding:7px 12px;font-size:.8rem;font-weight:600;text-decoration:none">🔎 Recherche web</a>':'')+
+   (f.reg?'<a href="'+echapperHtml(f.reg)+'" target="_blank" rel="noopener" style="background:#e0f2fe;color:var(--bleu);border-radius:6px;padding:7px 12px;font-size:.8rem;font-weight:600;text-decoration:none">🏛️ Registre national</a>':'')+
+   '</div></div>'+
+   '<div class="groupeChamps"><h3>Relation</h3>'+
+   '<div class="champ"><label for="cStage">Pipeline</label><select id="cStage">'+opt(PIPELINE,o.stage)+'</select></div>'+
+   '<div class="champ"><label for="cCotisant">Cotisant CMM</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+   '<input type="checkbox" id="cCotisant" '+(o.cotisant?'checked':'')+' style="width:auto"> '+
+   '<input type="number" id="cAnnee" placeholder="Année" value="'+(o.cotisant?o.cotisant.annee:new Date().getFullYear())+'" min="2000" max="2100" style="width:100px"> '+
+   '<input type="number" id="cMontant" placeholder="Montant €" value="'+(o.cotisant&&o.cotisant.montant?o.cotisant.montant:'')+'" min="0" style="width:120px"></div></div>'+
+   '<div class="champ"><label for="cTags">Étiquettes (séparées par des virgules)</label><input id="cTags" value="'+echapperHtml(o.tags.join(', '))+'" placeholder="ex. marina, plongée, partenaire événement"></div></div>'+
+   '<div class="groupeChamps"><h3>Contacts nominatifs</h3><div id="listeContacts"></div>'+
+   '<div class="formLigne"><input id="ctNom" placeholder="Nom et prénom"><input id="ctRole" placeholder="Fonction"><input id="ctTel" placeholder="Téléphone"><input id="ctEmail" placeholder="Email"><button class="btn small" id="btnAjoutContact">+ Ajouter</button></div></div>'+
+   '<div class="groupeChamps"><h3>Historique des interactions</h3><div id="listeInteractions"></div>'+
+   '<div class="formLigne"><input type="date" id="itDate" value="'+aujourdhuiISO()+'"><select id="itType">'+opt(TYPES_INTER,'Appel')+'</select><input id="itNote" placeholder="Compte rendu (ex. rappelé, interested par la plongée sous-marine…)"><button class="btn small" id="btnAjoutInter">+ Ajouter</button></div></div>'+
+   '<div class="groupeChamps"><h3>Relances planifiées</h3><div id="listeRelancesFiche"></div>'+
+   '<div class="formLigne"><input type="date" id="rlDate"><input id="rlObjet" placeholder="Objet (ex. renvoyer bulletin d\'adhésion)"><button class="btn small" id="btnAjoutRelance">+ Planifier</button></div></div>'+
+   '<div class="groupeChamps"><h3>Notes CRM</h3><div class="champ"><textarea id="cNotes" placeholder="Notes libres sur cette organisation…">'+echapperHtml(o.notes)+'</textarea></div></div>'+
+   '<div class="actions"><button class="btn primary" id="btnEnregistrerCRM">💾 Enregistrer</button></div>';
+  document.getElementById('drawer').classList.add('ouvert');
+  document.getElementById('drawer').setAttribute('aria-hidden','false');
+  rendreContacts(f);rendreInteractions(f);rendreRelancesFiche(f);
+  document.getElementById('btnAjoutContact').addEventListener('click',function(){
+    var nom=normaliserTexte(document.getElementById('ctNom').value);
+    if(!nom){alert('Indiquez au moins le nom du contact.');return;}
+    o.contacts.push({nom:nom,role:normaliserTexte(document.getElementById('ctRole').value),tel:normaliserTexte(document.getElementById('ctTel').value),email:normaliserTexte(document.getElementById('ctEmail').value).toLowerCase()});
+    ['ctNom','ctRole','ctTel','ctEmail'].forEach(function(id){document.getElementById(id).value='';});
+    sauvegarder();construireFiches();rendreFiches();rendreCompteurs();rendreRelancesVue();ouvrirFiche(no);
+  });
+  document.getElementById('btnAjoutInter').addEventListener('click',function(){
+    var d=document.getElementById('itDate').value||aujourdhuiISO();
+    var note=normaliserTexte(document.getElementById('itNote').value);
+    if(!note){alert('Décrivez brièvement l\'interaction.');return;}
+    o.interactions.push({d:d,type:document.getElementById('itType').value,note:note});
+    document.getElementById('itNote').value='';
+    sauvegarder();construireFiches();rendreFiches();rendreCompteurs();rendreRelancesVue();ouvrirFiche(no);
+  });
+  document.getElementById('btnAjoutRelance').addEventListener('click',function(){
+    var d=document.getElementById('rlDate').value;
+    if(!d){alert('Choisissez une date de relance.');return;}
+    o.relances.push({d:d,objet:normaliserTexte(document.getElementById('rlObjet').value),fait:false});
+    document.getElementById('rlDate').value='';document.getElementById('rlObjet').value='';
+    sauvegarder();construireFiches();rendreFiches();rendreCompteurs();rendreRelancesVue();ouvrirFiche(no);
+  });
+  document.getElementById('btnEnregistrerCRM').addEventListener('click',function(){
+    o.stage=document.getElementById('cStage').value;
+    o.cotisant=document.getElementById('cCotisant').checked?{annee:normaliserTexte(document.getElementById('cAnnee').value),montant:normaliserTexte(document.getElementById('cMontant').value)}:null;
+    o.tags=document.getElementById('cTags').value.split(',').map(normaliserTexte).filter(Boolean);
+    o.notes=document.getElementById('cNotes').value.trim();
+    sauvegarder();construireFiches();remplirSelects();rendreFiches();rendreCompteurs();rendreRelancesVue();
+    toast('💾 Fiche n° '+f.no+' enregistrée.');
+    ouvrirFiche(no);
+  });
+}
+function rendreContacts(f){
+  var o=f.org;
+  document.getElementById('listeContacts').innerHTML=o.contacts.length?o.contacts.map(function(c,i){
+    return '<div class="ligneItem"><span class="txt"><b>'+echapperHtml(c.nom)+'</b>'+(c.role?' · '+echapperHtml(c.role):'')+'<br><span style="font-size:.75rem;color:var(--gris)">'+(c.tel?'📞 '+echapperHtml(c.tel)+'  ':'')+(c.email?'✉ '+echapperHtml(c.email):'')+'</span></span><button class="btn small danger" data-suppr-contact="'+i+'">✖</button></div>';
+  }).join(''):'<p style="font-size:.78rem;color:var(--gris)">Aucun contact nominatif enregistré.</p>';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-suppr-contact]'),function(b){
+    b.addEventListener('click',function(){
+      if(!confirm('Supprimer ce contact ?'))return;
+      f.org.contacts.splice(+b.getAttribute('data-suppr-contact'),1);
+      sauvegarder();construireFiches();rendreFiches();ouvrirFiche(f.no);
+    });
+  });
+}
+function rendreInteractions(f){
+  var o=f.org;
+  var liste=o.interactions.slice().reverse();
+  document.getElementById('listeInteractions').innerHTML=liste.length?liste.map(function(it,i){
+    return '<div class="ligneItem"><span class="date">'+dateFr(it.d)+'</span><span class="chip" style="background:var(--bleu2)">'+echapperHtml(it.type)+'</span><span class="txt">'+echapperHtml(it.note)+'</span><button class="btn small danger" data-suppr-inter="'+(o.interactions.length-1-i)+'">✖</button></div>';
+  }).join(''):'<p style="font-size:.78rem;color:var(--gris)">Aucune interaction enregistrée.</p>';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-suppr-inter]'),function(b){
+    b.addEventListener('click',function(){
+      if(!confirm('Supprimer cette interaction ?'))return;
+      f.org.interactions.splice(+b.getAttribute('data-suppr-inter'),1);
+      sauvegarder();construireFiches();rendreFiches();rendreCompteurs();ouvrirFiche(f.no);
+    });
+  });
+}
+function rendreRelancesFiche(f){
+  var o=f.org;
+  var auj=aujourdhuiISO();
+  document.getElementById('listeRelancesFiche').innerHTML=o.relances.length?o.relances.slice().reverse().map(function(rl,ri){
+    var idx=o.relances.length-1-ri;
+    var cls=(!rl.fait&&rl.d<auj)?'enRetard':'';
+    return '<div class="ligneItem"><input type="checkbox" data-fait="'+idx+'" '+(rl.fait?'checked':'')+' style="width:auto"><span class="date '+cls+'">'+dateFr(rl.d)+(rl.fait?' ✓ faite':'')+'</span><span class="txt">'+echapperHtml(rl.objet||'relance')+'</span><button class="btn small danger" data-suppr-rel="'+idx+'">✖</button></div>';
+  }).join(''):'<p style="font-size:.78rem;color:var(--gris)">Aucune relance planifiée.</p>';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-fait]'),function(cb){
+    cb.addEventListener('change',function(){
+      var rl=o.relances[+cb.getAttribute('data-fait')];
+      rl.fait=cb.checked;
+      if(cb.checked&&rl.d===aujourdhuiISO()&&!normaliserTexte(rl.objet)){rl.objet='relance effectuée';}
+      sauvegarder();construireFiches();rendreFiches();rendreCompteurs();rendreRelancesVue();rendreRelancesFiche(f);
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-suppr-rel]'),function(b){
+    b.addEventListener('click',function(){
+      if(!confirm('Supprimer cette relance ?'))return;
+      o.relances.splice(+b.getAttribute('data-suppr-rel'),1);
+      sauvegarder();construireFiches();rendreFiches();rendreCompteurs();rendreRelancesVue();rendreRelancesFiche(f);
+    });
+  });
+}
+function fermerDrawer(){
+  document.getElementById('drawer').classList.remove('ouvert');
+  document.getElementById('drawer').setAttribute('aria-hidden','true');
+  ficheOuverte=null;
+}
+/* ===================== Vue relances ===================== */
+function rendreRelancesVue(){
+  var auj=aujourdhuiISO();
+  var toutes=[];
+  fiches.forEach(function(f){f.org.relances.forEach(function(rl){if(!rl.fait)toutes.push({f:f,rl:rl});});});
+  toutes.sort(function(a,b){return a.rl.d<b.rl.d?-1:1;});
+  document.getElementById('listeRelances').innerHTML=toutes.length?toutes.map(function(x){
+    var cls=x.rl.d<auj?'enRetard':(x.rl.d<=new Date(Date.now()+7*86400000).toISOString().slice(0,10)?'bientot':'');
+    return '<div class="ligneItem"><span class="date '+cls+'">'+dateFr(x.rl.d)+'</span><span class="txt"><b>'+echapperHtml(x.f.nom)+'</b> ('+echapperHtml(x.f.commune)+') — '+echapperHtml(x.rl.objet||'relance')+'</span><button class="btn small" data-ouvrir="'+x.f.no+'">Ouvrir</button></div>';
+  }).join(''):'<p style="font-size:.82rem;color:var(--gris)">Aucune relance en attente. Ouvrez une organisation pour en planifier.</p>';
+  brancherOuverture();
+}
+/* ===================== Aide ===================== */
+function rendreAide(){
+  document.getElementById('aideContent').innerHTML=
+  '<h3>🧭 Le CRM du Cluster Maritime de Martinique</h3>'+
+  '<p>Ce CRM gère les organisations de la filière maritime, à partir de la base de <b>1 291 fiches qualifiées par les élèves du LP Raymond Néris</b>. Il fonctionne <b>hors ligne</b>, entièrement dans votre navigateur : aucune donnée n\'est envoyée sur Internet.</p>'+
+  '<h3>Démarrage</h3><ol>'+
+  '<li><b>Importer / mettre à jour la base</b> : glissez le fichier Excel qualifié (structure « Base à qualifier », 21 colonnes). Les organisations sont créées ; les priorités 1 deviennent automatiquement « Cotisant » au pipeline, les structures introuvables « Inactif », les autres « Prospect ».</li>'+
+  '<li>Travaillez les fiches : pipeline, cotisations, contacts nominatifs, interactions, relances, étiquettes, notes.</li>'+
+  '<li>Ré-importer une nouvelle version de la base plus tard <b>conserve</b> tout votre travail CRM (fusion par n° de fiche).</li></ol>'+
+  '<h3>Pipeline de prospection</h3><ul>'+
+  '<li><b>Prospect</b> : pas encore démarché · <b>À contacter</b> : identifié comme cible · <b>En discussion</b> : échange en cours · <b>Cotisant</b> : adhérent à jour · <b>Inactif</b> : fermé ou sans suite.</li></ul>'+
+  '<h3>Sauvegarde — important</h3><ul>'+
+  '<li>La sauvegarde est <b>automatique dans ce navigateur</b> à chaque modification.</li>'+
+  '<li>Faites régulièrement une <b>« Sauvegarde complète (JSON) »</b> : elle contient tout (base + CRM) et se restaure sur n\'importe quel poste via « Restaurer une sauvegarde ».</li>'+
+  '<li><b>Export Excel</b> : la base (21 colonnes) enrichie de 9 colonnes CRM (pipeline, cotisation, étiquettes, contacts, interactions, relances, notes) — pratique pour partager un extrait.</li></ul>'+
+  '<h3>Bonnes pratiques</h3><ul>'+
+  '<li>Notez chaque appel, email ou rendez-vous dans <b>Historique des interactions</b> : c\'est la mémoire du cluster.</li>'+
+  '<li>Planifiez vos <b>relances</b> avec des dates : elles remontent au tableau de bord (retard en rouge, sous 7 jours en orange).</li>'+
+  '<li>Utilisez les <b>étiquettes</b> pour vos campagnes (ex. « salon 2026 », « marina », « événement partenaire »).</li></ul>';
+}
+/* ===================== Navigation / init ===================== */
+function allerVue(id){
+  Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('actif',b.dataset.vue===id);});
+  Array.prototype.forEach.call(document.querySelectorAll('.vue'),function(v){v.classList.toggle('active',v.id==='vue-'+id);});
+  if(id==='dashboard')rendreCompteurs();
+  if(id==='relances')rendreRelancesVue();
+}
+function toutRendre(){construireFiches();remplirSelects();rendreFiches();rendreCompteurs();rendreRelancesVue();}
+var toastTimer=null;
+function toast(msg){
+  var t=document.querySelector('.toast');
+  if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.style.display='none';},5000);
+}
+function init(){
+  rendreAide();
+  Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.addEventListener('click',function(){allerVue(b.dataset.vue);});});
+  document.getElementById('btnFermerDrawer').addEventListener('click',fermerDrawer);
+  document.getElementById('fRecherche').addEventListener('input',function(e){filtres.recherche=e.target.value;page=1;rendreFiches();});
+  document.getElementById('fSecteur').addEventListener('change',function(e){filtres.secteur=e.target.value;page=1;rendreFiches();});
+  document.getElementById('fCommune').addEventListener('change',function(e){filtres.commune=e.target.value;page=1;rendreFiches();});
+  document.getElementById('fPipeline').addEventListener('change',function(e){filtres.pipeline=e.target.value;page=1;rendreFiches();});
+  document.getElementById('fCotisants').addEventListener('change',function(e){filtres.cotisants=e.target.checked;page=1;rendreFiches();});
+  document.getElementById('fActives').addEventListener('change',function(e){filtres.actives=e.target.checked;page=1;rendreFiches();});
+  document.getElementById('fReset').addEventListener('click',function(){
+    filtres={recherche:'',secteur:'',commune:'',pipeline:'',cotisants:false,actives:false};
+    ['fRecherche','fSecteur','fCommune','fPipeline'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('fCotisants').checked=false;document.getElementById('fActives').checked=false;
+    page=1;rendreFiches();
+  });
+  document.getElementById('btnExportExcel').addEventListener('click',function(){if(!etat.base){alert('Aucune base importée.');return;}exporterExcel();});
+  document.getElementById('btnExportJson').addEventListener('click',function(){if(!etat.base){alert('Aucune base importée.');return;}exporterJson();});
+  var overlay=document.getElementById('overlay'),dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput');
+  document.getElementById('btnImport').addEventListener('click',function(){overlay.hidden=false;});
+  dropZone.addEventListener('click',function(){fileInput.click();});
+  fileInput.addEventListener('change',function(){if(fileInput.files[0])traiterFichier(fileInput.files[0]);fileInput.value='';});
+  ['dragover','dragenter'].forEach(function(ev){dropZone.addEventListener(ev,function(e){e.preventDefault();dropZone.classList.add('survol');});});
+  ['dragleave','drop'].forEach(function(ev){dropZone.addEventListener(ev,function(e){e.preventDefault();dropZone.classList.remove('survol');});});
+  dropZone.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)traiterFichier(f);});
+  overlay.addEventListener('dragover',function(e){e.preventDefault();});
+  overlay.addEventListener('drop',function(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f)traiterFichier(f);});
+  document.getElementById('btnImportJson').addEventListener('click',function(){
+    var inp=document.createElement('input');inp.type='file';inp.accept='.json';
+    inp.addEventListener('change',function(){
+      if(inp.files[0])importerJson(inp.files[0]).catch(function(err){alert('❌ Restauration impossible : '+err.message);});
+    });
+    inp.click();
+  });
+  if(charger()&&etat.base&&etat.base.rows.length&&etat.orgs){
+    toutRendre();
+    document.getElementById('saveIndicator').textContent='💾 Données restaurées ('+new Date(etat.savedAt).toLocaleString('fr-FR')+')';
+  }else{
+    etat={base:null,orgs:{},savedAt:null};
+    overlay.hidden=false;
+  }
+}
+function traiterFichier(file){
+  toast('⏳ Lecture du fichier…');
+  return importerBase(file).catch(function(err){
+    console.error(err);
+    alert('❌ Import impossible : '+err.message);
+  });
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')fermerDrawer();});
+init();
+</script>
+</body>
+</html>
