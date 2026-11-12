@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grille de notation /20 — Mission Annuaire Maritime (CMM × LP Néris)</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root{--bleu:#0b3d5c;--accent:#0a7ea4;--fond:#f4f8fa}
+  *{box-sizing:border-box}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#1c2b33;background:var(--fond);margin:0;padding:16px;line-height:1.5}
+  .feuille{max-width:900px;margin:0 auto;background:#fff;padding:30px 40px;border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.08)}
+  header{border-bottom:4px solid var(--bleu);padding-bottom:12px;margin-bottom:18px}
+  h1{color:var(--bleu);font-size:1.3rem;margin:0}
+  .sous{color:#5a6b75;font-size:.85rem;margin-top:4px}
+  h2{color:var(--bleu);font-size:1rem;margin:22px 0 8px;border-left:4px solid var(--accent);padding-left:8px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}
+  th{background:var(--bleu);color:#fff;text-align:left;padding:6px 9px}
+  td{border-bottom:1px solid #dce6eb;padding:6px 9px;vertical-align:top}
+  tr:nth-child(even) td{background:#f7fafc}
+  .pts{font-weight:700;white-space:nowrap}
+  .note{font-size:1.25rem;font-weight:700;color:var(--accent)}
+  .encadre{background:#eaf4f9;border:1.5px solid var(--accent);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:.9rem}
+  .total{background:var(--bleu);color:#fff;border-radius:8px;padding:12px 16px;font-size:1rem;margin-top:16px}
+  ul{padding-left:22px;font-size:.9rem}
+  @media print{body{background:#fff;padding:0}.feuille{box-shadow:none;max-width:100%;padding:8mm 10mm}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="feuille">
+  <header>
+    <img src="logo-cmm.png" alt="Cluster Maritime de Martinique" style="height:54px;width:auto;margin-bottom:6px">
+    <h1>🎓 Grille de notation sur 20 — Mission Annuaire Maritime</h1>
+    <div class="sous">CMM × Lycée Pro Raymond Néris (Le Marin) · Barème calé sur les points, flammes et défis de l'application · Note finale du projet</div>
+  </header>
+
+  <h2>1. Rappel du système de points de l'application</h2>
+  <table>
+    <tr><th>Action</th><th>Points app</th></tr>
+    <tr><td>Fiche passée « Vérifié » (date + source obligatoires)</td><td class="pts">+10</td></tr>
+    <tr><td>Bonus qualité : téléphone ET (courriel ou site) sur une fiche vérifiée</td><td class="pts">+2</td></tr>
+    <tr><td>Fiche « À valider » ou « Structure introuvable » correctement documentée en Observations</td><td class="pts">+3</td></tr>
+    <tr><td>Chaque coordonnée saisie (téléphone / courriel / site)</td><td class="pts">+1</td></tr>
+    <tr><td>Quête du jour accomplie</td><td class="pts">+20</td></tr>
+    <tr><td>Défi 10 minutes — score selon fiches traitées</td><td class="pts">classement</td></tr>
+    <tr><td>Série 🔥 (travailler au moins 1 fiche par jour) — badge « Feu sacré » à 3 jours</td><td class="pts">flammes</td></tr>
+  </table>
+  <p style="font-size:.85rem;color:#5a6b75">Grades : Mousse (0) · Matelot (60 pts) · Gabier (150) · Quartier-maître (300) · Maître d'équipage (600) · Second (1 200) · Capitaine (2 500) · Amiral de la flotte (5 000).</p>
+
+  <h2>2. Grille de notation individuelle sur 20</h2>
+  <table>
+    <tr><th>Critère</th><th>Indicateur dans l'app</th><th>Barème</th><th>Pts</th></tr>
+    <tr><td><b>A. Volume de vérification</b><br>Travail de fond sur les fiches</td>
+        <td>Nombre de fiches « Vérifié » de l'élève<br>(profil élève → tableau de bord)</td>
+        <td>0 à 9 fiches = 0<br>10 à 24 = 1 · 25 à 39 = 2 · 40 à 54 = 3<br>55 à 69 = 4 · 70 à 84 = 5 · 85 et + = 6</td><td class="pts">/6</td></tr>
+    <tr><td><b>B. Complétude des coordonnées</b><br>Qualité du renseignement</td>
+        <td>Part des fiches vérifiées avec le bonus +2<br>(téléphone ET courriel/site)</td>
+        <td>&lt; 30 % = 0 · 30 à 49 % = 1 · 50 à 69 % = 2<br>70 à 84 % = 3 · 85 % et + = 4</td><td class="pts">/4</td></tr>
+    <tr><td><b>C. Qualité du signalement</b><br>Rigueur d'investigation</td>
+        <td>Fiches « À valider » / « Introuvable »<br>avec observations documentées</td>
+        <td>0 = 0 · 1 à 2 = 1 · 3 à 5 = 2 · 6 et + = 3</td><td class="pts">/3</td></tr>
+    <tr><td><b>D. Régularité — flammes 🔥</b><br>Assiduité sur la durée</td>
+        <td>Série de jours travaillés<br>(badge « Feu sacré » = 3 jours)</td>
+        <td>0 à 1 jour = 0 · 2 jours = 1<br>3 jours et + = 2</td><td class="pts">/2</td></tr>
+    <tr><td><b>E. Défis et participation</b><br>Engagement collectif</td>
+        <td>Quêtes du jour accomplies,<br>défis 10 min, podium du groupe</td>
+        <td>1 pt par quête du jour accomplie (max 2)<br>+ 1 pt si participation à ≥ 3 défis 10 min</td><td class="pts">/3</td></tr>
+    <tr><td><b>F. Progression dans les grades</b><br>Niveau général atteint</td>
+        <td>Grade de l'élève en fin de projet</td>
+        <td>Mousse/Matelot = 0 · Gabier = 0,5 · Quartier-maître = 1<br>Maître d'équipage = 1,5 · Second et + = 2</td><td class="pts">/2</td></tr>
+  </table>
+  <div class="total">Note sur 20 = A (max 6) + B (max 4) + C (max 3) + D (max 2) + E (max 3) + F (max 2)</div>
+
+  <h2>3. Barème simplifié (option « conversion automatique »)</h2>
+  <p style="font-size:.9rem">Si vous préférez une note directement dérivée du score de l'application :</p>
+  <div class="encadre">
+    <b>Note = min(20 ; score de l'élève ÷ 150)</b> arrondie au demi-point.<br>
+    <span style="font-size:.85rem">Exemples : 300 pts → 2/20 · 750 pts → 5/20 · 1 500 pts → 10/20 · 2 250 pts → 15/20 · <b>3 000 pts et + → 20/20</b> (soit ≈ 85 fiches vérifiées complètes, ou l'équivalent en travail documenté).</span>
+  </div>
+
+  <h2>4. Note collective du projet de la classe (optionnelle)</h2>
+  <table>
+    <tr><th>Indicateur classe</th><th>Objectif</th><th>Barème</th></tr>
+    <tr><td>Taux de fiches « Vérifié » sur les 1 291</td><td>≥ 80 % de la base vérifiée</td><td class="pts">/10 (taux × 10)</td></tr>
+    <tr><td>Cotisants CMM (48 fiches priorité 1) tous vérifiés</td><td>100 % des cotisants</td><td class="pts">/4 (1 pt par tranche de 25 %)</td></tr>
+    <tr><td>Badge collectif « Marathon » (500 fiches vérifiées)</td><td>obtenu</td><td class="pts">/2</td></tr>
+    <tr><td>Podium des groupes : les 13 plages de 100 fiches toutes ≥ 50 %</td><td>aucun groupe laissé pour compte</td><td class="pts">/4 (1 pt par palier : 25 %, 50 %, 75 %, 100 % des groupes)</td></tr>
+  </table>
+
+  <h2>5. Où lire chaque indicateur</h2>
+  <ul>
+    <li><b>Profil élève</b> (bouton 👤) : points, grade, badges, série 🔥, fiches vérifiées de l'élève</li>
+    <li><b>🏁 Ma session</b> : bilan de la séance (fiches, points, badges)</li>
+    <li><b>Tableau de bord</b> : compteurs globaux, quête du jour, podium des groupes, avancement par plage de 100 fiches</li>
+    <li><b>Cotisants CMM</b> : compteur dédié dans le tableau de bord</li>
+  </ul>
+
+  <div style="margin-top:18px;padding-top:10px;border-top:1px dashed #b9c7cf;color:#5a6b75;font-size:.72rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <span>© Cluster Maritime de Martinique — données protégées (RGPD) · <a href="mentions-legales.html" style="color:inherit">⚖️ Mentions légales · RGPD</a></span>
+    <span>Système conçu par <b>PositivBusiness SASU</b> — <b>Alexandrine MILESI</b>, fondatrice</span>
+  </div>
+</div>
+</body>
+</html>
