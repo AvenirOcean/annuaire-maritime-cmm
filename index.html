@@ -138,6 +138,24 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 .badgeR.gagne{border-color:#f59e0b;background:#fffbeb;box-shadow:0 1px 4px rgba(245,158,11,.25)}
 .badgeR.verrouille{opacity:.45;filter:grayscale(.8)}
 .badgeR b{display:block;font-size:.8rem;margin:2px 0}
+/* ---------- Th\u00e8me sombre ---------- */
+html[data-theme="sombre"]{--fond:#0b1220;--carte:#16233a;--grisclair:#22314e;--bord:#31456a;--gris:#8ea3c2}
+html[data-theme="sombre"] body{background:#0b1220;color:#e2e8f0}
+html[data-theme="sombre"] .btn{background:#22314e;color:#7dd3fc}
+html[data-theme="sombre"] .btn:hover{background:#2c3f63}
+html[data-theme="sombre"] .btn.primary{background:#0e7490;color:#fff}
+html[data-theme="sombre"] .btn.primary:hover{background:#155e75}
+html[data-theme="sombre"] .lecture{background:#22314e;color:#e2e8f0}
+html[data-theme="sombre"] #drawer{background:#16233a}
+html[data-theme="sombre"] .champ input,html[data-theme="sombre"] .champ select,html[data-theme="sombre"] .champ textarea,
+html[data-theme="sombre"] .toolbar input,html[data-theme="sombre"] .toolbar select,
+html[data-theme="sombre"] .formLigne input,html[data-theme="sombre"] .formLigne select{background:#0b1220;color:#e2e8f0;border-color:#31456a}
+html[data-theme="sombre"] .modal .panneau,html[data-theme="sombre"] #overlay .panneau,html[data-theme="sombre"] #modalGenerique .panneau{background:#16233a;color:#e2e8f0}
+html[data-theme="sombre"] #tblFiches tr:hover td{background:#22314e}
+html[data-theme="sombre"] .filtreActif{background:#22314e;color:#7dd3fc}
+html[data-theme="sombre"] .badgeR{background:#16233a;color:#e2e8f0}
+html[data-theme="sombre"] .badgeR.gagne{background:#2a2410}
+html[data-theme="sombre"] #tblFiches th{background:#0a2f49}
 .guide{background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:18px 22px;line-height:1.55;font-size:.9rem}
 .guide h3{color:var(--bleu);margin:18px 0 6px}
 .guide table{border-collapse:collapse;width:100%;font-size:.82rem;margin:8px 0}
@@ -166,6 +184,7 @@ details{margin:8px 0}
   <button class="btn" id="btnSession">🏁 Ma session</button>
   <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
   <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
+  <button class="btn" id="btnTheme">🌙 Sombre</button>
 </header>
 
 <nav>
@@ -1411,7 +1430,8 @@ function rendreGuide(){
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
   '<p>Clique sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut de l\u2019application pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton en haut \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>';
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton en haut \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement avec le bouton \u00ab \ud83c\udf19 Sombre / \u2600\ufe0f Clair \u00bb en haut \u00e0 droite.</p>';
 }
 /* ===================== Navigation / divers ===================== */
 function allerVue(id){
@@ -1467,7 +1487,21 @@ function rechargerBaseCMM(silencieux){
   document.getElementById('overlay').hidden=true;
   toast('\u267b\ufe0f Base du CMM recharg\u00e9e : '+fiches.length+' fiches.'+(demo?'':' Vos saisies sont conserv\u00e9es.'));
 }
+function lireTheme(){try{return localStorage.getItem('cmm-theme')||'auto';}catch(e){return 'auto';}}
+function appliquerTheme(){
+  var pref=lireTheme();
+  var sombre=(pref==='sombre')||(pref==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme',sombre?'sombre':'clair');
+  var b=document.getElementById('btnTheme');
+  if(b)b.textContent=sombre?'\u2600\ufe0f Clair':'\ud83c\udf19 Sombre';
+}
+function basculerTheme(){
+  var sombre=document.documentElement.getAttribute('data-theme')==='sombre';
+  try{localStorage.setItem('cmm-theme',sombre?'clair':'sombre');}catch(e){}
+  appliquerTheme();
+}
 function init(){
+  appliquerTheme();
   rendreGuide();
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.addEventListener('click',function(){allerVue(b.dataset.vue);});});
   document.getElementById('btnFermerDrawer').addEventListener('click',fermerDrawer);
@@ -1513,6 +1547,7 @@ function init(){
   document.getElementById('btnSession').addEventListener('click',ouvrirSession);
   document.getElementById('btnDefi').addEventListener('click',toggleDefi);
   document.getElementById('btnBaseCMM').addEventListener('click',function(){rechargerBaseCMM(false);});
+  document.getElementById('btnTheme').addEventListener('click',basculerTheme);
   document.getElementById('btnFermerProfil').addEventListener('click',function(){document.getElementById('modalProfil').hidden=true;});
   document.getElementById('btnCreerProfil').addEventListener('click',function(){
     var pseudo=normaliserTexte(document.getElementById('inPseudo').value);
