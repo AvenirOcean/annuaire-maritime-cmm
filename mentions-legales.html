@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mentions légales, RGPD & politique de confidentialité — CMM</title>
+<style>
+  :root{--bleu:#0b3d5c;--accent:#0a7ea4;--fond:#f4f8fa}
+  *{box-sizing:border-box}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#1c2b33;background:var(--fond);margin:0;padding:16px;line-height:1.55}
+  .feuille{max-width:900px;margin:0 auto;background:#fff;padding:34px 44px;border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.08)}
+  header{border-bottom:4px solid var(--bleu);padding-bottom:14px;margin-bottom:20px}
+  h1{color:var(--bleu);font-size:1.4rem;margin:0}
+  .sous{color:#5a6b75;font-size:.85rem;margin-top:4px}
+  h2{color:var(--bleu);font-size:1.02rem;margin:26px 0 8px;border-left:4px solid var(--accent);padding-left:8px}
+  p,li{font-size:.92rem}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;margin:8px 0}
+  th{background:var(--bleu);color:#fff;text-align:left;padding:6px 9px}
+  td{border-bottom:1px solid #dce6eb;padding:6px 9px;vertical-align:top}
+  .credit{background:#eaf4f9;border:1.5px solid var(--accent);border-radius:8px;padding:12px 16px;margin:18px 0;font-size:.95rem}
+  footer{margin-top:26px;padding-top:10px;border-top:1px dashed #b9c7cf;color:#5a6b75;font-size:.75rem}
+  a{color:var(--accent)}
+  @media print{body{background:#fff;padding:0}.feuille{box-shadow:none;max-width:100%;padding:10mm 12mm}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="feuille">
+  <header>
+    <h1>⚓ Mentions légales, protection des données (RGPD) et politique de confidentialité</h1>
+    <div class="sous">Applications de la mission « Annuaire de la filière maritime de Martinique » — App élève, CRM du Cluster, fiche pédagogique</div>
+  </header>
+
+  <h2>1. Éditeur</h2>
+  <p><b>Cluster Maritime de Martinique (CMM)</b> — Le Marin, Martinique. Le CMM est l'éditeur et le responsable de traitement des données décrites ci-dessous. Projet pédagogique réalisé avec le <b>Lycée Professionnel Raymond Néris</b> (Le Marin), classe de 1ère Bac Pro AGOrA.</p>
+
+  <h2>2. Conception et fondatrice du système</h2>
+  <div class="credit">
+    🧭 <b>Conception du système :</b> <b>PositivBusiness SASU</b> — <b>Alexandrine MILESI</b>, <b>formation fondatrice de ce système</b>.<br>
+    <span style="font-size:.85rem;color:#5a6b75">Architecture applicative, application de qualification, CRM, synchronisation sécurisée et dispositif pédagogique.</span>
+  </div>
+
+  <h2>3. Données traitées et finalités</h2>
+  <table>
+    <tr><th>Données</th><th>Finalité</th><th>Base légale</th></tr>
+    <tr><td>Coordonnées professionnelles des 1 291 organisations (téléphone, courriel, site, SIREN, commune, secteur)</td><td>Constitution de l'annuaire professionnel de la filière maritime</td><td>Intérêt légitime du CMM (données professionnelles publiques, non personnelles au sens strict)</td></tr>
+    <tr><td>Saisies de vérification des élèves (statut, date, source, observations, pseudo, emoji)</td><td>Suivi pédagogique de la mission et consolidation de la base</td><td>Intérêt légitime + mission d'intérêt économique et pédagogique</td></tr>
+    <tr><td>Historique commercial du CRM (cotisations, contacts, interactions)</td><td>Gestion de la relation adhérents du CMM</td><td>Intérêt légitime et obligations contractuelles</td></tr>
+  </table>
+  <p>⚠️ <b>Aucune donnée personnelle des élèves</b> n'est collectée : le pseudo saisi est libre, non nominatif et reste dans le navigateur du poste. Aucune donnée sensible, aucun cookie publicitaire, aucun traceur tiers.</p>
+
+  <h2>4. Hébergement et localisation</h2>
+  <ul>
+    <li><b>Interface et base embarquée</b> : GitHub Pages (pages statiques, GitHub Inc., USA) — fichier HTML directement dans le navigateur.</li>
+    <li><b>Saisies synchronisées</b> : Supabase (base PostgreSQL managée, région choisie à la création du projet). Accès protégé par un code mission et des règles de sécurité au niveau des lignes (RLS).</li>
+  </ul>
+
+  <h2>5. Durées de conservation</h2>
+  <p>Les saisies de qualification sont conservées le temps de la mission puis intégrées à l'annuaire du CMM. Les données du CRM sont conservées selon la politique du CMM (durée d'adhésion + obligations légales et comptables).</p>
+
+  <h2>6. Vos droits (RGPD)</h2>
+  <p>Conformément au Règlement (UE) 2016/679, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur vos données, ainsi que d'un droit à la portabilité. Pour l'exercer : contactez le <b>Cluster Maritime de Martinique</b>. En cas de désaccord, vous pouvez saisir la <b>CNIL</b> (cnil.fr).</p>
+
+  <h2>7. Sécurité</h2>
+  <ul>
+    <li>Accès aux saisies protégé par <b>code mission</b> (transmis en classe) + règles RLS côté base.</li>
+    <li>Aucune création ni suppression de fiche possible ; colonnes sources en lecture seule.</li>
+    <li>Clés techniques « publiques par conception » ; les clés d'administration ne sont jamais diffusées.</li>
+  </ul>
+
+  <h2>8. Propriété intellectuelle</h2>
+  <p>La base de contacts reste la <b>propriété exclusive du CMM</b>. Toute reproduction ou réutilisation hors mission est interdite (charte signée par les élèves). Le système applicatif est une création de <b>PositivBusiness SASU</b> (Alexandrine MILESI, fondatrice), réalisée pour le CMM.</p>
+
+  <footer>
+    <div>CMM × LP Raymond Néris · Système conçu par PositivBusiness SASU — Alexandrine MILESI · 2026 — <a href="index.html">← Retour à l'application</a></div>
+  </footer>
+</div>
+</body>
+</html>
