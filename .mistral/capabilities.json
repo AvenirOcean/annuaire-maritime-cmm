@@ -3,8 +3,7 @@
   "requested": [
     "mistralai-capabilities/backend/fastapi",
     "mistralai-capabilities/database/postgres",
-    "mistralai-capabilities/deployment/apps",
-    "mistralai-capabilities/frontend/tanstack-start"
+    "mistralai-capabilities/deployment/apps"
   ],
   "installed": [
     {
@@ -29,14 +28,6 @@
     },
     {
       "capability": "mistralai-capabilities/feature/fastapi-postgres",
-      "version": "0.1.71"
-    },
-    {
-      "capability": "mistralai-capabilities/feature/fastapi-tanstack-start",
-      "version": "0.1.71"
-    },
-    {
-      "capability": "mistralai-capabilities/frontend/tanstack-start",
       "version": "0.1.71"
     }
   ]

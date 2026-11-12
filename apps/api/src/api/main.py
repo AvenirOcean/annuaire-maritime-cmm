@@ -1,5 +1,8 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from fastapi.responses import FileResponse
 
 from env.api import env as http_env
 from env.logging import env as logging_env
@@ -46,6 +49,13 @@ def create_app(*, hooks: FastAPIHooks | None = None) -> FastAPI:
     app.state.fastapi_hooks = manager
     manager.configure(app)
     app.include_router(create_api_router("api.routers"))
+
+    index_html = Path(__file__).resolve().parent / "static" / "index.html"
+
+    @app.get("/", include_in_schema=False)
+    async def index() -> FileResponse:
+        return FileResponse(index_html, media_type="text/html")
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[http_env.cors_origin],
