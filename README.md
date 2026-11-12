@@ -7,7 +7,7 @@ Application pédagogique réalisée pour le **Cluster Maritime de Martinique (CM
 L'application est **un seul fichier** : `index.html`. Aucune installation, aucun serveur, aucune dépendance.
 
 1. **Ouvrir** : double-cliquez sur `index.html` (PC) ou ouvrez-le dans Chrome/Edge. Elle fonctionne aussi sur tablette et téléphone.
-2. **Importer** : glissez-déposez le fichier Excel « Base à qualifier » (1 291 fiches) sur l'écran d'accueil. Un mode démo de 20 fiches fictives est disponible pour essayer.
+2. **Travailler immédiatement** : la base des 1 291 fiches du CMM est **déjà intégrée** dans l'application — aucun téléchargement n'est nécessaire pour commencer. Le bouton « Mettre à jour (Excel/CSV) » sert uniquement si le CMM fournit une nouvelle version du fichier, ou pour fusionner le travail d'un camarade.
 3. **Travailler** : filtrez la liste, ouvrez une fiche, vérifiez les coordonnées (boutons Recherche express / Registre national), saisissez, passez le statut à « Vérifié » avec date + source.
 4. **Échanger avec le CMM** : bouton « Export complet » → fichier Excel à la structure identique à l'import.
 
