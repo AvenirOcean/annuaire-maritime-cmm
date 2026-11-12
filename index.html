@@ -185,7 +185,7 @@ details{margin:8px 0}
 
   <section id="vue-carte" class="vue">
     <div class="carteBox">
-      <svg id="svgMap" viewBox="0 0 400 560" role="img" aria-label="Carte de la Martinique par commune"></svg>
+      <svg id="svgMap" viewBox="0 0 450 540" role="img" aria-label="Carte de la Martinique par commune"></svg>
       <div class="mapInfo">
         <h3>Répartition par commune</h3>
         <p style="font-size:.78rem;color:var(--gris);margin:.2em 0 .6em">Cliquez sur un cercle ou une ligne pour filtrer la liste. La couleur indique le secteur dominant, la taille le nombre de fiches.</p>
@@ -417,8 +417,9 @@ function parseXlsx(bytes){
 /* ---------- Écriture XLSX ---------- */
 function buildXlsx(headers,rows,sheetName){
   var enc=new TextEncoder();
+  function refCol(ci){var s='';ci++;while(ci>0){var m=(ci-1)%26;s=String.fromCharCode(65+m)+s;ci=Math.floor((ci-1)/26);}return s;}
   function cell(ri,ci,v){
-    var ref=String.fromCharCode(65+ci)+ri;
+    var ref=refCol(ci)+ri;
     var s=String(v==null?'':v);
     if(s==='')return '<c r="'+ref+'"/>';
     return '<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+echapperXml(s)+'</t></is></c>';
@@ -470,17 +471,13 @@ var SECTEURS=['Activités nautiques','Industrie nautique','Services connexes','P
 var STATUTS=['Non vérifié','Pré-rempli — à confirmer','Vérifié','À valider','Structure introuvable'];
 var SOURCES=['','Site officiel','Annuaire pro','Registre national','Page professionnelle'];
 var COULEURS_SECTEUR={'Activités nautiques':'#0e7490','Industrie nautique':'#b45309','Services connexes':'#6d28d9','Ports et capitaineries':'#15803d','Événements nautiques':'#be123c','Non renseigné':'#6b7280'};
-var COMMUNES_MQ=[
-  ["Grand'Rivière",96,18],['Macouba',300,30],['Basse-Pointe',283,62],['Le Marigot',296,84],
-  ['Le Lorrain',252,96],['Ajoupa-Bouillon',226,118],['Sainte-Marie',268,132],['Le Morne-Rouge',172,108],
-  ['Le Prêcheur',82,72],['Le Carbet',104,108],['Saint-Pierre',92,140],['Le Morne-Vert',72,148],
-  ['Bellefontaine',72,176],['Case-Pilote',84,196],['Schoelcher',96,214],['Fonds-Saint-Denis',188,142],
-  ['Saint-Joseph',172,198],['Fort-de-France',108,244],['Le Lamentin',162,242],['Gros-Morne',202,172],
-  ['La Trinité',272,172],['Le Robert',246,244],['Le Ducos',176,284],['Rivière-Salée',150,300],
-  ['Saint-Esprit',186,314],['Le François',232,298],['Le Vauclin',258,342],['Sainte-Luce',136,340],
-  ["Les Trois-Îlets",112,300],["Les Anses-d'Arlet",62,290],['Le Diamant',104,382],['Rivière-Pilote',150,386],
-  ['Le Marin',176,392],['Sainte-Anne',198,428]
-];
+var COMMUNES_GEO=[["Grand'Rivière", 14.875, -61.18],["Macouba", 14.855, -61.155],["Basse-Pointe", 14.87, -61.125],["Le Marigot", 14.825, -61.01],["Le Lorrain", 14.84, -61.06],["Ajoupa-Bouillon", 14.815, -61.025],["Sainte-Marie", 14.795, -60.995],["Le Morne-Rouge", 14.76, -61.135],["Le Prêcheur", 14.8, -61.195],["Le Carbet", 14.77, -61.185],["Saint-Pierre", 14.745, -61.175],["Le Morne-Vert", 14.715, -61.18],["Bellefontaine", 14.685, -61.155],["Case-Pilote", 14.665, -61.14],["Schoelcher", 14.608, -61.095],["Fonds-Saint-Denis", 14.715, -61.145],["Saint-Joseph", 14.665, -61.035],["Fort-de-France", 14.595, -61.075],["Le Lamentin", 14.61, -60.99],["Gros-Morne", 14.705, -61.0],["La Trinité", 14.74, -60.965],["Le Robert", 14.675, -60.94],["Le Ducos", 14.57, -60.97],["Rivière-Salée", 14.53, -60.975],["Saint-Esprit", 14.48, -60.93],["Le François", 14.615, -60.9],["Le Vauclin", 14.545, -60.835],["Sainte-Luce", 14.475, -60.922],["Les Trois-Îlets", 14.535, -61.04],["Les Anses-d'Arlet", 14.487, -61.055],["Le Diamant", 14.48, -61.025],["Rivière-Pilote", 14.49, -60.9],["Le Marin", 14.47, -60.87],["Sainte-Anne", 14.43, -60.885]];
+var COTE_MQ=[[14.878, -61.18],[14.866, -61.17],[14.862, -61.15],[14.872, -61.122],[14.856, -61.105],[14.848, -61.07],[14.835, -61.03],[14.827, -61.003],[14.8, -60.985],[14.77, -60.965],[14.758, -60.945],[14.757, -60.912],[14.745, -60.938],[14.725, -60.94],[14.7, -60.935],[14.672, -60.928],[14.645, -60.905],[14.618, -60.888],[14.59, -60.878],[14.562, -60.838],[14.535, -60.828],[14.505, -60.848],[14.472, -60.868],[14.442, -60.872],[14.385, -60.878],[14.383, -60.912],[14.405, -60.945],[14.445, -60.95],[14.475, -60.928],[14.47, -60.96],[14.462, -61.0],[14.455, -61.03],[14.475, -61.055],[14.487, -61.062],[14.52, -61.075],[14.552, -61.1],[14.592, -61.112],[14.618, -61.088],[14.622, -61.108],[14.655, -61.138],[14.687, -61.158],[14.715, -61.183],[14.742, -61.18],[14.78, -61.197],[14.83, -61.2]];
+function projeterMQ(lat,lon){var k=1000;return [Math.round((lon+61.25)*k),Math.round((14.90-lat)*k)];}
+function adoucierMQ(pts){var out=[];for(var i=0;i<pts.length;i++){var a=pts[i],b=pts[(i+1)%pts.length];
+  out.push([a[0]*0.75+b[0]*0.25,a[1]*0.75+b[1]*0.25]);out.push([a[0]*0.25+b[0]*0.75,a[1]*0.25+b[1]*0.75]);}return out;}
+var PATH_COTE=(function(){var c=adoucierMQ(adoucierMQ(COTE_MQ));var d='';for(var i=0;i<c.length;i++){var q=projeterMQ(c[i][0],c[i][1]);d+=(i?'L':'M')+q[0]+','+q[1]+' ';}return d+'Z';})();
+var COMMUNES_MQ=COMMUNES_GEO.map(function(c){var q=projeterMQ(c[1],c[2]);return [c[0],q[0],q[1]];});
 var CLE_COMMUNE_MQ={};COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
 var CLE_SECTEUR={'activitesnautiques':'Activités nautiques','industrienautique':'Industrie nautique','servicesconnexes':'Services connexes','portsetcapitaineries':'Ports et capitaineries','evenementsnautiques':'Événements nautiques'};
 function normaliserCommune(raw){
@@ -928,11 +925,17 @@ function rendreCarte(){
     else if(!estCommuneMartinique(f.commune))horsMq++;
   });
   svg.innerHTML=
-   '<path d="M96,18 C120,30 180,20 220,32 C255,42 292,18 302,32 C308,55 288,70 296,84 C312,120 322,160 300,178 C282,196 276,214 262,252 C270,300 268,330 258,344 C240,356 224,390 214,428 C200,440 185,432 176,394 C158,390 148,368 138,344 C118,338 108,362 104,384 C92,370 84,340 62,292 C70,262 66,230 74,198 C60,172 66,140 82,108 C86,72 88,40 96,18 Z" fill="#dceaf2" stroke="#7ea8c2" stroke-width="2" stroke-linejoin="round"></path>'+
+   '<defs>'+
+   '<linearGradient id="gMer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ecf8"/><stop offset="1" stop-color="#b3d5ea"/></linearGradient>'+
+   '<linearGradient id="gIle" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#b5dfa8"/><stop offset="0.55" stop-color="#8cc98a"/><stop offset="1" stop-color="#5fae73"/></linearGradient>'+
+   '</defs>'+
+   '<rect x="0" y="0" width="450" height="540" fill="url(#gMer)"></rect>'+
+   '<path d="'+PATH_COTE+'" fill="#3e7d4f" opacity=".25" transform="translate(2,3)"></path>'+
+   '<path d="'+PATH_COTE+'" fill="url(#gIle)" stroke="#3e7d4f" stroke-width="1.5" stroke-linejoin="round"></path>'+
    cercles+
-   '<g class="commune" data-commune="__HORSMQ__"><rect x="316" y="470" width="76" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="354" y="490" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="354" y="502" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="354" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
-   '<g class="commune" data-commune="Commune non renseignée"><rect x="210" y="470" width="96" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="258" y="490" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="258" y="502" text-anchor="middle" font-size="10" fill="#374151">renseignée</text><text x="258" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
-   '<text x="200" y="552" text-anchor="middle" font-size="10" fill="#6b7280">Martinique — nombre de fiches par commune (clic = filtrer)</text>';
+   '<g class="commune" data-commune="__HORSMQ__"><rect x="330" y="455" width="100" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="380" y="474" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="380" y="486" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="380" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
+   '<g class="commune" data-commune="Commune non renseign\u00e9e"><rect x="200" y="455" width="115" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="257" y="474" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="257" y="486" text-anchor="middle" font-size="10" fill="#374151">renseign\u00e9e</text><text x="257" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
+   '<text x="225" y="528" text-anchor="middle" font-size="10" fill="#4b6075">Martinique \u2014 nombre de fiches par commune (clic = filtrer)</text>';
   Array.prototype.forEach.call(svg.querySelectorAll('.commune'),function(g){
     g.addEventListener('click',function(){
       var c=g.getAttribute('data-commune');
