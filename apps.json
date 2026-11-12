@@ -1,5 +1,10 @@
 {
   "schemaVersion": 1,
+  "deployment": {
+    "organizationId": "268ff126-be58-4aa1-9a08-73c3ffea693f",
+    "workspaceId": "41aa41c6-aaee-40bf-8ceb-e9e436da9748",
+    "appId": "01a1cdf2-6e74-736a-af5b-7f2f650008c5"
+  },
   "modules": [
     {
       "type": "app",
