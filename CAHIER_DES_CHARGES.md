@@ -8,7 +8,7 @@
 
 | Acteur | Rôle | Besoin principal |
 |---|---|---|
-| Élève (1ère Bac Pro AGOrA) | Qualifie les fiches (téléphone, courriel, site, statut, source) | Outil simple, motivant, mobile |
+| Élève (Terminale AGOrA) | Qualifie les fiches (téléphone, courriel, site, statut, source) | Outil simple, motivant, mobile |
 | Enseignant / Prof | Encadre les groupes, suit l'avancement, anime la mission | **Voir tout, suivre l'évolution, animer des défis** |
 | CMM (administrateur métier) | Propriétaire de la base, réceptionne la collecte | Suivi global, export consolidé, qualité des données |
 | Administrateur technique | Gère la plateforme, les incidents, les évolutions | Supervision, FAQ, gestion des retours |
