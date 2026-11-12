@@ -758,12 +758,15 @@ function rendreCompteurs(){
     '<span>❓ Non vérifié : <b>'+c.non+'</b></span>'+
     '<span>❗ Introuvables : <b>'+c.introuvable+'</b></span>';
   var lots=[];
-  var G=Math.ceil(total/100);
-  for(var g=0;g<G;g++){
-    var a=g*100+1,b=Math.min((g+1)*100,total);
+  var NBE=24;
+  var deja=0;
+  for(var g=0;g<NBE&&deja<total;g++){
+    var taille=Math.floor(total/NBE)+(g<(total%NBE)?1:0);
+    var a=deja+1,b=deja+taille;
     var n=0,v=0;
     fiches.forEach(function(f){var x=+f.no;if(x>=a&&x<=b){n++;if(f.statut==='Vérifié')v++;}});
     lots.push({a:a,b:b,n:n,v:v,p:n?Math.round(100*v/n):0});
+    deja+=taille;
   }
   var tries=lots.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
   var medailles=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
@@ -1395,7 +1398,7 @@ function enregistrerFiche(f,passerSuivante){
 /* ===================== Guide ===================== */
 function rendreGuide(){
   document.getElementById('guideContent').innerHTML=
-  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. Vous travaillez par groupes, sur des plages de numéros de fiches (ex. fiches 1 à 100 = groupe A).</p>'+
+  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. La classe compte 24 élèves : la base est divisée en 24 plages individuelles d'environ 54 fiches (ex. élève 1 = fiches 1 à 54).</p>'+
   '<h3>1️⃣ Les statuts et leur signification</h3><table><tr><th>Statut</th><th>Signification</th></tr>'+
   '<tr><td><b>Non vérifié</b></td><td>Rien n\'a encore été contrôlé sur cette fiche.</td></tr>'+
   '<tr><td><b>Pré-rempli — à confirmer</b></td><td>Des coordonnées existent déjà (issues du CRM du CMM) : recoupez-les avec une seconde source, corrigez si obsolètes, puis passez à « Vérifié ».</td></tr>'+
