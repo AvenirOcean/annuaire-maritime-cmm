@@ -109,6 +109,14 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 .equipageRow .info{flex:1}
 .equipageRow .info .st{font-size:.72rem;color:var(--gris)}
 .equipageRow .pts{font-weight:700;color:var(--bleu);white-space:nowrap}
+@keyframes popScore{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+.recompense .score.pop{animation:popScore .5s}
+.qr{border-left:4px solid #f59e0b}
+#modalGenerique{position:fixed;inset:0;background:rgba(2,20,35,.6);z-index:95;display:flex;align-items:center;justify-content:center;padding:16px}
+#modalGenerique[hidden]{display:none}
+#modalGenerique .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto}
+#modalGenerique h2{margin:0 0 4px;color:var(--bleu)}
+.medaille{font-size:1.3rem;margin-right:4px}
 #overlay{position:fixed;inset:0;background:rgba(2,20,35,.82);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
 #overlay[hidden]{display:none}
 #overlay .panneau{background:#fff;border-radius:12px;max-width:640px;width:100%;padding:28px;text-align:center}
@@ -155,6 +163,8 @@ details{margin:8px 0}
   <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
   <button class="btn" id="btnDemo">🧪 Mode démo</button>
   <button class="btn" id="btnProfil">👤 Élève</button>
+  <button class="btn" id="btnSession">🏁 Ma session</button>
+  <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
 </header>
 
 <nav>
@@ -167,6 +177,7 @@ details{margin:8px 0}
 <main>
   <section id="vue-dashboard" class="vue active">
     <div class="recompense" id="blocRecompense"></div>
+    <div id="blocQuete"></div>
     <div class="compteurs" id="compteurs"></div>
     <div class="progressWrap">
       <h3>Avancement de la mission</h3>
@@ -233,6 +244,10 @@ details{margin:8px 0}
     <button class="fermer" id="btnFermerDrawer" title="Fermer">✕</button>
   </div>
   <div class="corps" id="drawerCorps"></div>
+</div>
+
+<div id="modalGenerique" hidden>
+  <div class="panneau" id="panneauGenerique"></div>
 </div>
 
 <div id="modalProfil" class="modal" hidden>
@@ -707,7 +722,7 @@ function rendreCompteurs(){
   });
   var pct=total?Math.round(100*c.verif/total):0;
   var defs=[['Total fiches',total,''],['Vérifié',c.verif,'vert'],['Pré-rempli — à confirmer',c.prem,'bleu'],['Non vérifié',c.non,'gris'],['À valider',c.avalider,''],['Structure introuvable',c.introuvable,'roug'],['Cotisants CMM (priorité 1)',c.cotisants,'ambr'],['Fermées (registre)',c.fermees,'roug']];
-  rendreRecompenses();rendreEquipage();
+  rendreRecompenses();rendreEquipage();rendreQuete();
   document.getElementById('compteurs').innerHTML=defs.map(function(x){return '<div class="cpt '+x[2]+'"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';}).join('');
   var pf=document.getElementById('progressFill');
   pf.style.width=Math.max(pct,3)+'%'; pf.textContent=pct+' %';
@@ -716,17 +731,29 @@ function rendreCompteurs(){
     '<span>⏳ À confirmer : <b>'+c.prem+'</b></span>'+
     '<span>❓ Non vérifié : <b>'+c.non+'</b></span>'+
     '<span>❗ Introuvables : <b>'+c.introuvable+'</b></span>';
+  var lots=[];
   var G=Math.ceil(total/100);
-  var gh='<div style="display:flex;flex-wrap:wrap;gap:8px">';
   for(var g=0;g<G;g++){
     var a=g*100+1,b=Math.min((g+1)*100,total);
     var n=0,v=0;
     fiches.forEach(function(f){var x=+f.no;if(x>=a&&x<=b){n++;if(f.statut==='Vérifié')v++;}});
-    var p=n?Math.round(100*v/n):0;
-    gh+='<div style="flex:1 1 100px;min-width:100px;background:var(--grisclair);border-radius:6px;padding:6px 8px;font-size:.72rem">'+
-      '<b>Fiches '+a+'–'+b+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
-      '<div style="height:8px;width:'+p+'%;background:'+(p===100?'#15803d':'#22c55e')+'"></div></div>'+p+' % ('+v+'/'+n+')</div>';
+    lots.push({a:a,b:b,n:n,v:v,p:n?Math.round(100*v/n):0});
   }
+  var tries=lots.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
+  var medailles=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
+  var gh='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">';
+  tries.forEach(function(t,i){
+    gh+='<div style="flex:1 1 140px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #f59e0b;border-radius:8px;padding:10px;text-align:center">'+
+      '<div class="medaille">'+medailles[i]+'</div><b style="font-size:.8rem">Fiches '+t.a+'\u2013'+t.b+'</b>'+
+      '<div style="font-size:1.4rem;font-weight:800;color:var(--ambre)">'+t.p+' %</div>'+
+      '<div style="font-size:.7rem;color:var(--gris)">'+t.v+'/'+t.n+' v\u00e9rifi\u00e9es</div></div>';
+  });
+  gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  lots.forEach(function(t){
+    gh+='<div style="flex:1 1 100px;min-width:100px;background:var(--grisclair);border-radius:6px;padding:6px 8px;font-size:.72rem">'+
+      '<b>Fiches '+t.a+'\u2013'+t.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
+      '<div style="height:8px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+t.p+' % ('+t.v+'/'+t.n+')</div>';
+  });
   gh+='</div>';
   document.getElementById('groupesAvancement').innerHTML=gh;
 }
@@ -825,6 +852,142 @@ function rendreListeProfils(){
     });
   });
 }
+/* ===================== C\u00e9l\u00e9brations, s\u00e9rie, d\u00e9fis, qu\u00eates ===================== */
+function aujourdhuiISO(){return new Date().toISOString().slice(0,10);}
+var sessionStats={fiches:0,points:0,badges:[]};
+var confettiParticles=[],confettiRAF=null;
+function lancerConfettis(){
+  var canvas=document.getElementById('confettiCanvas');
+  if(!canvas){canvas=document.createElement('canvas');canvas.id='confettiCanvas';canvas.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:300';document.body.appendChild(canvas);}
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  var couleurs=['#f59e0b','#0e7490','#15803d','#be123c','#6d28d9','#fbbf24','#22c55e'];
+  for(var i=0;i<130;i++){
+    confettiParticles.push({x:Math.random()*canvas.width,y:-20-Math.random()*80,vx:(Math.random()-.5)*3,vy:2+Math.random()*3.5,rot:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,w:5+Math.random()*6,c:couleurs[Math.floor(Math.random()*couleurs.length)],vie:0});
+  }
+  if(!confettiRAF)confettiRAF=requestAnimationFrame(animerConfettis);
+}
+function animerConfettis(){
+  var canvas=document.getElementById('confettiCanvas');if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  confettiParticles=confettiParticles.filter(function(p){return p.y<canvas.height+20&&p.vie<300;});
+  confettiParticles.forEach(function(p){
+    p.vie++;p.x+=p.vx;p.y+=p.vy;p.vy+=.02;p.rot+=p.vr;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+    ctx.fillStyle=p.c;ctx.globalAlpha=Math.max(0,1-p.vie/300);
+    ctx.fillRect(-p.w/2,-p.w/2,p.w,p.w*.6);
+    ctx.restore();
+  });
+  if(confettiParticles.length){confettiRAF=requestAnimationFrame(animerConfettis);}
+  else{confettiRAF=null;ctx.clearRect(0,0,canvas.width,canvas.height);}
+}
+function majStreak(){
+  var auj=aujourdhuiISO();
+  etat.streak=etat.streak||{dernier:'',compte:0};
+  if(etat.streak.dernier===auj)return;
+  var hier=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  etat.streak.compte=(etat.streak.dernier===hier)?(etat.streak.compte+1):1;
+  etat.streak.dernier=auj;
+  if(etat.streak.compte>1)toast('\ud83d\udd25 S\u00e9rie : '+etat.streak.compte+' jour(s) d\'affil\u00e9e !');
+}
+function queteDuJour(){
+  var auj=aujourdhuiISO();
+  var seed=+auj.replace(/-/g,'')%5;
+  var duJour=fiches.filter(function(f){return f.dte===auj;});
+  var verifiees=0,cotisants=0,tels=0,obs=0,communes={};
+  duJour.forEach(function(f){
+    if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src){verifiees++;communes[f.commune]=1;if(f.prio.charAt(0)==='1')cotisants++;if(f.tel)tels++;}
+    if(f.obs)obs++;
+  });
+  var defs=[
+    {titre:'Passer 5 fiches en \u00ab V\u00e9rifi\u00e9 \u00bb',cible:5,n:verifiees},
+    {titre:'V\u00e9rifier 3 cotisants CMM (priorit\u00e9 1)',cible:3,n:cotisants},
+    {titre:'Confirmer 5 t\u00e9l\u00e9phones',cible:5,n:tels},
+    {titre:'V\u00e9rifier des fiches dans 3 communes diff\u00e9rentes',cible:3,n:Object.keys(communes).length},
+    {titre:'Documenter 2 fiches (observations ou doublons)',cible:2,n:obs}
+  ];
+  var q=defs[seed];q.date=auj;
+  return q;
+}
+function verifierQuete(){
+  var q=queteDuJour();
+  if(q.n>=q.cible&&etat.queteFait!==q.date){
+    etat.queteFait=q.date;
+    toast('\ud83c\udfaf Qu\u00eate du jour accomplie : '+q.titre+' ! Bonus +20 pts');
+    lancerConfettis();
+  }
+}
+function rendreQuete(){
+  var q=queteDuJour();
+  var pct=Math.min(100,Math.round(100*q.n/q.cible));
+  var fait=etat.queteFait===q.date;
+  document.getElementById('blocQuete').innerHTML='<div class="progressWrap qr" style="margin-bottom:16px"><h3>\ud83c\udfaf Qu\u00eate du jour '+(fait?'\u2014 accomplie \u2705':'')+'</h3>'+
+    '<p style="font-size:.85rem;margin:.2em 0 .6em"><b>'+q.titre+'</b> \u2014 '+Math.min(q.n,q.cible)+'/'+q.cible+' \u00b7 r\u00e9compense : <b>+20 pts</b></p>'+
+    '<div class="progressBar"><div class="progressFill" style="width:'+pct+'%;background:'+(fait?'#15803d':'linear-gradient(90deg,#f59e0b,#fbbf24)')+'">'+pct+' %</div></div></div>';
+}
+function ouvrirModalGenerique(html){
+  document.getElementById('panneauGenerique').innerHTML=html;
+  document.getElementById('modalGenerique').hidden=false;
+}
+function ouvrirSession(){
+  var st=etat.streak?etat.streak.compte:0;
+  var html='<h2>\ud83c\udfc1 Bilan de ta session</h2>'+
+   '<p style="font-size:.9rem">Depuis l\u2019ouverture de l\u2019application sur ce poste :</p>'+
+   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">'+
+   '<div class="cpt vert"><div class="n">'+sessionStats.fiches+'</div><div class="l">fiches enregistr\u00e9es</div></div>'+
+   '<div class="cpt bleu"><div class="n">+'+sessionStats.points+'</div><div class="l">points gagn\u00e9s</div></div>'+
+   '<div class="cpt ambr"><div class="n">'+sessionStats.badges.length+'</div><div class="l">badges d\u00e9bloqu\u00e9s</div></div>'+
+   '<div class="cpt"><div class="n">'+st+'</div><div class="l">jours de s\u00e9rie \ud83d\udd25</div></div>'+
+   '</div>'+
+   (sessionStats.badges.length?'<p style="font-size:.85rem">Badges de la session : '+sessionStats.badges.join(' \u00b7 ')+'</p>':'')+
+   '<p style="font-size:.8rem;color:var(--gris)">Pense \u00e0 faire un \u00ab Export ma s\u00e9lection \u00bb (ta plage de fiches) ou \u00ab Export complet \u00bb pour transmettre ton travail au CMM.</p>'+
+   '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="btnFermerSession">Fermer</button></div>';
+  ouvrirModalGenerique(html);
+  document.getElementById('btnFermerSession').addEventListener('click',function(){document.getElementById('modalGenerique').hidden=true;});
+  if(sessionStats.fiches>=5)lancerConfettis();
+}
+var defi={actif:false,debut:0,pointsDebut:0,fiches:0,interval:null};
+function toggleDefi(){
+  if(defi.actif){finDefi();return;}
+  if(!confirm('D\u00e9fi \u00e9clair : 10 minutes pour traiter un maximum de fiches. Pr\u00eat ? (re-clique sur le badge pour arr\u00eater)'))return;
+  defi={actif:true,debut:Date.now(),pointsDebut:calculerScore().points,fiches:0,interval:null};
+  defi.interval=setInterval(tickDefi,1000);
+  tickDefi();
+  toast('\u26a1 D\u00e9fi lanc\u00e9 : 10 minutes, top d\u00e9part !');
+}
+function tickDefi(){
+  var restant=Math.max(0,600-Math.floor((Date.now()-defi.debut)/1000));
+  var mn=Math.floor(restant/60),sec=restant%60;
+  var badge=document.getElementById('badgeDefi');
+  if(!badge){
+    badge=document.createElement('div');badge.id='badgeDefi';
+    badge.style.cssText='position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#be123c;color:#fff;padding:6px 16px;border-radius:999px;font-weight:700;z-index:60;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;font-size:.85rem';
+    document.body.appendChild(badge);
+    badge.addEventListener('click',finDefi);
+    badge.title='Cliquer pour arr\u00eater le d\u00e9fi';
+  }
+  badge.style.display='block';
+  badge.textContent='\u26a1 D\u00e9fi : '+mn+':'+(sec<10?'0':'')+sec+' \u2014 '+defi.fiches+' fiche(s) trait\u00e9e(s)';
+  if(restant<=0)finDefi();
+}
+function finDefi(){
+  if(!defi.actif)return;
+  defi.actif=false;
+  clearInterval(defi.interval);
+  var badge=document.getElementById('badgeDefi');if(badge)badge.style.display='none';
+  var pts=calculerScore().points-defi.pointsDebut;
+  var html='<h2>\u26a1 D\u00e9fi termin\u00e9 !</h2>'+
+   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">'+
+   '<div class="cpt vert"><div class="n">'+defi.fiches+'</div><div class="l">fiches trait\u00e9es</div></div>'+
+   '<div class="cpt bleu"><div class="n">+'+pts+'</div><div class="l">points gagn\u00e9s</div></div>'+
+   '</div>'+
+   '<p style="font-size:.85rem">'+(defi.fiches>=5?'Excellent rythme, bien jou\u00e9 ! \ud83d\udcaa':(defi.fiches>0?'Bien jou\u00e9 ! Retente un d\u00e9fi pour battre ton score.':'Aucune fiche trait\u00e9e \u2014 retente le d\u00e9fi apr\u00e8s avoir rep\u00e9r\u00e9 tes fiches cibles !'))+'</p>'+
+   '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="btnFermerDefi">Fermer</button></div>';
+  ouvrirModalGenerique(html);
+  document.getElementById('btnFermerDefi').addEventListener('click',function(){document.getElementById('modalGenerique').hidden=true;});
+  if(defi.fiches>0)lancerConfettis();
+}
+
 /* ===================== R\u00e9compenses ===================== */
 var RANGS=[
  {nom:'Mousse',pts:0},{nom:'Matelot',pts:60},{nom:'Gabier',pts:150},{nom:'Quartier-ma\u00eetre',pts:300},
@@ -851,6 +1014,7 @@ function calculerScore(){
     if(f.statut==='Structure introuvable'&&f.obs)introuvablesDoc++;
     if(f.prio.charAt(0)==='1'){cotisantsTotal++;if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)cotisantsVerifies++;}
   });
+  if(etat.queteFait===aujourdhuiISO())total+=20;
   var score={points:total,verifiees:verifiees,nbCommunes:Object.keys(communes).length,introuvablesDoc:introuvablesDoc,telSaisis:telSaisis,cotisantsVerifies:cotisantsVerifies,cotisantsTotal:cotisantsTotal};
   score.badges=[
     {emo:'\ud83e\uded1',nom:'Premier cap',desc:'1 fiche v\u00e9rifi\u00e9e',ok:verifiees>=1},
@@ -867,6 +1031,7 @@ function calculerScore(){
   for(var i=0;i<RANGS.length;i++)if(score.points>=RANGS[i].pts)rang=RANGS[i];
   var suivant=null;
   for(var j=0;j<RANGS.length;j++)if(RANGS[j].pts>score.points){suivant=RANGS[j];break;}
+  score.badges.push({emo:'\ud83d\udd25',nom:'Feu sacr\u00e9',desc:'3 jours de s\u00e9rie',ok:!!(etat.streak&&etat.streak.compte>=3)});
   score.rang=rang;score.suivant=suivant;
   return score;
 }
@@ -875,7 +1040,8 @@ function rendreRecompenses(){
   var pctProchain=sc.suivant?Math.min(100,Math.round(100*(sc.points-sc.rang.pts)/(sc.suivant.pts-sc.rang.pts))):100;
   var html='<div><div class="score">'+sc.points+' pts</div>'+
     '<div class="rang">'+(sc.rang.pts>=2500?'\ud83d\udea2 ':'\u2693 ')+sc.rang.nom+'</div>'+
-    '<div class="sous">'+sc.verifiees+' fiche(s) v\u00e9rifi\u00e9e(s) sur '+fiches.length+'</div></div>'+
+    '<div class="sous">'+sc.verifiees+' fiche(s) v\u00e9rifi\u00e9e(s) sur '+fiches.length+'</div>'+
+    '<div class="sous">'+(etat.streak&&etat.streak.compte>0?'\ud83d\udd25 S\u00e9rie : '+etat.streak.compte+' jour(s)':'\ud83d\udd25 Commence ta s\u00e9rie aujourd\'hui !')+'</div></div>'+
     '<div class="barre"><div style="width:'+pctProchain+'%"></div></div>'+
     '<div class="sous">'+(sc.suivant?('Encore '+(sc.suivant.pts-sc.points)+' pts pour '+sc.suivant.nom):'Grade maximum atteint ! \ud83c\udf89')+'</div>'+
     '<div class="sous" style="flex-basis:100%;font-size:.7rem">\ud83c\udfc6 Points : +10 par fiche \u00ab V\u00e9rifi\u00e9 \u00bb (date + source) \u00b7 +2 si t\u00e9l\u00e9phone ET courriel/site \u00b7 +3 par fiche \u00ab \u00c0 valider \u00bb ou \u00ab Introuvable \u00bb document\u00e9e \u00b7 +1 par coordonn\u00e9e saisie. Score du poste, recalcul\u00e9 \u00e0 chaque enregistrement.</div>'+
@@ -1080,7 +1246,7 @@ function ouvrirFiche(no){
    '<div class="champ"><label for="eWeb">Site internet</label><input id="eWeb" value="'+echapperHtml(f.web)+'" placeholder="https://www.entreprise.fr ou « aucun »"><div class="msg" id="mWeb"></div></div></div>'+
    '<div class="groupeChamps"><h3>Vérification</h3>'+
    '<div class="champ"><label for="eStatut">Statut de vérification</label><select id="eStatut">'+opt(STATUTS,f.statut)+'</select><div class="msg" id="mStatut"></div></div>'+
-   '<div class="champ"><label for="eDte">Date de vérification <span class="ro">(obligatoire pour « Vérifié »)</span></label><input type="date" id="eDte" value="'+echapperHtml(f.dte)+'"></div>'+
+   '<div class="champ"><label for="eDte">Date de vérification <span class="ro">(obligatoire pour « Vérifié »)</span></label><input type="date" id="eDte" value="'+echapperHtml(f.dte||aujourdhuiISO())+'"></div>'+
    '<div class="champ"><label for="eSrc">Source de vérification <span class="ro">(obligatoire pour « Vérifié »)</span></label><select id="eSrc">'+opt(SOURCES,f.src)+'</select></div>'+
    '<div class="champ"><label for="eObs">Observations <span class="ro">(libre — corrections d\'identité, doublons, difficultés…)</span></label><textarea id="eObs">'+echapperHtml(f.obs)+'</textarea></div></div>'+
    '<div class="liens">'+
@@ -1088,7 +1254,8 @@ function ouvrirFiche(no){
    (f.reg?'<a href="'+echapperHtml(f.reg)+'" target="_blank" rel="noopener">🏛️ Fiche registre national (SIREN)</a>':'')+
    '</div>'+
    '<div class="actions">'+
-   '<button class="btn primary" id="btnEnregistrer">💾 Enregistrer</button>'+
+   '<button class="btn primary" id="btnEnregistrer">💾 Enregistrer</button>'
+   '<button class="btn primary" id="btnSuivante" title="Raccourci : Ctrl+Entrée">⏭ Enregistrer + suivante</button>'+
    '<button class="btn" id="btnDoublon">🧷 Signaler un doublon</button>'+
    '<button class="btn" id="btnFicheSuivante">Fiche suivante ▶</button>'+
    '</div>'+
@@ -1113,6 +1280,7 @@ function ouvrirFiche(no){
     document.getElementById('mStatut').textContent='';
   });
   document.getElementById('btnEnregistrer').addEventListener('click',function(){enregistrerFiche(f);});
+  document.getElementById('btnSuivante').addEventListener('click',function(){enregistrerFiche(f,true);});
   document.getElementById('btnDoublon').addEventListener('click',function(){
     var autre=prompt("Signaler un doublon : indiquez le n° de la fiche en double (la fiche actuelle n° "+f.no+" ne sera ni supprimée ni fusionnée).");
     if(autre===null)return;
@@ -1139,7 +1307,7 @@ function fermerDrawer(){
   document.getElementById('drawer').setAttribute('aria-hidden','true');
   ficheOuverte=null;
 }
-function enregistrerFiche(f){
+function enregistrerFiche(f,passerSuivante){
   var tel=document.getElementById('eTel').value.trim();
   var eml=document.getElementById('eEml').value.trim().toLowerCase();
   var web=normaliserSite(document.getElementById('eWeb').value);
@@ -1166,13 +1334,36 @@ function enregistrerFiche(f){
   var e=etat.entries[f.no]||(etat.entries[f.no]={});
   e.st=st;e.tel=tel;e.eml=eml;e.web=web;e.dte=dte;e.src=src;e.obs=obs;
   e.auteur=profil.pseudo;e.emoji=profil.emoji;
+  var scoreAvant=calculerScore();
   var avant=pointsFiche(f);
-  construireFiches(); sauvegarder();
+  construireFiches(); majStreak(); sauvegarder();
   var fApres=null;
   for(var i=0;i<fiches.length;i++)if(fiches[i].no===f.no){fApres=fiches[i];break;}
   var delta=fApres?(pointsFiche(fApres)-avant):0;
+  var scoreApres=calculerScore();
+  sessionStats.fiches++;sessionStats.points+=delta;
+  if(defi.actif)defi.fiches++;
+  scoreApres.badges.forEach(function(b){
+    if(!b.ok)return;
+    var dejaFait=false;
+    scoreAvant.badges.forEach(function(b2){if(b2.nom===b.nom&&b2.ok)dejaFait=true;});
+    if(!dejaFait){
+      sessionStats.badges.push(b.emo+' '+b.nom);
+      toast('🎖️ Nouveau badge : '+b.nom+' '+b.emo);
+      lancerConfettis();
+    }
+  });
+  verifierQuete();
   rendreCompteurs(); rendreFiches(); rendreCarte();
+  if(st==='Vérifié'&&dte&&src)lancerConfettis();
   toast('💾 Fiche n° '+f.no+' enregistrée.'+(delta>0?' ⚓ +'+delta+' point(s) !':''));
+  if(passerSuivante){
+    var liste=fichesFiltrees();
+    var idx=-1;
+    for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){idx=j;break;}
+    var suiv=liste[idx+1]||liste[0];
+    if(suiv&&suiv.no!==f.no){ouvrirFiche(suiv.no);return;}
+  }
   ouvrirFiche(f.no);
 }
 /* ===================== Guide ===================== */
@@ -1217,7 +1408,9 @@ function rendreGuide(){
   '<h3>9\ufe0f\u20e3 R\u00e9compenses : points et badges</h3>'+
   '<p>Chaque fiche bien travaill\u00e9e rapporte des points : <b>+10</b> pour une fiche pass\u00e9e \u00ab V\u00e9rifi\u00e9 \u00bb (date + source), <b>+2</b> de bonus si le t\u00e9l\u00e9phone ET le courriel ou le site sont renseign\u00e9s, <b>+3</b> pour une fiche \u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb correctement document\u00e9e en Observations, et <b>+1</b> par coordonn\u00e9e saisie. Les points font grimper votre grade maritime (Mousse, Matelot, Gabier, Quartier-ma\u00eetre, Ma\u00eetre d\u2019\u00e9quipage, Second, Capitaine, Amiral) et d\u00e9bloquent des badges (Premier cap, \u00c9quipage, Cotisants au clair, Cartographe\u2026). Le score est celui du poste : il est recalcul\u00e9 \u00e0 chaque enregistrement \u2014 seule la qualit\u00e9 du travail compte !</p>'+
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
-  '<p>Clique sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut de l\u2019application pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>';
+  '<p>Clique sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut de l\u2019application pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
+  '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton en haut \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>';
 }
 /* ===================== Navigation / divers ===================== */
 function allerVue(id){
@@ -1299,6 +1492,8 @@ function init(){
   });
   document.getElementById('btnDemoOverlay').addEventListener('click',activerDemo);
   document.getElementById('btnProfil').addEventListener('click',ouvrirModalProfil);
+  document.getElementById('btnSession').addEventListener('click',ouvrirSession);
+  document.getElementById('btnDefi').addEventListener('click',toggleDefi);
   document.getElementById('btnFermerProfil').addEventListener('click',function(){document.getElementById('modalProfil').hidden=true;});
   document.getElementById('btnCreerProfil').addEventListener('click',function(){
     var pseudo=normaliserTexte(document.getElementById('inPseudo').value);
@@ -1348,7 +1543,10 @@ function traiterFichier(file){
     alert('❌ Import impossible : '+err.message);
   });
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape')fermerDrawer();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')fermerDrawer();
+  if(e.ctrlKey&&e.key==='Enter'&&ficheOuverte&&document.getElementById('drawer').classList.contains('ouvert')){e.preventDefault();enregistrerFiche(ficheOuverte,true);}
+});
 init();
 </script>
 </body>
