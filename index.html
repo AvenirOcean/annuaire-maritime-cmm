@@ -165,6 +165,7 @@ details{margin:8px 0}
   <button class="btn" id="btnProfil">👤 Élève</button>
   <button class="btn" id="btnSession">🏁 Ma session</button>
   <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
+  <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
 </header>
 
 <nav>
@@ -1444,10 +1445,27 @@ function toast(msg){
 }
 function activerDemo(){
   var d=genererDemo();
-  etat={base:{headers:d.headers,rows:d.rows},entries:{},savedAt:null};
+  etat={base:{headers:d.headers,rows:d.rows},entries:{},profils:etat.profils||{},savedAt:null,demo:true};
   construireFiches();sauvegarder();toutRendre();
   document.getElementById('overlay').hidden=true;
   toast('🧪 Mode démo : 20 fiches fictives. Importez la vraie base du CMM quand vous êtes prêt.');
+}
+function estDemo(){
+  return etat.demo===true||(etat.base&&etat.base.rows&&etat.base.rows.length===20&&typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length>20);
+}
+function rechargerBaseCMM(silencieux){
+  if(typeof BASE_EMBARQUEE==='undefined'||!BASE_EMBARQUEE||!BASE_EMBARQUEE.rows||!BASE_EMBARQUEE.rows.length){alert('La base du CMM n\u2019est pas disponible dans cette version.');return;}
+  var demo=estDemo();
+  if(!silencieux&&!confirm(demo?
+    'Revenir \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?\nLes saisies faites sur les fiches de d\u00e9monstration ne seront pas conserv\u00e9es (elles concernaient des fiches fictives).':
+    'Recharger la base officielle du CMM int\u00e9gr\u00e9e \u00e0 l\u2019application ?\nVos saisies sur les fiches r\u00e9elles seront conserv\u00e9es.'))return;
+  var profils=etat.profils||{};
+  var streak=etat.streak||null;
+  var queteFait=etat.queteFait||null;
+  etat={base:BASE_EMBARQUEE,entries:(demo?{}:(etat.entries||{})),profils:profils,streak:streak,queteFait:queteFait,savedAt:null,demo:false};
+  construireFiches();sauvegarder();toutRendre();
+  document.getElementById('overlay').hidden=true;
+  toast('\u267b\ufe0f Base du CMM recharg\u00e9e : '+fiches.length+' fiches.'+(demo?'':' Vos saisies sont conserv\u00e9es.'));
 }
 function init(){
   rendreGuide();
@@ -1494,6 +1512,7 @@ function init(){
   document.getElementById('btnProfil').addEventListener('click',ouvrirModalProfil);
   document.getElementById('btnSession').addEventListener('click',ouvrirSession);
   document.getElementById('btnDefi').addEventListener('click',toggleDefi);
+  document.getElementById('btnBaseCMM').addEventListener('click',function(){rechargerBaseCMM(false);});
   document.getElementById('btnFermerProfil').addEventListener('click',function(){document.getElementById('modalProfil').hidden=true;});
   document.getElementById('btnCreerProfil').addEventListener('click',function(){
     var pseudo=normaliserTexte(document.getElementById('inPseudo').value);
@@ -1523,7 +1542,18 @@ function init(){
   if(charger()&&etat.base&&etat.base.rows.length){
     etat.profils=etat.profils||{};
     majBoutonProfil();
-    toutRendre();
+    if(estDemo()&&typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length>20){
+      if(confirm('Ce poste est encore en mode d\u00e9monstration (20 fiches fictives).\nRevenir maintenant \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?')){
+        rechargerBaseCMM(true);
+        document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
+        toast('\u267b\ufe0f Retour \u00e0 la base du CMM : '+fiches.length+' fiches.');
+      }else{
+        toutRendre();
+        toast('\ud83e\uddea Mode d\u00e9mo actif (20 fiches). Cliquez sur \u00ab \u267b\ufe0f Base CMM \u00bb pour charger les 1 291 fiches.');
+      }
+    }else{
+      toutRendre();
+    }
     document.getElementById('saveIndicator').textContent='💾 Travail local restauré ('+new Date(etat.savedAt).toLocaleString('fr-FR')+')';
     toast('Bienvenue ! Votre travail sauvegardé a été restauré : '+fiches.length+' fiches.');
   }else if(typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length){
