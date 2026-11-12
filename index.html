@@ -185,6 +185,7 @@ details{margin:8px 0}
   <button class="btn primary" id="btnExport">📤 Export complet</button>
   <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
   <button class="btn" id="btnDemo">🧪 Mode démo</button>
+  <button class="btn" id="btnProf">👨‍🏫 Prof</button>
   <button class="btn" id="btnProfil">👤 Élève</button>
   <button class="btn" id="btnSession">🏁 Ma session</button>
   <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
@@ -276,6 +277,17 @@ details{margin:8px 0}
   <div class="panneau" id="panneauGenerique"></div>
 </div>
 
+<div id="modalProf" class="modal" hidden>
+  <div class="panneau" style="max-width:880px">
+    <h2>👨‍🏫 Espace Prof — pilotage de la classe en direct</h2>
+    <div id="profContenu"><p>Chargement…</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn" id="btnProfRafraichir">↻ Rafraîchir</button>
+      <button class="btn" id="btnProfProfil">🏅 Créer mon profil prof (jouer les défis)</button>
+      <button class="btn" id="btnFermerProf">Fermer</button>
+    </div>
+  </div>
+</div>
 <div id="modalProfil" class="modal" hidden>
   <div class="panneau">
     <h2>👤 Profil élève</h2>
@@ -1612,6 +1624,96 @@ function demarrerSync(){
   tirerSaisies();
   setInterval(tirerSaisies,20000);
 }
+/* ===================== Espace Prof (V2.1) ===================== */
+var PROF_CODE='CMM-PROF-2026';
+var LS_PROF='cmm-prof-ok';
+function profAutorise(){
+  var ok=null;
+  try{ok=localStorage.getItem(LS_PROF);}catch(err){}
+  if(ok==='1')return true;
+  var c=prompt("\U0001F468\u200d\U0001F3EB Code enseignant (donn\u00e9 par le CMM) :");
+  if(c&&c.trim()===PROF_CODE){
+    try{localStorage.setItem(LS_PROF,'1');}catch(err){}
+    return true;
+  }
+  if(c!==null)alert("\u26A0\uFE0F Code enseignant incorrect.");
+  return false;
+}
+function pointsSaisie(e){
+  var p=0;
+  if(e.statut==='V\u00e9rifi\u00e9'&&e.dte&&e.src){p+=10;if(e.tel&&(e.eml||e.web))p+=2;}
+  else if((e.statut==='\u00c0 valider'||e.statut==='Structure introuvable')&&e.obs)p+=3;
+  if(e.tel)p+=1;if(e.eml)p+=1;if(e.web)p+=1;
+  return p;
+}
+function chargerProf(){
+  var h=headersSync();
+  if(!h){document.getElementById('profContenu').innerHTML="<p>\u26A0\uFE0F Entrez d'abord le code mission.</p>";return;}
+  document.getElementById('profContenu').innerHTML='<p>\u23f3 Chargement des saisies de la classe…</p>';
+  fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  }).then(function(liste){rendreProf(liste);}).catch(function(){
+    document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Synchronisation impossible pour le moment. V\u00e9rifiez la connexion puis rafra\u00eechissez.</p>';
+  });
+}
+function rendreProf(liste){
+  var total=liste.length,verif=0,eleves={},activite=liste.slice().sort(function(a,b){return String(b.maj).localeCompare(String(a.maj));}).slice(0,20);
+  liste.forEach(function(e){
+    if(e.statut==='V\u00e9rifi\u00e9')verif++;
+    var k=e.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={s:0,v:0,p:0,emoji:e.emoji||''};
+    eleves[k].s++;if(e.statut==='V\u00e9rifi\u00e9')eleves[k].v++;
+    eleves[k].p+=pointsSaisie(e);
+  });
+  var classe=Object.keys(eleves).map(function(k){return {nom:k,d:eleves[k]};}).sort(function(a,b){return b.d.p-a.d.p;});
+  var plages=[],deja=0,TOT=1291,NBE=24;
+  for(var g=0;g<NBE;g++){
+    var t=Math.floor(TOT/NBE)+(g<(TOT%NBE)?1:0);
+    plages.push({a:deja+1,b:deja+t,n:t,v:0});deja+=t;
+  }
+  liste.forEach(function(e){
+    var x=+e.no_fiche;
+    if(isNaN(x))return;
+    plages.forEach(function(pl){if(x>=pl.a&&x<=pl.b&&e.statut==='V\u00e9rifi\u00e9')pl.v++;});
+  });
+  var h='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">'+
+    profKpi('\u00c9l\u00e8ves actifs',classe.length)+
+    profKpi('Fiches saisies',total)+
+    profKpi('Fiches v\u00e9rifi\u00e9es',verif)+
+    profKpi('Avancement global',Math.round(100*verif/1291)+' %')+'</div>';
+  h+='<h3 style="margin:10px 0 6px">\U0001F3C6 Classement live (par \u00e9l\u00e8ve)</h3><table style="width:100%;border-collapse:collapse;font-size:.85rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:6px">#</th><th style="text-align:left;padding:6px">\u00c9l\u00e8ve</th><th style="text-align:right;padding:6px">Saisies</th><th style="text-align:right;padding:6px">V\u00e9rifi\u00e9es</th><th style="text-align:right;padding:6px">Points</th></tr>';
+  classe.forEach(function(e,i){
+    h+='<tr><td style="padding:5px 6px">'+(i+1)+'</td><td style="padding:5px 6px">'+e.d.emoji+' '+e.nom+'</td><td style="text-align:right;padding:5px 6px">'+e.d.s+'</td><td style="text-align:right;padding:5px 6px">'+e.d.v+'</td><td style="text-align:right;padding:5px 6px"><b>'+e.d.p+'</b></td></tr>';
+  });
+  h+='</table>';
+  h+='<h3 style="margin:14px 0 6px">\u2705 Avancement des 24 plages (fiches v\u00e9rifi\u00e9es)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  plages.forEach(function(pl){
+    var pc=Math.round(100*pl.v/pl.n);
+    h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
+  });
+  h+='</div>';
+  h+='<h3 style="margin:14px 0 6px">\U0001F4E5 Derni\u00e8res saisies de la classe</h3><table style="width:100%;border-collapse:collapse;font-size:.8rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:5px">Quand</th><th style="text-align:left;padding:5px">\u00c9l\u00e8ve</th><th style="text-align:left;padding:5px">Fiche</th><th style="text-align:left;padding:5px">Statut</th></tr>';
+  activite.forEach(function(e){
+    var d=e.maj?new Date(e.maj):null;
+    h+='<tr><td style="padding:4px 5px">'+(d?d.toLocaleString('fr-FR'):'\u2014')+'</td><td style="padding:4px 5px">'+(e.emoji||'')+' '+(e.auteur||'(anonyme)')+'</td><td style="padding:4px 5px">n\u00b0 '+e.no_fiche+'</td><td style="padding:4px 5px">'+e.statut+'</td></tr>';
+  });
+  h+='</table>';
+  h+='<p style="font-size:.72rem;color:var(--gris);margin-top:10px">\U0001F4E1 Actualis\u00e9 \u00e0 '+new Date().toLocaleTimeString('fr-FR')+' \u2014 rafra\u00eechissement automatique toutes les 20 s. Le prof peut rejoindre les d\u00e9fis : cr\u00e9ez votre profil avec le bouton ci-dessous, votre score entre au classement.</p>';
+  document.getElementById('profContenu').innerHTML=h;
+}
+function profKpi(titre,valeur){
+  return '<div style="flex:1 1 130px;background:var(--grisclair);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--accent)">'+valeur+'</div><div style="font-size:.72rem;color:var(--gris)">'+titre+'</div></div>';
+}
+function ouvrirProf(){
+  if(!profAutorise())return;
+  document.getElementById('modalProf').hidden=false;
+  chargerProf();
+  if(!ouvrirProf._tick){ouvrirProf._tick=setInterval(function(){
+    if(!document.getElementById('modalProf').hidden)chargerProf();
+  },20000);}
+}
+
 function init(){
   appliquerTheme();
   rendreGuide();
@@ -1656,6 +1758,13 @@ function init(){
   });
   document.getElementById('btnDemoOverlay').addEventListener('click',activerDemo);
   document.getElementById('btnProfil').addEventListener('click',ouvrirModalProfil);
+  document.getElementById('btnProf').addEventListener('click',ouvrirProf);
+  document.getElementById('btnFermerProf').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
+  document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
+  document.getElementById('btnProfProfil').addEventListener('click',function(){
+    document.getElementById('modalProf').hidden=true;ouvrirModalProfil();
+    toast("\U0001F3C5 Cr\u00e9ez votre profil prof : votre score entrera au classement face aux \u00e9l\u00e8ves !");
+  });
   document.getElementById('btnSession').addEventListener('click',ouvrirSession);
   document.getElementById('btnDefi').addEventListener('click',toggleDefi);
   document.getElementById('btnBaseCMM').addEventListener('click',function(){rechargerBaseCMM(false);});
