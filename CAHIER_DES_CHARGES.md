@@ -121,7 +121,7 @@ Aucune donnée personnelle : pseudos libres non nominatifs, aucune donnée de na
 | Vague | Contenu | Effort estimé |
 |---|---|---|
 | V2.1 | Espace Prof : dashboard classe en direct + classement live + participation prof aux défis existants | ~2 jours |
-| V2.2 | Historisation + graphiques d'évolution (groupes/individus) + export suivi | ~2 jours |
+| V2.2 | ✅ **Livré** — Historisation (table `evenements`, script `supabase-evenements.sql`) + graphiques d'évolution (courbe classe, top 5 élèves) dans l'Espace Prof + export suivi CSV | ~2 jours |
 | V2.3 | Bouton FAQ/Retours + file admin + modération | ~1,5 jour |
 | V2.4 | Défis flash prof ↔ élèves + défis inter-groupes programmés | ~2 jours |
 | V2.5 | Espace administrateur complet (pilotage qualité, rotation des codes, export consolidé) | ~1,5 jour |

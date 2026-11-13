@@ -283,6 +283,7 @@ details{margin:8px 0}
     <div id="profContenu"><p>Chargement…</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
       <button class="btn" id="btnProfRafraichir">↻ Rafraîchir</button>
+      <button class="btn" id="btnProfExport">📄 Export suivi (CSV)</button>
       <button class="btn" id="btnProfProfil">🏅 Créer mon profil prof (jouer les défis)</button>
       <button class="btn" id="btnFermerProf">Fermer</button>
     </div>
@@ -1383,6 +1384,7 @@ function enregistrerFiche(f,passerSuivante){
   var delta=fApres?(pointsFiche(fApres)-avant):0;
   var scoreApres=calculerScore();
   sessionStats.fiches++;sessionStats.points+=delta;
+  journaliserEvenement(f.no,'saisie',delta);
   if(defi.actif)defi.fiches++;
   scoreApres.badges.forEach(function(b){
     if(!b.ok)return;
@@ -1614,6 +1616,26 @@ function pousserSaisie(no){
     syncIndic('📴 Envoi en attente (réessai auto)');
   });
 }
+function journaliserEvenement(no,type,points){
+  if(estDemo())return;
+  var h=headersSync();
+  if(!h)return;
+  var profil=profilActif();
+  fetch(SUPABASE_URL+'/rest/v1/evenements',{method:'POST',headers:h,
+    body:JSON.stringify({no_fiche:String(no),auteur:profil?profil.pseudo:'',type:type||'saisie',points:points||0})
+  }).catch(function(){});
+}
+function chargerEvenements(){
+  var h=headersSync();
+  if(!h)return Promise.resolve(null);
+  h['X-Prof-Code']=PROF_CODE;
+  return fetch(SUPABASE_URL+'/rest/v1/evenements?select=*&order=horodatage.asc',{headers:h}).then(function(r){
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  }).then(function(liste){
+    return Array.isArray(liste)?liste:null;
+  }).catch(function(){return null;});
+}
 function demarrerSync(){
   if(typeof fetch==='undefined'){syncIndic('📴 Navigateur ancien');return;}
   var el=document.getElementById('syncIndicator');
@@ -1650,14 +1672,19 @@ function chargerProf(){
   var h=headersSync();
   if(!h){document.getElementById('profContenu').innerHTML="<p>\u26A0\uFE0F Entrez d'abord le code mission.</p>";return;}
   document.getElementById('profContenu').innerHTML='<p>\u23f3 Chargement des saisies de la classe…</p>';
-  fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
+  var pSaisies=fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
     if(!r.ok)throw new Error('http '+r.status);
     return r.json();
-  }).then(function(liste){rendreProf(liste);}).catch(function(){
+  });
+  Promise.all([pSaisies,chargerEvenements()]).then(function(res){
+    rendreProf(res[0],res[1]);
+  }).catch(function(){
     document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Synchronisation impossible pour le moment. V\u00e9rifiez la connexion puis rafra\u00eechissez.</p>';
   });
 }
-function rendreProf(liste){
+var derniersEvts=null;
+function rendreProf(liste,evts){
+  derniersEvts=evts||null;
   var total=liste.length,verif=0,eleves={},activite=liste.slice().sort(function(a,b){return String(b.maj).localeCompare(String(a.maj));}).slice(0,20);
   liste.forEach(function(e){
     if(e.statut==='V\u00e9rifi\u00e9')verif++;
@@ -1693,6 +1720,10 @@ function rendreProf(liste){
     h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
   });
   h+='</div>';
+  h+='<h3 style="margin:14px 0 6px">📈 Évolution de la classe (V2.2)</h3>';
+  if(!evts){h+='<p style="font-size:.8rem">⚠️ Historisation pas encore active : le CMM doit exécuter le script SQL de la table evenements (fichier supabase-evenements.sql du dépôt) dans le SQL Editor Supabase.</p>';}
+  else if(!evts.length){h+='<p style="font-size:.8rem">Aucun événement encore enregistré : la courbe se remplira dès les premières saisies.</p>';}
+  else{h+=courbeClasse(evts)+courbeEleves(evts);}
   h+='<h3 style="margin:14px 0 6px">\U0001F4E5 Derni\u00e8res saisies de la classe</h3><table style="width:100%;border-collapse:collapse;font-size:.8rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:5px">Quand</th><th style="text-align:left;padding:5px">\u00c9l\u00e8ve</th><th style="text-align:left;padding:5px">Fiche</th><th style="text-align:left;padding:5px">Statut</th></tr>';
   activite.forEach(function(e){
     var d=e.maj?new Date(e.maj):null;
@@ -1704,6 +1735,82 @@ function rendreProf(liste){
 }
 function profKpi(titre,valeur){
   return '<div style="flex:1 1 130px;background:var(--grisclair);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--accent)">'+valeur+'</div><div style="font-size:.72rem;color:var(--gris)">'+titre+'</div></div>';
+}
+function joursEvenements(evts){
+  var parJour={},jours=[];
+  evts.forEach(function(ev){
+    var j=String(ev.horodatage||'').slice(0,10);
+    if(!parJour[j]){parJour[j]=0;jours.push(j);}
+    parJour[j]+=(ev.points||0);
+  });
+  jours.sort();
+  return {parJour:parJour,jours:jours};
+}
+var COULEURS_COURBES=['#2563eb','#16a34a','#dc2626','#9333ea','#ea580c'];
+function courbeClasse(evts){
+  var d=joursEvenements(evts),jours=d.jours;
+  if(!jours.length)return '';
+  var cum=0,pts=jours.map(function(j){cum+=d.parJour[j];return cum;});
+  var W=760,H=170,P=34,n=pts.length,max=Math.max.apply(null,pts.concat([10]));
+  var xy=pts.map(function(v,i){return [P+(W-2*P)*(n===1?1:i/(n-1)),H-P-(H-2*P)*(v/max)];});
+  var ligne=xy.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+  var aire=ligne+' L'+xy[n-1][0].toFixed(1)+' '+(H-P)+' L'+xy[0][0].toFixed(1)+' '+(H-P)+' Z';
+  return '<div style="background:var(--grisclair);border-radius:8px;padding:8px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'+
+    '<path d="'+aire+'" fill="rgba(10,126,164,.15)"/>'+
+    '<path d="'+ligne+'" fill="none" stroke="#0a7ea4" stroke-width="2.5"/>'+
+    '<text x="'+P+'" y="16" font-size="11" fill="currentColor">Points cumulés de la classe</text>'+
+    '<text x="'+(W-P)+'" y="16" text-anchor="end" font-size="11" fill="currentColor">'+pts[n-1]+' pts</text>'+
+    '<text x="'+P+'" y="'+(H-8)+'" font-size="10" fill="currentColor">'+jours[0]+'</text>'+
+    '<text x="'+(W-P)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="currentColor">'+jours[n-1]+'</text>'+
+    '</svg></div>';
+}
+function courbeEleves(evts){
+  var d=joursEvenements(evts),jours=d.jours;
+  if(!jours.length)return '';
+  var parEleve={};
+  evts.forEach(function(ev){
+    var a=ev.auteur||'(anonyme)';
+    if(!parEleve[a])parEleve[a]={};
+    var j=String(ev.horodatage||'').slice(0,10);
+    parEleve[a][j]=(parEleve[a][j]||0)+(ev.points||0);
+  });
+  var noms=Object.keys(parEleve).map(function(a){
+    var t=0;jours.forEach(function(j){t+=(parEleve[a][j]||0);});
+    return {nom:a,total:t};
+  }).sort(function(x,y){return y.total-x.total;}).slice(0,5);
+  if(!noms.length)return '';
+  var W=760,H=170,P=34,n=jours.length,max=10;
+  noms.forEach(function(o){
+    var c=0;jours.forEach(function(j){c+=(parEleve[o.nom][j]||0);if(c>max)max=c;});
+  });
+  var h='<div style="background:var(--grisclair);border-radius:8px;padding:8px;margin-top:8px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  noms.forEach(function(o,idx){
+    var c=0,xy=jours.map(function(j,i){
+      c+=(parEleve[o.nom][j]||0);
+      return [P+(W-2*P)*(n===1?1:i/(n-1)),H-P-(H-2*P)*(c/max)];
+    });
+    var ligne=xy.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+    h+='<path d="'+ligne+'" fill="none" stroke="'+COULEURS_COURBES[idx]+'" stroke-width="2"/>';
+  });
+  h+='<text x="'+P+'" y="16" font-size="11" fill="currentColor">Top élèves (points cumulés)</text>';
+  h+='<text x="'+P+'" y="'+(H-8)+'" font-size="10" fill="currentColor">'+jours[0]+'</text>';
+  h+='<text x="'+(W-P)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="currentColor">'+jours[n-1]+'</text>';
+  h+='</svg><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.72rem;margin-top:4px">';
+  noms.forEach(function(o,idx){
+    h+='<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:'+COULEURS_COURBES[idx]+'"></span>'+o.nom+' ('+o.total+')</span>';
+  });
+  h+='</div></div>';
+  return h;
+}
+function exporterSuivi(){
+  if(!derniersEvts||!derniersEvts.length){alert('Aucun événement à exporter pour le moment.');return;}
+  var lignes=[['Date','Élève','Fiche','Type','Points'].join(';')];
+  derniersEvts.forEach(function(ev){
+    lignes.push([String(ev.horodatage||'').replace(/;/g,','),ev.auteur||'',ev.no_fiche||'',ev.type||'',ev.points||0].join(';'));
+  });
+  var bloc=new Blob(['\ufeff'+lignes.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(bloc);a.download='suivi-mission-annuaire.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 function ouvrirProf(){
   if(!profAutorise())return;
@@ -1761,6 +1868,7 @@ function init(){
   document.getElementById('btnProf').addEventListener('click',ouvrirProf);
   document.getElementById('btnFermerProf').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
   document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
+  document.getElementById('btnProfExport').addEventListener('click',exporterSuivi);
   document.getElementById('btnProfProfil').addEventListener('click',function(){
     document.getElementById('modalProf').hidden=true;ouvrirModalProfil();
     toast("\U0001F3C5 Cr\u00e9ez votre profil prof : votre score entrera au classement face aux \u00e9l\u00e8ves !");
