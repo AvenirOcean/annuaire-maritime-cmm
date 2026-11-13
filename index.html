@@ -332,7 +332,8 @@ details{margin:8px 0}
     <div class="champP"><label for="inPseudo">Mon pseudo (prénom ou surnom de classe)</label><input id="inPseudo" maxlength="30" placeholder="ex. Jean-Baptiste, Groupe A…"></div>
     <div class="champP"><label>Mon emoji (visible sur la carte)</label><div class="emojiChoix" id="emojiGrid"></div></div>
     <div class="champP"><label for="inStatut">Mon statut (facultatif — ex. « Groupe A · chef de bord »)</label><input id="inStatut" maxlength="60" placeholder="ex. Groupe B · fiches 101 à 200"></div>
-    <div class="champP"><label for="inNumero">Mon n° d’élève (1 à 24) — active les défis d’équipe</label><input id="inNumero" type="number" min="1" max="24" placeholder="ex. 7"></div>
+    <div class="champP"><label for="inNumero">Ma plage de fiches (n° d’élève 1 à 24) — attribuée automatiquement si vide</label><input id="inNumero" type="number" min="1" max="24" placeholder="attribué automatiquement"></div>
+    <div class="champP"><label class="chk"><input type="checkbox" id="inProf"> Je suis enseignant — je joue les défis sans prendre de plage de fiches</label></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button class="btn primary" id="btnCreerProfil">✅ Créer / utiliser ce profil</button>
       <button class="btn" id="btnFermerProfil">Fermer</button>
@@ -898,7 +899,9 @@ function ouvrirModalProfil(){
     b.addEventListener('click',function(){emojiChoisi=b.getAttribute('data-e');Array.prototype.forEach.call(grid.querySelectorAll('button'),function(x){x.classList.remove('sel');});b.classList.add('sel');});
   });
   var pr=profilActif();
-  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';document.getElementById('inNumero').value=pr.numero||'';}
+  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';document.getElementById('inNumero').value=pr.numero||'';document.getElementById('inProf').checked=!!pr.prof;}
+  var libre=numeroLibre();
+  document.getElementById('inNumero').placeholder=libre?('attribu\u00e9 automatiquement (ex. '+libre+')'):'attribu\u00e9 automatiquement';
   rendreListeProfils();
   document.getElementById('modalProfil').hidden=false;
 }
@@ -1034,6 +1037,21 @@ function plageEquipe(num){
   }
   return null;
 }
+function numerosPris(){
+  var pris={};
+  for(var no in etat.entries){var e=etat.entries[no];if(e.auteur&&e.numero)pris[e.numero]=1;}
+  Object.keys(etat.profils||{}).forEach(function(id){var pr=etat.profils[id];if(pr.numero)pris[pr.numero]=1;});
+  return pris;
+}
+function numeroLibre(){
+  var pris=numerosPris();
+  for(var n=1;n<=24;n++)if(!pris[n])return n;
+  return 0;
+}
+function plageTexte(n){
+  var pl=plageEquipe(n);
+  return pl?('fiches '+pl.a+' \u00e0 '+pl.b):'';
+}
 function monNumero(){
   var pr=profilActif();
   var n=pr?parseInt(pr.numero,10):NaN;
@@ -1076,7 +1094,7 @@ function rendreDefisEquipe(){
   if(!el)return;
   var d=defisEquipe();
   if(!d){
-    el.innerHTML='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</h3><p style="font-size:.8rem;margin:.2em 0">Indique ton <b>n\u00b0 d\u2019\u00e9l\u00e8ve (1 \u00e0 24)</b> dans ton profil (menu \u2630) pour d\u00e9bloquer la coop\u00e9ration : qu\u00eate \u00e0 plusieurs, objectif \u00e9quipage et semaine des \u00e9quipages.</p></div>';
+    el.innerHTML='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</h3><p style="font-size:.8rem;margin:.2em 0">Cr\u00e9e ton profil \u00e9l\u00e8ve (menu \u2630) : ta plage de fiches est attribu\u00e9e automatiquement et d\u00e9bloque la coop\u00e9ration : qu\u00eate \u00e0 plusieurs, objectif \u00e9quipage et semaine des \u00e9quipages. (Profil enseignant : sans plage, les d\u00e9fis d\u2019\u00e9quipe sont d\u00e9sactiv\u00e9s.)</p></div>';
     return;
   }
   verifierDefisEquipe();
@@ -1530,7 +1548,7 @@ function enregistrerFiche(f,passerSuivante){
   }
   var e=etat.entries[f.no]||(etat.entries[f.no]={});
   e.st=st;e.tel=tel;e.eml=eml;e.web=web;e.dte=dte;e.src=src;e.obs=obs;
-  e.auteur=profil.pseudo;e.emoji=profil.emoji;
+  e.auteur=profil.pseudo;e.emoji=profil.emoji;e.numero=profil.numero||0;
   var scoreAvant=calculerScore();
   var avant=pointsFiche(f);
   construireFiches(); majStreak(); sauvegarder(); pousserSaisie(f.no);
@@ -1609,7 +1627,7 @@ function rendreGuide(){
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
   '<p>Ouvre le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 Mon profil \u00e9l\u00e8ve \u00bb pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. <b>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</b> : indique ton n\u00b0 d\u2019\u00e9l\u00e8ve (1 \u00e0 24) dans ton profil \u2014 coop\u00e9ration du jour (3 membres actifs, +20 pts), objectif \u00e9quipage (12 fiches v\u00e9rifi\u00e9es, +30 pts) et classement de la semaine des \u00e9quipages. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. <b>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</b> : ta plage de fiches (n\u00b0 d\u2019\u00e9l\u00e8ve 1 \u00e0 24) est attribu\u00e9e automatiquement \u00e0 la cr\u00e9ation de ton profil \u2014 coop\u00e9ration du jour (3 membres actifs, +20 pts), objectif \u00e9quipage (12 fiches v\u00e9rifi\u00e9es, +30 pts) et classement de la semaine des \u00e9quipages. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
   '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement via le menu \u2630 puis \u00ab \ud83c\udf19 Sombre / clair \u00bb.</p>';
 }
 /* ===================== Navigation / divers ===================== */
@@ -1737,7 +1755,7 @@ function tirerSaisies(){
       s=liste[i];
       e=etat.entries[s.no_fiche];
       if(!e){e=etat.entries[s.no_fiche]={};nouvelles++;}
-      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||'';e.emoji=s.emoji||'';
+      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||'';e.emoji=s.emoji||'';e.numero=s.numero||0;
     }
     for(var no in etat.entries){
       if(!connus[no])pousserSaisie(no);
@@ -1766,7 +1784,7 @@ function pousserSaisie(no){
   h['Prefer']='resolution=merge-duplicates';
   fetch(SUPABASE_URL+'/rest/v1/saisies',{
     method:'POST',headers:h,
-    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||''})
+    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||'',numero:e.numero||0})
   }).then(function(r){
     if(!r.ok)throw new Error('http '+r.status);
     syncIndic('📡 En ligne · synchronisé');
@@ -1819,6 +1837,8 @@ function profAutorise(){
   if(c!==null)alert("\u26A0\uFE0F Code enseignant incorrect.");
   return false;
 }
+function plageDebut(n){var pl=plageEquipe(n);return pl?pl.a:0;}
+function plageFin(n){var pl=plageEquipe(n);return pl?pl.b:0;}
 function pointsSaisie(e){
   var p=0;
   if(e.statut==='V\u00e9rifi\u00e9'&&e.dte&&e.src){p+=10;if(e.tel&&(e.eml||e.web))p+=2;}
@@ -1847,7 +1867,8 @@ function rendreProf(liste,evts){
   liste.forEach(function(e){
     if(e.statut==='V\u00e9rifi\u00e9')verif++;
     var k=e.auteur||'(anonyme)';
-    if(!eleves[k])eleves[k]={s:0,v:0,p:0,emoji:e.emoji||''};
+    if(!eleves[k])eleves[k]={s:0,v:0,p:0,emoji:e.emoji||'',num:0};
+    if(e.numero)eleves[k].num=e.numero;
     eleves[k].s++;if(e.statut==='V\u00e9rifi\u00e9')eleves[k].v++;
     eleves[k].p+=pointsSaisie(e);
   });
@@ -1867,9 +1888,10 @@ function rendreProf(liste,evts){
     profKpi('Fiches saisies',total)+
     profKpi('Fiches v\u00e9rifi\u00e9es',verif)+
     profKpi('Avancement global',Math.round(100*verif/1291)+' %')+'</div>';
-  h+='<h3 style="margin:10px 0 6px">\U0001F3C6 Classement live (par \u00e9l\u00e8ve)</h3><table style="width:100%;border-collapse:collapse;font-size:.85rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:6px">#</th><th style="text-align:left;padding:6px">\u00c9l\u00e8ve</th><th style="text-align:right;padding:6px">Saisies</th><th style="text-align:right;padding:6px">V\u00e9rifi\u00e9es</th><th style="text-align:right;padding:6px">Points</th></tr>';
+  h+='<h3 style="margin:10px 0 6px">\U0001F3C6 Classement live (par \u00e9l\u00e8ve)</h3><table style="width:100%;border-collapse:collapse;font-size:.85rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:6px">#</th><th style="text-align:left;padding:6px">\u00c9l\u00e8ve</th><th style="text-align:left;padding:6px">Plage</th><th style="text-align:right;padding:6px">Saisies</th><th style="text-align:right;padding:6px">V\u00e9rifi\u00e9es</th><th style="text-align:right;padding:6px">Points</th></tr>';
   classe.forEach(function(e,i){
-    h+='<tr><td style="padding:5px 6px">'+(i+1)+'</td><td style="padding:5px 6px">'+e.d.emoji+' '+e.nom+'</td><td style="text-align:right;padding:5px 6px">'+e.d.s+'</td><td style="text-align:right;padding:5px 6px">'+e.d.v+'</td><td style="text-align:right;padding:5px 6px"><b>'+e.d.p+'</b></td></tr>';
+    var plTxt=e.d.num?('\u00e9l\u00e8ve '+e.d.num+' \u00b7 fiches '+plageDebut(e.d.num)+'\u2013'+plageFin(e.d.num)):'\u2014';
+    h+='<tr><td style="padding:5px 6px">'+(i+1)+'</td><td style="padding:5px 6px">'+e.d.emoji+' '+e.nom+'</td><td style="padding:5px 6px;font-size:.75rem">'+plTxt+'</td><td style="text-align:right;padding:5px 6px">'+e.d.s+'</td><td style="text-align:right;padding:5px 6px">'+e.d.v+'</td><td style="text-align:right;padding:5px 6px"><b>'+e.d.p+'</b></td></tr>';
   });
   h+='</table>';
   h+='<h3 style="margin:14px 0 6px">\u2705 Avancement des 6 \u00e9quipes de 4 \u00e9l\u00e8ves (fiches v\u00e9rifi\u00e9es)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
@@ -2054,16 +2076,19 @@ function init(){
     var numEl=document.getElementById('inNumero');
     var numero=parseInt(numEl.value,10);
     if(isNaN(numero)||numero<1||numero>24){numero=0;}
+    var estProf=document.getElementById('inProf').checked;
     var msg=document.getElementById('msgProfil');
     if(!pseudo){msg.textContent='Indique un pseudo pour continuer.';return;}
     if(!emojiChoisi){msg.textContent='Choisis un emoji.';return;}
+    if(estProf){numero=0;}
+    else if(!numero){numero=numeroLibre();if(!numero){msg.textContent='Les 24 plages sont d\u00e9j\u00e0 attribu\u00e9es. Indique ton n\u00b0 dans le champ.';return;}}
     var id=etat.profilActif&&etat.profils[etat.profilActif]?etat.profilActif:('p'+Date.now());
-    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut,numero:numero};
+    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut,numero:numero,prof:estProf};
     etat.profilActif=id;
     sauvegarder();construireFiches();rendreCompteurs();rendreCarte();rendreListeProfils();majBoutonProfil();
     document.getElementById('modalProfil').hidden=true;
     msg.textContent='';
-    toast('\ud83d\udc64 Profil enregistr\u00e9 : '+emojiChoisi+' '+pseudo+'. Ton travail va appara\u00eetre sur la carte !');
+    toast('\ud83d\udc64 Profil enregistr\u00e9 : '+emojiChoisi+' '+pseudo+(numero?'. Plage attribu\u00e9e : '+plageTexte(numero):'')+'. Ton travail va appara\u00eetra sur la carte !');
   });
   var overlay=document.getElementById('overlay'),dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput');
   document.getElementById('btnImport').addEventListener('click',function(){overlay.hidden=false;});
