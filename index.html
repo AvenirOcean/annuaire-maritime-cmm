@@ -245,7 +245,7 @@ details{margin:8px 0}
       <div class="legendDash" id="legendDash"></div>
     </div>
     <div class="progressWrap" style="margin-top:12px">
-      <h3>Par groupe de travail (plages de 100 fiches)</h3>
+      <h3>Par équipe de classe (6 équipes de 4 élèves)</h3>
       <div id="groupesAvancement"></div>
     </div>
     <div class="progressWrap" style="margin-top:12px">
@@ -814,16 +814,32 @@ function rendreCompteurs(){
     lots.push({a:a,b:b,n:n,v:v,p:n?Math.round(100*v/n):0});
     deja+=taille;
   }
-  var tries=lots.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
+  var equipes=[],NBQ=6,PAR=4;
+  for(var q=0;q<NBQ;q++){
+    var ls=lots.slice(q*PAR,(q+1)*PAR);
+    if(!ls.length)break;
+    var n=0,v=0;
+    ls.forEach(function(t){n+=t.n;v+=t.v;});
+    equipes.push({a:ls[0].a,b:ls[ls.length-1].b,n:n,v:v,p:n?Math.round(100*v/n):0});
+  }
+  var tries=equipes.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
   var medailles=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
   var gh='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">';
   tries.forEach(function(t,i){
     gh+='<div style="flex:1 1 140px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #f59e0b;border-radius:8px;padding:10px;text-align:center">'+
-      '<div class="medaille">'+medailles[i]+'</div><b style="font-size:.8rem">Fiches '+t.a+'\u2013'+t.b+'</b>'+
+      '<div class="medaille">'+medailles[i]+'</div><b style="font-size:.8rem">\u00c9quipe fiches '+t.a+'\u2013'+t.b+'</b>'+
       '<div style="font-size:1.4rem;font-weight:800;color:var(--ambre)">'+t.p+' %</div>'+
       '<div style="font-size:.7rem;color:var(--gris)">'+t.v+'/'+t.n+' v\u00e9rifi\u00e9es</div></div>';
   });
-  gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+  equipes.forEach(function(t,qi){
+    gh+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:.75rem">'+
+      '<b>\u00c9quipe '+(qi+1)+' \u00b7 \u00e9l\u00e8ves '+(qi*PAR+1)+'\u2013'+((qi+1)*PAR)+'</b>'+
+      '<div style="background:#e5e7eb;border-radius:999px;height:9px;margin-top:5px;overflow:hidden">'+
+      '<div style="height:9px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+
+      t.p+' % ('+t.v+'/'+t.n+') \u00b7 fiches '+t.a+'\u2013'+t.b+'</div>';
+  });
+  gh+='</div><p style="font-size:.72rem;color:var(--gris);margin:0 0 8px">D\u00e9tail des 24 plages individuelles (une par \u00e9l\u00e8ve) :</p><div style="display:flex;flex-wrap:wrap;gap:8px">';
   lots.forEach(function(t){
     gh+='<div style="flex:1 1 100px;min-width:100px;background:var(--grisclair);border-radius:6px;padding:6px 8px;font-size:.72rem">'+
       '<b>Fiches '+t.a+'\u2013'+t.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
@@ -1445,7 +1461,7 @@ function enregistrerFiche(f,passerSuivante){
 /* ===================== Guide ===================== */
 function rendreGuide(){
   document.getElementById('guideContent').innerHTML=
-  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. La classe compte 24 élèves : la base est divisée en 24 plages individuelles d\'environ 54 fiches (ex. élève 1 = fiches 1 à 54).</p>'+
+  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. La classe compte 24 élèves : la base est divisée en 24 plages individuelles d\'environ 54 fiches (ex. élève 1 = fiches 1 à 54), regroupées en 6 équipes de 4 élèves (ex. équipe 1 = fiches 1 à 216).</p>'+
   '<h3>1️⃣ Les statuts et leur signification</h3><table><tr><th>Statut</th><th>Signification</th></tr>'+
   '<tr><td><b>Non vérifié</b></td><td>Rien n\'a encore été contrôlé sur cette fiche.</td></tr>'+
   '<tr><td><b>Pré-rempli — à confirmer</b></td><td>Des coordonnées existent déjà (issues du CRM du CMM) : recoupez-les avec une seconde source, corrigez si obsolètes, puis passez à « Vérifié ».</td></tr>'+
@@ -1487,7 +1503,7 @@ function rendreGuide(){
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
   '<p>Ouvre le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 Mon profil \u00e9l\u00e8ve \u00bb pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
   '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement via le menu \u2630 puis \u00ab \ud83c\udf19 Sombre / clair \u00bb.</p>';
 }
 /* ===================== Navigation / divers ===================== */
@@ -1750,7 +1766,16 @@ function rendreProf(liste,evts){
     h+='<tr><td style="padding:5px 6px">'+(i+1)+'</td><td style="padding:5px 6px">'+e.d.emoji+' '+e.nom+'</td><td style="text-align:right;padding:5px 6px">'+e.d.s+'</td><td style="text-align:right;padding:5px 6px">'+e.d.v+'</td><td style="text-align:right;padding:5px 6px"><b>'+e.d.p+'</b></td></tr>';
   });
   h+='</table>';
-  h+='<h3 style="margin:14px 0 6px">\u2705 Avancement des 24 plages (fiches v\u00e9rifi\u00e9es)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  h+='<h3 style="margin:14px 0 6px">\u2705 Avancement des 6 \u00e9quipes de 4 \u00e9l\u00e8ves (fiches v\u00e9rifi\u00e9es)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  for(var q=0;q<plages.length;q+=4){
+    var ls=plages.slice(q,q+4);
+    if(!ls.length)break;
+    var vn=0,tn=0;
+    ls.forEach(function(pl){vn+=pl.v;tn+=pl.n;});
+    var qc=tn?Math.round(100*vn/tn):0;
+    h+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:6px 9px;font-size:.72rem"><b>\u00c9quipe '+(q/4+1)+' \u00b7 \u00e9l\u00e8ves '+(q+1)+'\u2013'+(q+4)+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden"><div style="height:8px;width:'+qc+'%;background:'+(qc===100?'#15803d':'#22c55e')+'"></div></div>'+vn+'/'+tn+' \u00b7 fiches '+ls[0].a+'\u2013'+ls[ls.length-1].b+'</div>';
+  }
+  h+='</div><h3 style="margin:12px 0 6px">D\u00e9tail : 24 plages individuelles</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
   plages.forEach(function(pl){
     var pc=Math.round(100*pl.v/pl.n);
     h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
