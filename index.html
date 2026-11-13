@@ -118,6 +118,7 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 #barreJeu{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;padding:10px 16px;max-width:1400px;margin:0 auto}
 #barreJeu .recompense{flex:1 1 340px;margin:0}
 #barreJeu #blocQuete{flex:1 1 300px;margin:0}
+#barreJeu #blocDefisEquipe{flex:1 1 300px;margin:0}
 #menuFond{position:fixed;inset:0;background:rgba(2,20,35,.55);z-index:98}
 #menuFond[hidden]{display:none}
 #menuLateral{position:fixed;top:0;right:0;bottom:0;width:min(320px,88vw);background:#fff;z-index:99;box-shadow:-6px 0 24px rgba(2,20,35,.25);padding:14px;overflow:auto}
@@ -234,6 +235,7 @@ details{margin:8px 0}
 <div id="barreJeu">
   <div class="recompense" id="blocRecompense"></div>
   <div id="blocQuete"></div>
+  <div id="blocDefisEquipe"></div>
 </div>
 
 <main>
@@ -256,7 +258,7 @@ details{margin:8px 0}
 
   <section id="vue-carte" class="vue active">
     <div class="carteBox">
-      <svg id="svgMap" viewBox="0 0 450 540" role="img" aria-label="Carte de la Martinique par commune"></svg>
+      <svg id="svgMap" viewBox="0 0 600 690" role="img" aria-label="Carte de la Martinique par commune"></svg>
       <div class="mapInfo">
         <h3>Répartition par commune</h3>
         <p style="font-size:.78rem;color:var(--gris);margin:.2em 0 .6em">Cliquez sur un cercle ou une ligne pour filtrer la liste. La couleur indique le secteur dominant, la taille le nombre de fiches.</p>
@@ -330,6 +332,7 @@ details{margin:8px 0}
     <div class="champP"><label for="inPseudo">Mon pseudo (prénom ou surnom de classe)</label><input id="inPseudo" maxlength="30" placeholder="ex. Jean-Baptiste, Groupe A…"></div>
     <div class="champP"><label>Mon emoji (visible sur la carte)</label><div class="emojiChoix" id="emojiGrid"></div></div>
     <div class="champP"><label for="inStatut">Mon statut (facultatif — ex. « Groupe A · chef de bord »)</label><input id="inStatut" maxlength="60" placeholder="ex. Groupe B · fiches 101 à 200"></div>
+    <div class="champP"><label for="inNumero">Mon n° d’élève (1 à 24) — active les défis d’équipe</label><input id="inNumero" type="number" min="1" max="24" placeholder="ex. 7"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button class="btn primary" id="btnCreerProfil">✅ Créer / utiliser ce profil</button>
       <button class="btn" id="btnFermerProfil">Fermer</button>
@@ -559,14 +562,20 @@ var SECTEURS=['Activités nautiques','Industrie nautique','Services connexes','P
 var STATUTS=['Non vérifié','Pré-rempli — à confirmer','Vérifié','À valider','Structure introuvable'];
 var SOURCES=['','Site officiel','Annuaire pro','Registre national','Page professionnelle'];
 var COULEURS_SECTEUR={'Activités nautiques':'#0e7490','Industrie nautique':'#b45309','Services connexes':'#6d28d9','Ports et capitaineries':'#15803d','Événements nautiques':'#be123c','Non renseigné':'#6b7280'};
-var COMMUNES_GEO=[["Grand'Rivière", 14.875, -61.18],["Macouba", 14.855, -61.155],["Basse-Pointe", 14.87, -61.125],["Le Marigot", 14.825, -61.01],["Le Lorrain", 14.84, -61.06],["Ajoupa-Bouillon", 14.815, -61.025],["Sainte-Marie", 14.795, -60.995],["Le Morne-Rouge", 14.76, -61.135],["Le Prêcheur", 14.8, -61.195],["Le Carbet", 14.77, -61.185],["Saint-Pierre", 14.745, -61.175],["Le Morne-Vert", 14.715, -61.18],["Bellefontaine", 14.685, -61.155],["Case-Pilote", 14.665, -61.14],["Schoelcher", 14.608, -61.095],["Fonds-Saint-Denis", 14.715, -61.145],["Saint-Joseph", 14.665, -61.035],["Fort-de-France", 14.595, -61.075],["Le Lamentin", 14.61, -60.99],["Gros-Morne", 14.705, -61.0],["La Trinité", 14.74, -60.965],["Le Robert", 14.675, -60.94],["Le Ducos", 14.57, -60.97],["Rivière-Salée", 14.53, -60.975],["Saint-Esprit", 14.48, -60.93],["Le François", 14.615, -60.9],["Le Vauclin", 14.545, -60.835],["Sainte-Luce", 14.475, -60.922],["Les Trois-Îlets", 14.535, -61.04],["Les Anses-d'Arlet", 14.487, -61.055],["Le Diamant", 14.48, -61.025],["Rivière-Pilote", 14.49, -60.9],["Le Marin", 14.47, -60.87],["Sainte-Anne", 14.43, -60.885]];
-var COTE_MQ=[[14.878, -61.18],[14.866, -61.17],[14.862, -61.15],[14.872, -61.122],[14.856, -61.105],[14.848, -61.07],[14.835, -61.03],[14.827, -61.003],[14.8, -60.985],[14.77, -60.965],[14.758, -60.945],[14.757, -60.912],[14.745, -60.938],[14.725, -60.94],[14.7, -60.935],[14.672, -60.928],[14.645, -60.905],[14.618, -60.888],[14.59, -60.878],[14.562, -60.838],[14.535, -60.828],[14.505, -60.848],[14.472, -60.868],[14.442, -60.872],[14.385, -60.878],[14.383, -60.912],[14.405, -60.945],[14.445, -60.95],[14.475, -60.928],[14.47, -60.96],[14.462, -61.0],[14.455, -61.03],[14.475, -61.055],[14.487, -61.062],[14.52, -61.075],[14.552, -61.1],[14.592, -61.112],[14.618, -61.088],[14.622, -61.108],[14.655, -61.138],[14.687, -61.158],[14.715, -61.183],[14.742, -61.18],[14.78, -61.197],[14.83, -61.2]];
-function projeterMQ(lat,lon){var k=1000;return [Math.round((lon+61.25)*k),Math.round((14.90-lat)*k)];}
-function adoucierMQ(pts){var out=[];for(var i=0;i<pts.length;i++){var a=pts[i],b=pts[(i+1)%pts.length];
-  out.push([a[0]*0.75+b[0]*0.25,a[1]*0.75+b[1]*0.25]);out.push([a[0]*0.25+b[0]*0.75,a[1]*0.25+b[1]*0.75]);}return out;}
-var PATH_COTE=(function(){var c=adoucierMQ(adoucierMQ(COTE_MQ));var d='';for(var i=0;i<c.length;i++){var q=projeterMQ(c[i][0],c[i][1]);d+=(i?'L':'M')+q[0]+','+q[1]+' ';}return d+'Z';})();
-var COMMUNES_MQ=COMMUNES_GEO.map(function(c){var q=projeterMQ(c[1],c[2]);return [c[0],q[0],q[1]];});
-var CLE_COMMUNE_MQ={};COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
+var GEO_MQ={"contour":[[-61.18492,14.88573],[-61.22131,14.86914],[-61.23917,14.82202],[-61.23093,14.78219],[-61.18835,14.74567],[-61.19728,14.7025],[-61.16226,14.64205],[-61.12175,14.61481],[-61.10458,14.59621],[-61.06819,14.58558],[-61.04141,14.58691],[-61.02287,14.57295],[-61.00914,14.55966],[-61.03043,14.56165],[-61.05034,14.57096],[-61.0778,14.55899],[-61.10184,14.54039],[-61.11626,14.51446],[-61.10252,14.49651],[-61.10321,14.4779],[-61.07712,14.45263],[-61.05446,14.44532],[-61.03798,14.43335],[-61.03317,14.44465],[-61.02905,14.4646],[-61.01051,14.45795],[-60.97755,14.45995],[-60.92606,14.45263],[-60.89722,14.44133],[-60.90271,14.42138],[-60.88486,14.3868],[-60.86151,14.37616],[-60.84709,14.38813],[-60.82924,14.39877],[-60.81825,14.42338],[-60.8004,14.4513],[-60.80177,14.47856],[-60.81207,14.49984],[-60.81963,14.5231],[-60.82375,14.54903],[-60.81757,14.57162],[-60.83611,14.58026],[-60.8416,14.59953],[-60.84023,14.61083],[-60.83954,14.62877],[-60.85121,14.64006],[-60.87044,14.63076],[-60.87524,14.64272],[-60.87456,14.66331],[-60.87387,14.68125],[-60.87112,14.69652],[-60.89035,14.70383],[-60.90614,14.7191],[-60.92537,14.73637],[-60.90614,14.72774],[-60.88211,14.7284],[-60.87799,14.74567],[-60.86975,14.75496],[-60.86494,14.7782],[-60.88348,14.78949],[-60.91507,14.77488],[-60.94803,14.76492],[-60.95284,14.77754],[-60.97549,14.79679],[-61.01738,14.83463],[-61.06133,14.85852],[-61.11763,14.88573],[-61.18492,14.88573]],"communes":[["L'Ajoupa-Bouillon",14.82094,-61.11749],["Les Anses-d'Arlet",14.4884,-61.0847],["Basse-Pointe",14.86935,-61.11521],["Le Carbet",14.7119,-61.1811],["Case-Pilote",14.6396,-61.1385],["Le Diamant",14.4816,-61.0263],["Ducos",14.57529,-60.97453],["Fonds-Saint-Denis",14.7328,-61.1421],["Fort-de-France",14.60365,-61.07418],["Le François",14.61513,-60.90311],["Grand'Rivière",14.87383,-61.17954],["Gros-Morne",14.7,-61],["Le Lamentin",14.61341,-60.99964],["Le Lorrain",14.83257,-61.05553],["Macouba",14.871,-61.1367],["Le Marigot",14.803,-61.0405],["Le Marin",14.47158,-60.86989],["Le Morne-Rouge",14.7761,-61.13564],["Le Prêcheur",14.8027,-61.2256],["Rivière-Pilote",14.48738,-60.90257],["Rivière-Salée",14.5336,-60.974],["Le Robert",14.67751,-60.94228],["Saint-Esprit",14.55,-60.93333],["Saint-Joseph",14.67099,-61.03905],["Saint-Pierre",14.74309,-61.17541],["Sainte-Anne",14.43452,-60.88078],["Sainte-Luce",14.46848,-60.92138],["Sainte-Marie",14.78352,-60.99227],["Schœlcher",14.61774,-61.099],["La Trinité",14.73807,-60.96319],["Les Trois-Îlets",14.53912,-61.03354],["Le Vauclin",14.5454,-60.83831],["Le Morne-Vert",14.6968,-61.1516],["Bellefontaine",14.6685,-61.156]]};
+/* Projection : longitude corrigee du cosinus de la latitude moyenne */
+var CARTO_LARG=600,CARTO_MARGE=46;
+var _pts=GEO_MQ.contour,_lngs=_pts.map(function(p){return p[0];}),_lats=_pts.map(function(p){return p[1];});
+var _lngMin=Math.min.apply(null,_lngs),_lngMax=Math.max.apply(null,_lngs);
+var _latMin=Math.min.apply(null,_lats),_latMax=Math.max.apply(null,_lats);
+var _kLng=Math.cos((_latMin+_latMax)/2*Math.PI/180);
+var CARTO_ECH=(CARTO_LARG-2*CARTO_MARGE)/((_lngMax-_lngMin)*_kLng);
+var CARTO_HAUT=Math.round((_latMax-_latMin)*CARTO_ECH+2*CARTO_MARGE);
+function projeterMQ(lng,lat){return [CARTO_MARGE+(lng-_lngMin)*_kLng*CARTO_ECH,CARTO_MARGE+(_latMax-lat)*CARTO_ECH];}
+var PATH_COTE=(function(){var d='';GEO_MQ.contour.forEach(function(p,i){var q=projeterMQ(p[0],p[1]);d+=(i?'L':'M')+q[0].toFixed(1)+','+q[1].toFixed(1)+' ';});return d+'Z';})();
+var CLE_COMMUNE_MQ={};
+var COMMUNES_MQ=GEO_MQ.communes.map(function(c){var q=projeterMQ(c[2],c[1]);return [normaliserCommune(c[0]),q[0],q[1]];});
+COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
 var CLE_SECTEUR={'activitesnautiques':'Activités nautiques','industrienautique':'Industrie nautique','servicesconnexes':'Services connexes','portsetcapitaineries':'Ports et capitaineries','evenementsnautiques':'Événements nautiques'};
 function normaliserCommune(raw){
   var s=normaliserTexte(raw);
@@ -794,7 +803,7 @@ function rendreCompteurs(){
   });
   var pct=total?Math.round(100*c.verif/total):0;
   var defs=[['Total fiches',total,''],['Vérifié',c.verif,'vert'],['Pré-rempli — à confirmer',c.prem,'bleu'],['Non vérifié',c.non,'gris'],['À valider',c.avalider,''],['Structure introuvable',c.introuvable,'roug'],['Cotisants CMM (priorité 1)',c.cotisants,'ambr'],['Fermées (registre)',c.fermees,'roug']];
-  rendreRecompenses();rendreEquipage();rendreQuete();
+  rendreRecompenses();rendreEquipage();rendreDefisEquipe();rendreQuete();
   document.getElementById('compteurs').innerHTML=defs.map(function(x){return '<div class="cpt '+x[2]+'"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';}).join('');
   var pf=document.getElementById('progressFill');
   pf.style.width=Math.max(pct,3)+'%'; pf.textContent=pct+' %';
@@ -889,7 +898,7 @@ function ouvrirModalProfil(){
     b.addEventListener('click',function(){emojiChoisi=b.getAttribute('data-e');Array.prototype.forEach.call(grid.querySelectorAll('button'),function(x){x.classList.remove('sel');});b.classList.add('sel');});
   });
   var pr=profilActif();
-  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';}
+  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';document.getElementById('inNumero').value=pr.numero||'';}
   rendreListeProfils();
   document.getElementById('modalProfil').hidden=false;
 }
@@ -1016,6 +1025,87 @@ function rendreQuete(){
     '<p style="font-size:.85rem;margin:.2em 0 .6em"><b>'+q.titre+'</b> \u2014 '+Math.min(q.n,q.cible)+'/'+q.cible+' \u00b7 r\u00e9compense : <b>+20 pts</b></p>'+
     '<div class="progressBar"><div class="progressFill" style="width:'+pct+'%;background:'+(fait?'#15803d':'linear-gradient(90deg,#f59e0b,#fbbf24)')+'">'+pct+' %</div></div></div>';
 }
+function plageEquipe(num){
+  var TOT=1291,NBE=24,deja=0;
+  for(var g=0;g<NBE;g++){
+    var t=Math.floor(TOT/NBE)+(g<(TOT%NBE)?1:0);
+    if(num===g+1)return {a:deja+1,b:deja+t};
+    deja+=t;
+  }
+  return null;
+}
+function monNumero(){
+  var pr=profilActif();
+  var n=pr?parseInt(pr.numero,10):NaN;
+  return (n>=1&&n<=24)?n:0;
+}
+function defisEquipe(){
+  var n=monNumero();
+  if(!n)return null;
+  var pl=plageEquipe(n);
+  if(!pl)return null;
+  var auj=aujourdhuiISO();
+  var verifJour=0,membres={};
+  fiches.forEach(function(f){
+    var x=+f.no;
+    if(x>=pl.a&&x<=pl.b&&f.dte===auj){
+      if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)verifJour++;
+      if(f.auteur)membres[f.auteur]=1;
+    }
+  });
+  return {n:n,eq:Math.ceil(n/4),a:pl.a,b:pl.b,verifJour:verifJour,membres:Object.keys(membres).length};
+}
+function verifierDefisEquipe(){
+  var d=defisEquipe();
+  if(!d)return;
+  var auj=aujourdhuiISO();
+  etat.defisEq=etat.defisEq||{};
+  if(d.membres>=3&&etat.defisEq.coop!==auj){
+    etat.defisEq.coop=auj;
+    toast('\ud83e\udd1d D\u00e9fi coop accompli : 3 membres de ton \u00e9quipe ont saisi aujourd\u2019hui ! +20 pts');
+    lancerConfettis();sauvegarder();
+  }
+  if(d.verifJour>=12&&etat.defisEq.obj!==auj){
+    etat.defisEq.obj=auj;
+    toast('\ud83d\ude80 Objectif \u00e9quipage accompli : 12 fiches de l\u2019\u00e9quipe v\u00e9rifi\u00e9es aujourd\u2019hui ! +30 pts');
+    lancerConfettis();sauvegarder();
+  }
+}
+function rendreDefisEquipe(){
+  var el=document.getElementById('blocDefisEquipe');
+  if(!el)return;
+  var d=defisEquipe();
+  if(!d){
+    el.innerHTML='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</h3><p style="font-size:.8rem;margin:.2em 0">Indique ton <b>n\u00b0 d\u2019\u00e9l\u00e8ve (1 \u00e0 24)</b> dans ton profil (menu \u2630) pour d\u00e9bloquer la coop\u00e9ration : qu\u00eate \u00e0 plusieurs, objectif \u00e9quipage et semaine des \u00e9quipages.</p></div>';
+    return;
+  }
+  verifierDefisEquipe();
+  var auj=aujourdhuiISO();
+  var g=etat.defisEq||{};
+  var p1=Math.min(100,Math.round(100*d.membres/3)),p2=Math.min(100,Math.round(100*d.verifJour/12));
+  var lundi=new Date();lundi.setDate(lundi.getDate()-((lundi.getDay()+6)%7));
+  var ref=lundi.toISOString().slice(0,10);
+  var ranges=[],scores=[];
+  for(var q=1;q<=6;q++){
+    var r1=plageEquipe(4*q-3),r2=plageEquipe(Math.min(24,4*q));
+    ranges.push({a:r1.a,b:r2.b});scores.push(0);
+  }
+  fiches.forEach(function(f){
+    if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src&&f.dte>=ref){
+      var x=+f.no;
+      for(var q=0;q<6;q++){if(x>=ranges[q].a&&x<=ranges[q].b){scores[q]++;break;}}
+    }
+  });
+  var monScore=scores[d.eq-1],rang=1;
+  scores.forEach(function(v){if(v>monScore)rang++;});
+  var h='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe \u2014 \u00c9quipe '+d.eq+' (\u00e9l\u00e8ves '+((d.eq-1)*4+1)+' \u00e0 '+Math.min(24,d.eq*4)+', fiches '+d.a+' \u00e0 '+d.b+')</h3>';
+  h+='<p style="font-size:.8rem;margin:.2em 0 .5em"><b>Coop\u00e9ration du jour :</b> au moins <b>3 membres</b> de l\u2019\u00e9quipe saisissent une fiche aujourd\u2019hui \u2014 '+Math.min(d.membres,3)+'/3 \u00b7 r\u00e9compense : <b>+20 pts</b>'+(g.coop===auj?' \u2705':'')+'</p>';
+  h+='<div class="progressBar"><div class="progressFill" style="width:'+p1+'%;background:'+(g.coop===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p1+' %</div></div>';
+  h+='<p style="font-size:.8rem;margin:.6em 0 .5em"><b>Objectif \u00e9quipage :</b> <b>12 fiches</b> de la plage v\u00e9rifi\u00e9es aujourd\u2019hui \u2014 '+Math.min(d.verifJour,12)+'/12 \u00b7 r\u00e9compense : <b>+30 pts</b>'+(g.obj===auj?' \u2705':'')+'</p>';
+  h+='<div class="progressBar"><div class="progressFill" style="width:'+p2+'%;background:'+(g.obj===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p2+' %</div></div>';
+  h+='<p style="font-size:.78rem;margin:.6em 0 0">\u2694\ufe0f <b>Semaine des \u00e9quipages</b> : ton \u00e9quipe a v\u00e9rifi\u00e9 <b>'+monScore+'</b> fiche(s) cette semaine \u2014 rang <b>'+rang+'/6</b>'+(rang===1?' \ud83e\udd47':'')+'</p></div>';
+  el.innerHTML=h;
+}
 function ouvrirModalGenerique(html){
   document.getElementById('panneauGenerique').innerHTML=html;
   document.getElementById('modalGenerique').hidden=false;
@@ -1106,6 +1196,8 @@ function calculerScore(){
     if(f.prio.charAt(0)==='1'){cotisantsTotal++;if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)cotisantsVerifies++;}
   });
   if(etat.queteFait===aujourdhuiISO())total+=20;
+  if(etat.defisEq&&etat.defisEq.coop===aujourdhuiISO())total+=20;
+  if(etat.defisEq&&etat.defisEq.obj===aujourdhuiISO())total+=30;
   var score={points:total,verifiees:verifiees,nbCommunes:Object.keys(communes).length,introuvablesDoc:introuvablesDoc,telSaisis:telSaisis,cotisantsVerifies:cotisantsVerifies,cotisantsTotal:cotisantsTotal};
   score.badges=[
     {emo:'\ud83e\uded1',nom:'Premier cap',desc:'1 fiche v\u00e9rifi\u00e9e',ok:verifiees>=1},
@@ -1167,36 +1259,50 @@ function rendreCarte(){
       contributeurs[f.commune][f.emojiFiche+' '+f.auteur]=f.emojiFiche;
     }
   });
-  var cercles='';
+  var lieuxCarte=[];
   COMMUNES_MQ.forEach(function(c){
     var d=data[c[0]]; if(!d)return;
-    var r=6+16*Math.sqrt(d.n/maxN);
-    var sect=secteurDominant(d.secteurs);
-    var emos=contributeurs[c[0]]?Object.keys(contributeurs[c[0]]).map(function(k){return contributeurs[c[0]][k];}):[];
+    lieuxCarte.push({nom:c[0],x:c[1],y:c[2],n:d.n,r:6+20*Math.sqrt(d.n/maxN),sect:secteurDominant(d.secteurs)});
+  });
+  var occupes=lieuxCarte.map(function(l){return {l:l,x:l.x-l.r,y:l.y-l.r,w:2*l.r,h:2*l.r};});
+  var cercles='',nomsTxt='';
+  lieuxCarte.slice().sort(function(a2,b2){return b2.n-a2.n;}).forEach(function(l){
+    var sel=filtres.commune===l.nom;
+    var emos=contributeurs[l.nom]?Object.keys(contributeurs[l.nom]).map(function(k){return contributeurs[l.nom][k];}):[];
     var emosUniq=[];emos.forEach(function(e){if(emosUniq.indexOf(e)<0)emosUniq.push(e);});
     var emosTxt='';
-    emosUniq.slice(0,3).forEach(function(e,i){emosTxt+='<text x="'+(c[1]+r+4+i*13)+'" y="'+(c[2]+4)+'" font-size="11">'+e+'</text>';});
-    cercles+='<g class="commune" data-commune="'+echapperXml(c[0])+'">'+
-      '<circle cx="'+c[1]+'" cy="'+c[2]+'" r="'+r+'" fill="'+COULEURS_SECTEUR[sect]+'" fill-opacity=".78" stroke="#fff" stroke-width="1.5"></circle>'+
-      '<text x="'+c[1]+'" y="'+(c[2]-r-3)+'" text-anchor="middle" font-size="9" fill="#374151">'+d.n+'</text>'+emosTxt+'</g>';
+    emosUniq.slice(0,3).forEach(function(e,i){emosTxt+='<text x="'+(l.x+l.r+4+i*13).toFixed(1)+'" y="'+(l.y+4).toFixed(1)+'" font-size="11">'+e+'</text>';});
+    cercles+='<g class="commune" data-commune="'+echapperXml(l.nom)+'" style="cursor:pointer">'+
+      '<title>'+echapperXml(l.nom)+' · '+l.n+' fiche(s) · secteur dominant : '+echapperXml(l.sect)+'</title>'+
+      '<circle cx="'+l.x.toFixed(1)+'" cy="'+l.y.toFixed(1)+'" r="'+l.r.toFixed(1)+'" fill="'+COULEURS_SECTEUR[l.sect]+'" fill-opacity="'+(sel?'1':'.86')+'" stroke="'+(sel?'#1c2530':'#ffffff')+'" stroke-width="'+(sel?'3':'2')+'"></circle>'+
+      '<text x="'+l.x.toFixed(1)+'" y="'+(l.y-l.r-3).toFixed(1)+'" text-anchor="middle" font-size="9" fill="#374151">'+l.n+'</text>'+emosTxt+'</g>';
+    var largeur=l.nom.length*6.7+6,hauteur=15,e=l.r+5;
+    var positions={droite:{ancre:'start',x:l.x+e,y:l.y+4,bx:l.x+e-3,by:l.y-9},gauche:{ancre:'end',x:l.x-e,y:l.y+4,bx:l.x-e-largeur+3,by:l.y-9},dessous:{ancre:'middle',x:l.x,y:l.y+l.r+14,bx:l.x-largeur/2,by:l.y+l.r+2},dessus:{ancre:'middle',x:l.x,y:l.y-l.r-6,bx:l.x-largeur/2,by:l.y-l.r-18}};
+    var ordre=l.x<200?['gauche','dessous','dessus','droite']:(l.x>420?['droite','dessous','dessus','gauche']:['dessous','droite','gauche','dessus']);
+    for(var i=0;i<ordre.length;i++){
+      var pos=positions[ordre[i]],bx=pos.bx,by=pos.by;
+      var horsCadre=bx<2||by<2||bx+largeur>CARTO_LARG-2||by+hauteur>CARTO_HAUT-2;
+      var gene=occupes.some(function(z){return z.l!==l&&bx<z.x+z.w&&bx+largeur>z.x&&by<z.y+z.h&&by+hauteur>z.y;});
+      if(horsCadre||gene)continue;
+      occupes.push({l:null,x:bx,y:by,w:largeur,h:hauteur});
+      nomsTxt+='<text x="'+pos.x.toFixed(1)+'" y="'+pos.y.toFixed(1)+'" text-anchor="'+pos.ancre+'" font-size="12" font-weight="600" fill="#1c2530" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">'+echapperXml(l.nom)+'</text>';
+      break;
+    }
   });
   var horsMq=0,nonRenseignee=0;
   fiches.forEach(function(f){
     if(f.commune==='Commune non renseignée')nonRenseignee++;
     else if(!estCommuneMartinique(f.commune))horsMq++;
   });
+  var yBox=CARTO_HAUT-70;
+  svg.setAttribute('viewBox','0 0 '+CARTO_LARG+' '+CARTO_HAUT);
   svg.innerHTML=
-   '<defs>'+
-   '<linearGradient id="gMer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ecf8"/><stop offset="1" stop-color="#b3d5ea"/></linearGradient>'+
-   '<linearGradient id="gIle" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#b5dfa8"/><stop offset="0.55" stop-color="#8cc98a"/><stop offset="1" stop-color="#5fae73"/></linearGradient>'+
-   '</defs>'+
-   '<rect x="0" y="0" width="450" height="540" fill="url(#gMer)"></rect>'+
-   '<path d="'+PATH_COTE+'" fill="#3e7d4f" opacity=".25" transform="translate(2,3)"></path>'+
-   '<path d="'+PATH_COTE+'" fill="url(#gIle)" stroke="#3e7d4f" stroke-width="1.5" stroke-linejoin="round"></path>'+
-   cercles+
-   '<g class="commune" data-commune="__HORSMQ__"><rect x="330" y="455" width="100" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="380" y="474" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="380" y="486" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="380" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
-   '<g class="commune" data-commune="Commune non renseign\u00e9e"><rect x="200" y="455" width="115" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="257" y="474" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="257" y="486" text-anchor="middle" font-size="10" fill="#374151">renseign\u00e9e</text><text x="257" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
-   '<text x="225" y="528" text-anchor="middle" font-size="10" fill="#4b6075">Martinique \u2014 nombre de fiches par commune (clic = filtrer)</text>';
+   '<rect x="0" y="0" width="'+CARTO_LARG+'" height="'+CARTO_HAUT+'" rx="10" fill="#b5dbea"></rect>'+
+   '<polygon points="'+GEO_MQ.contour.map(function(p){var q=projeterMQ(p[0],p[1]);return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' ')+'" fill="#c1dfa3" stroke="#4f8a2b" stroke-width="1.5" stroke-linejoin="round"></polygon>'+
+   cercles+nomsTxt+
+   '<g class="commune" data-commune="__HORSMQ__" style="cursor:pointer"><rect x="'+(CARTO_LARG-120)+'" y="'+yBox+'" width="100" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3"></rect><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+19)+'" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+31)+'" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+46)+'" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
+   '<g class="commune" data-commune="Commune non renseignée" style="cursor:pointer"><rect x="'+(CARTO_LARG-245)+'" y="'+yBox+'" width="115" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3"></rect><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+19)+'" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+31)+'" text-anchor="middle" font-size="10" fill="#374151">renseignée</text><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+46)+'" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
+   '<text x="'+(CARTO_LARG/2)+'" y="'+(CARTO_HAUT-8)+'" text-anchor="middle" font-size="10" fill="#4b6075">Martinique — nombre de fiches par commune (clic = filtrer)</text>';
   Array.prototype.forEach.call(svg.querySelectorAll('.commune'),function(g){
     g.addEventListener('click',function(){
       var c=g.getAttribute('data-commune');
@@ -1503,7 +1609,7 @@ function rendreGuide(){
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
   '<p>Ouvre le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 Mon profil \u00e9l\u00e8ve \u00bb pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. <b>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</b> : indique ton n\u00b0 d\u2019\u00e9l\u00e8ve (1 \u00e0 24) dans ton profil \u2014 coop\u00e9ration du jour (3 membres actifs, +20 pts), objectif \u00e9quipage (12 fiches v\u00e9rifi\u00e9es, +30 pts) et classement de la semaine des \u00e9quipages. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
   '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement via le menu \u2630 puis \u00ab \ud83c\udf19 Sombre / clair \u00bb.</p>';
 }
 /* ===================== Navigation / divers ===================== */
@@ -1945,11 +2051,14 @@ function init(){
   document.getElementById('btnCreerProfil').addEventListener('click',function(){
     var pseudo=normaliserTexte(document.getElementById('inPseudo').value);
     var statut=normaliserTexte(document.getElementById('inStatut').value);
+    var numEl=document.getElementById('inNumero');
+    var numero=parseInt(numEl.value,10);
+    if(isNaN(numero)||numero<1||numero>24){numero=0;}
     var msg=document.getElementById('msgProfil');
     if(!pseudo){msg.textContent='Indique un pseudo pour continuer.';return;}
     if(!emojiChoisi){msg.textContent='Choisis un emoji.';return;}
     var id=etat.profilActif&&etat.profils[etat.profilActif]?etat.profilActif:('p'+Date.now());
-    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut};
+    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut,numero:numero};
     etat.profilActif=id;
     sauvegarder();construireFiches();rendreCompteurs();rendreCarte();rendreListeProfils();majBoutonProfil();
     document.getElementById('modalProfil').hidden=true;
