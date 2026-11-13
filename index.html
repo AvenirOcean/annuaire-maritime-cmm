@@ -115,6 +115,22 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 @keyframes popScore{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
 .recompense .score.pop{animation:popScore .5s}
 .qr{border-left:4px solid #f59e0b}
+#barreJeu{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;padding:10px 16px;max-width:1400px;margin:0 auto}
+#barreJeu .recompense{flex:1 1 340px;margin:0}
+#barreJeu #blocQuete{flex:1 1 300px;margin:0}
+#menuFond{position:fixed;inset:0;background:rgba(2,20,35,.55);z-index:98}
+#menuFond[hidden]{display:none}
+#menuLateral{position:fixed;top:0;right:0;bottom:0;width:min(320px,88vw);background:#fff;z-index:99;box-shadow:-6px 0 24px rgba(2,20,35,.25);padding:14px;overflow:auto}
+#menuLateral[hidden]{display:none}
+#menuLateral .enteteMenu{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+#menuLateral .enteteMenu b{color:var(--bleu)}
+#menuLateral .enteteMenu button{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--gris)}
+.menuNav{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.menuNav button{background:transparent;border:none;text-align:left;padding:10px 12px;border-radius:8px;font-size:.95rem;cursor:pointer;color:#1f2937}
+.menuNav button.actif{background:var(--bleu);color:#fff;font-weight:600}
+.menuSep{border-top:1px solid var(--bord);margin:10px 0}
+.menuOutils{display:flex;flex-direction:column;gap:8px}
+.menuOutils .btn{text-align:left}
 #modalGenerique{position:fixed;inset:0;background:rgba(2,20,35,.6);z-index:95;display:flex;align-items:center;justify-content:center;padding:16px}
 #modalGenerique[hidden]{display:none}
 #modalGenerique .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto}
@@ -181,30 +197,47 @@ details{margin:8px 0}
   </div>
   <div id="syncIndicator" style="font-size:.75rem;opacity:.9;white-space:nowrap;cursor:pointer" title="Cliquez pour changer le code mission">📡 …</div>
   <div id="saveIndicator">—</div>
-  <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
-  <button class="btn primary" id="btnExport">📤 Export complet</button>
-  <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
-  <button class="btn" id="btnDemo">🧪 Mode démo</button>
-  <button class="btn" id="btnProf">👨‍🏫 Prof</button>
-  <button class="btn" id="btnProfil">👤 Élève</button>
-  <button class="btn" id="btnSession">🏁 Ma session</button>
-  <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
-  <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
-  <button class="btn" id="btnTheme">🌙 Sombre</button>
+  <button class="btn" id="btnMenu">☰ Menu</button>
 </header>
+<div id="menuFond" hidden></div>
+<aside id="menuLateral" hidden aria-label="Menu de l'application">
+  <div class="enteteMenu"><b>⚓ Menu</b><button id="btnFermerMenu" title="Fermer">✕</button></div>
+  <nav class="menuNav">
+    <button data-vue="carte">🗺 Carte des fiches</button>
+    <button data-vue="fiches">📋 Liste des fiches</button>
+    <button data-vue="dashboard">📊 Tableau de bord (compteurs, 24 groupes)</button>
+    <button data-vue="guide">📖 Mode d'emploi</button>
+  </nav>
+  <div class="menuSep"></div>
+  <div class="menuOutils">
+    <button class="btn" id="btnProfil">👤 Mon profil élève</button>
+    <button class="btn" id="btnSession">🏁 Ma session (points, badges)</button>
+    <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
+    <button class="btn" id="btnProf">👨‍🏫 Espace Prof</button>
+    <button class="btn" id="btnTheme">🌙 Sombre / clair</button>
+    <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
+    <button class="btn primary" id="btnExport">📤 Export complet</button>
+    <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
+    <button class="btn" id="btnDemo">🧪 Mode démo</button>
+    <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
+  </div>
+</aside>
 <div id="bandeauLancement" hidden style="background:linear-gradient(90deg,#0d3a6e,#0a7ea4);color:#fff;padding:8px 14px;text-align:center;font-size:.85rem"></div>
 
 <nav>
-  <button data-vue="dashboard" class="actif">Tableau de bord</button>
-  <button data-vue="carte">Carte</button>
+  <button data-vue="carte" class="actif">🗺 Carte</button>
   <button data-vue="fiches">Fiches</button>
+  <button data-vue="dashboard">Tableau de bord</button>
   <button data-vue="guide">Mode d'emploi</button>
 </nav>
 
+<div id="barreJeu">
+  <div class="recompense" id="blocRecompense"></div>
+  <div id="blocQuete"></div>
+</div>
+
 <main>
-  <section id="vue-dashboard" class="vue active">
-    <div class="recompense" id="blocRecompense"></div>
-    <div id="blocQuete"></div>
+  <section id="vue-dashboard" class="vue">
     <div class="compteurs" id="compteurs"></div>
     <div class="progressWrap">
       <h3>Avancement de la mission</h3>
@@ -221,7 +254,7 @@ details{margin:8px 0}
     </div>
   </section>
 
-  <section id="vue-carte" class="vue">
+  <section id="vue-carte" class="vue active">
     <div class="carteBox">
       <svg id="svgMap" viewBox="0 0 450 540" role="img" aria-label="Carte de la Martinique par commune"></svg>
       <div class="mapInfo">
@@ -816,7 +849,7 @@ function rendreEquipage(){
       '<span class="info"><b>'+echapperHtml(r.p.pseudo)+'</b>'+(r.p.statut?'<div class="st">'+echapperHtml(r.p.statut)+'</div>':'')+'</span>'+
       '<span class="pts">'+r.pts+' pts \u00b7 '+r.verif+' v\u00e9rifi\u00e9e(s) \u00b7 '+r.nb+' fiche(s) travaill\u00e9e(s)</span></div>';
   }).join('');
-  if(!rows.length)html='<p style="font-size:.8rem;color:var(--gris)">Aucun profil \u00e9l\u00e8ve sur ce poste. Cliquez sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut pour cr\u00e9er votre profil (pseudo + emoji) : votre travail appara\u00eetra alors sur la carte !</p>';
+  if(!rows.length)html='<p style="font-size:.8rem;color:var(--gris)">Aucun profil \u00e9l\u00e8ve sur ce poste. Ouvrez le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb pour cr\u00e9er votre profil (pseudo + emoji) : votre travail appara\u00eetra alors sur la carte !</p>';
   if(nonAttribue)html+='<p style="font-size:.72rem;color:var(--gris)">'+nonAttribue+' fiche(s) travaill\u00e9e(s) avant la cr\u00e9ation des profils (non attribu\u00e9es).</p>';
   document.getElementById('blocEquipage').innerHTML=html;
 }
@@ -1452,13 +1485,16 @@ function rendreGuide(){
   '<h3>9\ufe0f\u20e3 R\u00e9compenses : points et badges</h3>'+
   '<p>Chaque fiche bien travaill\u00e9e rapporte des points : <b>+10</b> pour une fiche pass\u00e9e \u00ab V\u00e9rifi\u00e9 \u00bb (date + source), <b>+2</b> de bonus si le t\u00e9l\u00e9phone ET le courriel ou le site sont renseign\u00e9s, <b>+3</b> pour une fiche \u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb correctement document\u00e9e en Observations, et <b>+1</b> par coordonn\u00e9e saisie. Les points font grimper votre grade maritime (Mousse, Matelot, Gabier, Quartier-ma\u00eetre, Ma\u00eetre d\u2019\u00e9quipage, Second, Capitaine, Amiral) et d\u00e9bloquent des badges (Premier cap, \u00c9quipage, Cotisants au clair, Cartographe\u2026). Le score est celui du poste : il est recalcul\u00e9 \u00e0 chaque enregistrement \u2014 seule la qualit\u00e9 du travail compte !</p>'+
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
-  '<p>Clique sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut de l\u2019application pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
+  '<p>Ouvre le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 Mon profil \u00e9l\u00e8ve \u00bb pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton en haut \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
-  '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement avec le bouton \u00ab \ud83c\udf19 Sombre / \u2600\ufe0f Clair \u00bb en haut \u00e0 droite.</p>';
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement via le menu \u2630 puis \u00ab \ud83c\udf19 Sombre / clair \u00bb.</p>';
 }
 /* ===================== Navigation / divers ===================== */
+function ouvrirMenu(){document.getElementById('menuFond').hidden=false;document.getElementById('menuLateral').hidden=false;}
+function fermerMenu(){document.getElementById('menuFond').hidden=true;document.getElementById('menuLateral').hidden=true;}
 function allerVue(id){
+  fermerMenu();
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('actif',b.dataset.vue===id);});
   Array.prototype.forEach.call(document.querySelectorAll('.vue'),function(v){v.classList.toggle('active',v.id==='vue-'+id);});
   if(id==='carte')rendreCarte();
@@ -1826,6 +1862,9 @@ function init(){
   rendreGuide();
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.addEventListener('click',function(){allerVue(b.dataset.vue);});});
   document.getElementById('btnFermerDrawer').addEventListener('click',fermerDrawer);
+  document.getElementById('btnMenu').addEventListener('click',ouvrirMenu);
+  document.getElementById('btnFermerMenu').addEventListener('click',fermerMenu);
+  document.getElementById('menuFond').addEventListener('click',fermerMenu);
   document.getElementById('fRecherche').addEventListener('input',function(e){filtres.recherche=e.target.value;page=1;rendreFiches();});
   ['fSecteur','fPriorite','fStatut','fCommune'].forEach(function(id){
     document.getElementById(id).addEventListener('change',function(e){
