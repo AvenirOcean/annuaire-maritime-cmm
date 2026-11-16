@@ -92,7 +92,9 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 .groupeChamps h3{margin:0 0 10px;font-size:.85rem;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
 .modal{position:fixed;inset:0;background:rgba(2,20,35,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal[hidden]{display:none}
-.modal .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto}
+.modal .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal .panneau table{min-width:420px}
+.modal .panneau>table,.modal .panneau>div>table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .modal h2{margin:0 0 4px;color:var(--bleu);font-size:1.05rem}
 .modal p{font-size:.82rem;color:#4b5563;margin:.3em 0 .8em}
 .emojiChoix{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
@@ -314,8 +316,11 @@ details{margin:8px 0}
 </div>
 
 <div id="modalProf" class="modal" hidden>
-  <div class="panneau" style="max-width:880px">
-    <h2>👨‍🏫 Espace Prof — pilotage de la classe en direct</h2>
+  <div class="panneau" style="max-width:880px;width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h2 style="margin:0">👨‍🏫 Espace Prof — pilotage de la classe en direct</h2>
+      <button class="fermerModal" id="btnFermerProfHaut" title="Fermer" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gris);padding:4px 8px">✕</button>
+    </div>
     <div id="profContenu"><p>Chargement…</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
       <button class="btn" id="btnProfRafraichir">↻ Rafraîchir</button>
@@ -345,7 +350,10 @@ details{margin:8px 0}
 
 <div id="modalAide" class="modal" hidden>
   <div class="panneau" style="max-width:640px">
-    <h2>❓ Aide & retours</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h2 style="margin:0">❓ Aide & retours</h2>
+      <button class="fermerModal" id="btnFermerAideHaut" title="Fermer" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gris);padding:4px 8px">✕</button>
+    </div>
     <div id="aideContenu">
       <h3 style="margin:8px 0 4px">Questions fréquentes</h3>
       <p style="font-size:.82rem"><b>« Le code mission ne marche pas »</b> — vérifie la saisie : <b>CMM-MARIN-2026</b> (clique sur l’indicateur 📡 en haut pour le ressaisir). Code enseignant : <b>CMM-PROF-2026</b> (réservé aux profs et au CMM).</p>
@@ -2100,7 +2108,9 @@ function init(){
   document.getElementById('btnProf').addEventListener('click',ouvrirProf);
   document.getElementById('btnAide').addEventListener('click',function(){fermerMenu();ouvrirAide();});
   document.getElementById('btnFermerAide').addEventListener('click',function(){document.getElementById('modalAide').hidden=true;});
+  document.getElementById('btnFermerAideHaut').addEventListener('click',function(){document.getElementById('modalAide').hidden=true;});
   document.getElementById('btnFermerProf').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
+  document.getElementById('btnFermerProfHaut').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
   document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
   document.getElementById('btnProfExport').addEventListener('click',exporterSuivi);
   document.getElementById('btnProfProfil').addEventListener('click',function(){
