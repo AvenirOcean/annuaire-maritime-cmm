@@ -832,6 +832,7 @@ function rendreCompteurs(){
     ls.forEach(function(t){n+=t.n;v+=t.v;});
     equipes.push({a:ls[0].a,b:ls[ls.length-1].b,n:n,v:v,p:n?Math.round(100*v/n):0});
   }
+  var pp=pseudosParNumero();
   var tries=equipes.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
   var medailles=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
   var gh='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">';
@@ -844,15 +845,16 @@ function rendreCompteurs(){
   gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
   equipes.forEach(function(t,qi){
     gh+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:.75rem">'+
-      '<b>\u00c9quipe '+(qi+1)+' \u00b7 \u00e9l\u00e8ves '+(qi*PAR+1)+'\u2013'+((qi+1)*PAR)+'</b>'+
+      (function(){var mb=[];for(var k=qi*PAR+1;k<=(qi+1)*PAR;k++){if(pp[k])mb.push(pp[k]);}return '<b>\u00c9quipe '+(qi+1)+(mb.length?' \u00b7 '+mb.join(', '):' \u00b7 \u00e9l\u00e8ves '+(qi*PAR+1)+'\u2013'+((qi+1)*PAR))+'</b>';})()+
       '<div style="background:#e5e7eb;border-radius:999px;height:9px;margin-top:5px;overflow:hidden">'+
       '<div style="height:9px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+
       t.p+' % ('+t.v+'/'+t.n+') \u00b7 fiches '+t.a+'\u2013'+t.b+'</div>';
   });
   gh+='</div><p style="font-size:.72rem;color:var(--gris);margin:0 0 8px">D\u00e9tail des 24 plages individuelles (une par \u00e9l\u00e8ve) :</p><div style="display:flex;flex-wrap:wrap;gap:8px">';
-  lots.forEach(function(t){
+  lots.forEach(function(t,li){
     gh+='<div style="flex:1 1 100px;min-width:100px;background:var(--grisclair);border-radius:6px;padding:6px 8px;font-size:.72rem">'+
-      '<b>Fiches '+t.a+'\u2013'+t.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
+      '<b>'+(pp[li+1]?pp[li+1]+' \u00b7 ':'')+'fiches '+t.a+'\u2013'+t.b+'</b>'+''+
+      '<div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
       '<div style="height:8px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+t.p+' % ('+t.v+'/'+t.n+')</div>';
   });
   gh+='</div>';
@@ -1036,6 +1038,14 @@ function plageEquipe(num){
     deja+=t;
   }
   return null;
+}
+function pseudosParNumero(){
+  var m={};
+  for(var no in etat.entries){
+    var e=etat.entries[no];
+    if(e.auteur&&e.numero)m[e.numero]=(e.emoji?e.emoji+' ':'')+e.auteur;
+  }
+  return m;
 }
 function numerosPris(){
   var pris={};
@@ -1863,6 +1873,7 @@ function chargerProf(){
 var derniersEvts=null;
 function rendreProf(liste,evts){
   derniersEvts=evts||null;
+  var pp=pseudosParNumero();
   var total=liste.length,verif=0,eleves={},activite=liste.slice().sort(function(a,b){return String(b.maj).localeCompare(String(a.maj));}).slice(0,20);
   liste.forEach(function(e){
     if(e.statut==='V\u00e9rifi\u00e9')verif++;
@@ -1901,12 +1912,13 @@ function rendreProf(liste,evts){
     var vn=0,tn=0;
     ls.forEach(function(pl){vn+=pl.v;tn+=pl.n;});
     var qc=tn?Math.round(100*vn/tn):0;
-    h+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:6px 9px;font-size:.72rem"><b>\u00c9quipe '+(q/4+1)+' \u00b7 \u00e9l\u00e8ves '+(q+1)+'\u2013'+(q+4)+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden"><div style="height:8px;width:'+qc+'%;background:'+(qc===100?'#15803d':'#22c55e')+'"></div></div>'+vn+'/'+tn+' \u00b7 fiches '+ls[0].a+'\u2013'+ls[ls.length-1].b+'</div>';
+    var mb=[];for(var k=q+1;k<=q+4;k++){if(pp[k])mb.push(pp[k]);}
+    h+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:6px 9px;font-size:.72rem"><b>\u00c9quipe '+(q/4+1)+(mb.length?' \u00b7 '+mb.join(', '):' \u00b7 \u00e9l\u00e8ves '+(q+1)+'\u2013'+(q+4))+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden"><div style="height:8px;width:'+qc+'%;background:'+(qc===100?'#15803d':'#22c55e')+'"></div></div>'+vn+'/'+tn+' \u00b7 fiches '+ls[0].a+'\u2013'+ls[ls.length-1].b+'</div>';
   }
   h+='</div><h3 style="margin:12px 0 6px">D\u00e9tail : 24 plages individuelles</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
-  plages.forEach(function(pl){
+  plages.forEach(function(pl,pi){
     var pc=Math.round(100*pl.v/pl.n);
-    h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
+    h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+(pp[pi+1]?pp[pi+1]+' · ':'')+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
   });
   h+='</div>';
   h+='<h3 style="margin:14px 0 6px">📈 Évolution de la classe (V2.2)</h3>';
