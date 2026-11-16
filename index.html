@@ -1043,7 +1043,10 @@ function pseudosParNumero(){
   var m={};
   for(var no in etat.entries){
     var e=etat.entries[no];
-    if(e.auteur&&e.numero)m[e.numero]=(e.emoji?e.emoji+' ':'')+e.auteur;
+    if(!e.auteur||!e.numero)continue;
+    var cur=m[e.numero];
+    if(!cur){m[e.numero]=(e.emoji?e.emoji+' ':'')+e.auteur;}
+    else if(e.emoji&&cur===e.auteur){m[e.numero]=e.emoji+' '+e.auteur;}
   }
   return m;
 }
