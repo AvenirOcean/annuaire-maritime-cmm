@@ -215,6 +215,7 @@ details{margin:8px 0}
     <button class="btn" id="btnSession">🏁 Ma session (points, badges)</button>
     <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
     <button class="btn" id="btnProf">👨‍🏫 Espace Prof</button>
+    <button class="btn" id="btnAide">❓ Aide & retours</button>
     <button class="btn" id="btnTheme">🌙 Sombre / clair</button>
     <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
     <button class="btn primary" id="btnExport">📤 Export complet</button>
@@ -342,6 +343,27 @@ details{margin:8px 0}
   </div>
 </div>
 
+<div id="modalAide" class="modal" hidden>
+  <div class="panneau" style="max-width:640px">
+    <h2>❓ Aide & retours</h2>
+    <div id="aideContenu">
+      <h3 style="margin:8px 0 4px">Questions fréquentes</h3>
+      <p style="font-size:.82rem"><b>« Le code mission ne marche pas »</b> — vérifie la saisie : <b>CMM-MARIN-2026</b> (clique sur l’indicateur 📡 en haut pour le ressaisir). Code enseignant : <b>CMM-PROF-2026</b> (réservé aux profs et au CMM).</p>
+      <p style="font-size:.82rem"><b>« Mes saisies ne partagent pas »</b> — la synchronisation est automatique toutes les 20 s quand l’indicateur affiche 📡 « En ligne ». Hors connexion, rien n’est perdu : tout repart dès le retour d’Internet.</p>
+      <p style="font-size:.82rem"><b>« Je ne peux pas passer en « Vérifié » »</b> — la date et la source de vérification sont obligatoires. Enregistre + suivante (Ctrl+Entrée) préremplit la date du jour.</p>
+      <p style="font-size:.82rem"><b>« Où est ma plage de fiches ? »</b> — elle est attribuée automatiquement à la création de ton profil élève (ouvre le menu ☰ → 👤 Mon profil élève). Le tableau de bord l’affiche avec ton pseudo.</p>
+      <p style="font-size:.82rem"><b>« Puis-je corriger une erreur ? »</b> — oui, rouvre la fiche et corrige ; note les précisions en Observations. Jamais de création ni suppression de fiche.</p>
+      <h3 style="margin:12px 0 4px">Nous contacter</h3>
+      <p style="font-size:.82rem">Un bug, une idée d’amélioration, une question ? Écris-nous directement :</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+        <a class="btn primary" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/596696057669?text=Bonjour%20CMM%2C%20je%20vous%20écris%20au%20sujet%20de%20la%20Mission%20Annuaire%20Maritime%20%3A">📲 WhatsApp CMM</a>
+        <a class="btn" style="text-decoration:none" href="mailto:clustermaritimemartinique@gmail.com?subject=Retour%20Mission%20Annuaire%20Maritime">✉️ Email CMM</a>
+      </div>
+      <p style="font-size:.75rem;color:var(--gris)">Réponse rapide en journée. Pour un problème technique, précise si possible : le n° de fiche, l’appareil (téléphone/PC) et ce que tu faisais.</p>
+    </div>
+    <div style="margin-top:10px"><button class="btn" id="btnFermerAide">Fermer</button></div>
+  </div>
+</div>
 <div id="overlay" hidden>
   <div class="panneau">
     <h2>⚓ Mise à jour de la base</h2>
@@ -2016,6 +2038,9 @@ function exporterSuivi(){
   var a=document.createElement('a');a.href=URL.createObjectURL(bloc);a.download='suivi-mission-annuaire.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
+function ouvrirAide(){
+  document.getElementById('modalAide').hidden=false;
+}
 function ouvrirProf(){
   if(!profAutorise())return;
   document.getElementById('modalProf').hidden=false;
@@ -2073,6 +2098,8 @@ function init(){
   document.getElementById('btnDemoOverlay').addEventListener('click',activerDemo);
   document.getElementById('btnProfil').addEventListener('click',ouvrirModalProfil);
   document.getElementById('btnProf').addEventListener('click',ouvrirProf);
+  document.getElementById('btnAide').addEventListener('click',function(){fermerMenu();ouvrirAide();});
+  document.getElementById('btnFermerAide').addEventListener('click',function(){document.getElementById('modalAide').hidden=true;});
   document.getElementById('btnFermerProf').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
   document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
   document.getElementById('btnProfExport').addEventListener('click',exporterSuivi);
