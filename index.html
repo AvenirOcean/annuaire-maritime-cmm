@@ -1455,19 +1455,19 @@ function rendreFiches(){
     var badges=
       (f.prio.charAt(0)==='1'?'<span class="badge b-cotisant" title="Cotisant CMM">COTISANT</span>':'')+
       (f.statut==='Pré-rempli — à confirmer'?'<span class="badge b-prem">PRÉ-REMP</span>':'')+
-      (f.statut==='Vérifié'?'<span class="badge b-verif">VÉRIFIÉ</span>':'')+
+      (f.statut==='Vérifié'?(ficheVerrouillee(f)?'<span class="badge b-verif">\U0001F512 VÉRIFIÉ</span>':'<span class="badge b-verif">VÉRIFIÉ</span>'):'')+
       (f.statut==='À valider'?'<span class="badge b-avalider">À VALIDER</span>':'')+
       (f.statut==='Structure introuvable'?'<span class="badge b-introuvable">INTROUVABLE</span>':'')+
       (f.etatReg==='Fermée'?'<span class="badge b-fermee" title="Cessée au registre">FERMÉE</span>':'')+
       (f.saisi?' <span title="Saisies enregistrées">✏️</span>':'');
     var couleur=COULEURS_SECTEUR[f.secteur]||'#6b7280';
-    return '<tr data-no="'+echapperHtml(f.no)+'">'+
+    return '<tr data-no="'+echapperHtml(f.no)+'"'+(ficheVerrouillee(f)?' style="background:#f0fdf4"':'')+'>'+
       '<td><b>'+echapperHtml(f.no)+'</b></td>'+
       '<td style="font-size:.72rem;white-space:nowrap">'+echapperHtml(f.prio)+'</td>'+
       '<td>'+badges+'<span style="margin-left:4px">'+echapperHtml(f.nom)+'</span></td>'+
       '<td>'+echapperHtml(f.commune)+'</td>'+
       '<td><span class="pastille" style="background:'+couleur+'"></span><span style="font-size:.72rem">'+echapperHtml(f.secteur)+'</span></td>'+
-      '<td class="statutPuce">'+echapperHtml(f.statut)+'</td></tr>';
+      '<td class="statutPuce">'+echapperHtml(f.statut)+(ficheVerrouillee(f)&&f.auteur?' <span style="font-size:.68rem;color:#059669;white-space:nowrap">'+(f.emojiFiche||'\u270f\uFE0F')+' '+echapperHtml(f.auteur)+'</span>':'')+'</td></tr>';
   }).join('');
   Array.prototype.forEach.call(document.querySelectorAll('#tbodyFiches tr'),function(tr){
     tr.addEventListener('click',function(){ouvrirFiche(tr.getAttribute('data-no'));});
@@ -1483,12 +1483,40 @@ function rendreFiches(){
 }
 
 /* ===================== Fiche en édition ===================== */
+function ficheVerrouillee(f){return !!(f&&f.saisi&&f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src);}
 function ouvrirFiche(no){
   var f=null;
   for(var i=0;i<fiches.length;i++)if(fiches[i].no===no){f=fiches[i];break;}
   if(!f)return;
   ficheOuverte=f;
   document.getElementById('drawerTitre').innerHTML='Fiche n° '+echapperHtml(f.no)+' — '+echapperHtml(f.nom);
+  if(ficheVerrouillee(f)){
+    var qui=(f.emojiFiche?f.emojiFiche+' ':'')+(f.auteur||'un \u00e9l\u00e8ve');
+    function roL(label,val){return '<div class="champ"><label>'+label+'</label><div class="lecture">'+(val?echapperHtml(val):'<span style="color:#9ca3af">\u2014</span>')+'</div></div>';}
+    document.getElementById('drawerCorps').innerHTML=
+     '<div style="background:#ecfdf5;border:1px solid #10b981;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.85rem">'+
+     '<b>\U0001F512 Fiche v\u00e9rifi\u00e9e \u2014 verrouill\u00e9e</b><br>'+
+     'Valid\u00e9e par <b>'+echapperHtml(qui)+'</b>'+(f.dte?' le '+echapperHtml(f.dte):'')+(f.src?' \u00b7 source : '+echapperHtml(f.src):'')+'.<br>'+
+     'Elle ne peut plus \u00eatre modifi\u00e9e par un autre \u00e9l\u00e8ve. Pour signaler une erreur : menu \u2630 \u2192 \u2753 Aide &amp; retours.</div>'+
+     '<div class="groupeChamps"><h3>Coordonn\u00e9es v\u00e9rifi\u00e9es (lecture seule)</h3>'+
+     roL('T\u00e9l\u00e9phone',f.tel)+roL('Email',f.eml)+roL('Site internet',f.web)+
+     roL('Statut',f.statut)+roL('Date de v\u00e9rification',f.dte)+roL('Source de v\u00e9rification',f.src)+roL('Observations',f.obs)+'</div>'+
+     '<div class="liens">'+
+     (f.rech?'<a href="'+echapperHtml(f.rech)+'" target="_blank" rel="noopener">\U0001F50E Recherche express</a>':'')+
+     (f.reg?'<a href="'+echapperHtml(f.reg)+'" target="_blank" rel="noopener">\U0001F3DB\uFE0F Fiche registre national</a>':'')+
+     '</div>'+
+     '<div class="actions"><button class="btn" id="btnFicheSuivante">Fiche suivante \u25B6</button></div>';
+    document.getElementById('drawer').classList.add('ouvert');
+    document.getElementById('drawer').setAttribute('aria-hidden','false');
+    document.getElementById('btnFicheSuivante').addEventListener('click',function(){
+      var liste=fichesFiltrees();
+      var i=-1;
+      for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){i=j;break;}
+      var suivante=liste[i+1]||liste[0];
+      if(suivante)ouvrirFiche(suivante.no);
+    });
+    return;
+  }
   function ro(label,val){return '<div class="champ"><label>'+label+' <span class="ro">(lecture seule)</span></label><div class="lecture">'+(val?echapperHtml(val):'<span style="color:#9ca3af">—</span>')+'</div></div>';}
   function opt(list,sel){return list.map(function(s){return '<option value="'+echapperHtml(s)+'"'+(s===sel?' selected':'')+'>'+echapperHtml(s)+'</option>';}).join('');}
   document.getElementById('drawerCorps').innerHTML=
@@ -1566,6 +1594,7 @@ function fermerDrawer(){
   ficheOuverte=null;
 }
 function enregistrerFiche(f,passerSuivante){
+  if(ficheVerrouillee(f)){alert('\U0001F512 Cette fiche est v\u00e9rifi\u00e9e et verrouill\u00e9e : elle ne peut plus \u00eatre modifi\u00e9e. Signalez une erreur via \u2753 Aide & retours.');return;}
   var tel=document.getElementById('eTel').value.trim();
   var eml=document.getElementById('eEml').value.trim().toLowerCase();
   var web=normaliserSite(document.getElementById('eWeb').value);
