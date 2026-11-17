@@ -2237,13 +2237,10 @@ function init(){
       if(avantLancement()){
         toutRendre();
         toast('🧪 Mode démo jusqu\'au lancement officiel (lundi 16 novembre, 7 h). Cliquez sur « ♻️ Base CMM » si vous voulez voir la vraie base.');
-      }else if(confirm('Ce poste est encore en mode d\u00e9monstration (20 fiches fictives).\nRevenir maintenant \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?')){
+      }else{
         rechargerBaseCMM(true);
         document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
-        toast('\u267b\ufe0f Retour \u00e0 la base du CMM : '+fiches.length+' fiches.');
-      }else{
-        toutRendre();
-        toast('\ud83e\uddea Mode d\u00e9mo actif (20 fiches). Cliquez sur \u00ab \u267b\ufe0f Base CMM \u00bb pour charger les 1 291 fiches.');
+        toast('\u267b\ufe0f Lancement officiel : retour automatique \u00e0 la base du CMM ('+fiches.length+' fiches). Bienvenue dans la mission !');
       }
     }else{
       toutRendre();
