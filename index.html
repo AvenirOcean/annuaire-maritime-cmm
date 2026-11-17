@@ -1483,6 +1483,30 @@ function rendreFiches(){
 }
 
 /* ===================== Fiche en édition ===================== */
+function ficheIncomplete(f){
+  if(!f||!f.saisi)return false;
+  if(f.statut==='V\u00e9rifi\u00e9'||f.statut==='Structure introuvable'||f.statut==='\u00c0 valider')return false;
+  return true;
+}
+function montrerBanniereIncomplete(f){
+  var d=document.getElementById('drawerCorps');
+  if(!d||document.getElementById('banniereIncomplete'))return;
+  var b=document.createElement('div');
+  b.id='banniereIncomplete';
+  b.style.cssText='background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.85rem';
+  b.innerHTML='<b>\u26a0\ufe0f Fiche non compl\u00e9t\u00e9e</b><br>'+
+    'Avez-vous pens\u00e9 \u00e0 <b>t\u00e9l\u00e9phoner au professionnel</b> pour obtenir les renseignements manquants (t\u00e9l\u00e9phone, email, site internet) ?<br>'+
+    '<span style="font-size:.75rem;color:#6b7280">La fiche reste ouverte et modifiable. Si le professionnel est injoignable apr\u00e8s plusieurs essais, notez vos recherches en Observations puis choisissez le statut adapt\u00e9 (\u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb).</span>'+
+    '<div style="margin-top:8px"><button class="btn" id="btnPasserQuandMeme">\u25b6 Passer quand m\u00eame \u00e0 la suivante</button></div>';
+  d.insertBefore(b,d.firstChild);
+  document.getElementById('btnPasserQuandMeme').addEventListener('click',function(){
+    var liste=fichesFiltrees();
+    var i=-1;
+    for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){i=j;break;}
+    var suiv=liste[i+1]||liste[0];
+    if(suiv&&suiv.no!==f.no)ouvrirFiche(suiv.no);
+  });
+}
 function ficheVerrouillee(f){return !!(f&&f.saisi&&f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src);}
 function ouvrirFiche(no){
   var f=null;
@@ -1587,6 +1611,7 @@ function ouvrirFiche(no){
     var suivante=liste[i+1]||liste[0];
     if(suivante)ouvrirFiche(suivante.no);
   });
+  if(ficheIncomplete(f))montrerBanniereIncomplete(f);
 }
 function fermerDrawer(){
   document.getElementById('drawer').classList.remove('ouvert');
@@ -1645,7 +1670,7 @@ function enregistrerFiche(f,passerSuivante){
   rendreCompteurs(); rendreFiches(); rendreCarte();
   if(st==='Vérifié'&&dte&&src)lancerConfettis();
   toast('💾 Fiche n° '+f.no+' enregistrée.'+(delta>0?' ⚓ +'+delta+' point(s) !':''));
-  if(passerSuivante){
+  if(passerSuivante&&!ficheIncomplete(fApres)){
     var liste=fichesFiltrees();
     var idx=-1;
     for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){idx=j;break;}
