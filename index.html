@@ -1841,9 +1841,13 @@ function lireCodeMission(){
   var c=null;
   try{c=localStorage.getItem(LS_CODE);}catch(err){}
   while(!(c&&c.trim())){
-    c=prompt('🔑 Code de la mission (donné par votre enseignant) :');
+    c=prompt('\U0001F511 Code de la mission (donn\u00e9 par votre enseignant) :');
     if(c===null)return null;
     c=(c||'').trim();
+    if(c&&c.toUpperCase()==='CMM-PROF-2026'){
+      alert('\u2139\ufe0f CMM-PROF-2026 est le code ENSEIGNANT : il ne sert pas ici.\n\n\u2022 Ici, pour la synchronisation : code mission CMM-MARIN-2026\n\u2022 Code enseignant : menu \u2630 \u2192 \U0001F468\u200D\U0001F3EB Espace Prof');
+      c='';
+    }
   }
   try{localStorage.setItem(LS_CODE,c);}catch(err){}
   return c;
