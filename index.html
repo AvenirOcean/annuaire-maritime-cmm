@@ -188,6 +188,29 @@ details{margin:8px 0}
   #drawer{width:100vw;right:-100vw}
   header h1{font-size:1rem}
 }
+
+/* ===================== Motion design ===================== */
+.btn{transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{box-shadow:0 1px 3px rgba(13,58,110,.25)}
+.btn.primary:hover{box-shadow:0 3px 10px rgba(13,58,110,.32)}
+nav button{transition:background .15s,color .15s}
+.modal .panneau{animation:panneauIn .25s ease-out}
+@keyframes panneauIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+#menuLateral{animation:menuIn .22s ease-out}
+@keyframes menuIn{from{transform:translateX(50px);opacity:.4}to{transform:none;opacity:1}}
+section.vue.active{animation:vueIn .25s ease-out}
+@keyframes vueIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#tblFiches tbody tr{transition:background .18s}
+#tblFiches tbody tr:hover{background:rgba(56,189,248,.09)}
+.cpt{transition:transform .2s ease,box-shadow .2s ease}
+.cpt:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(2,20,35,.10)}
+#svgMap .commune{animation:fadeIn .5s ease-out backwards}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.toast{animation:toastIn .3s ease-out}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
