@@ -243,8 +243,6 @@ section.vue.active{animation:vueIn .25s ease-out}
     <button class="btn" id="btnAide">❓ Aide & retours</button>
     <button class="btn" id="btnTheme">🌙 Sombre / clair</button>
     <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
-    <button class="btn primary" id="btnExport">📤 Export complet</button>
-    <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
     <button class="btn" id="btnDemo">🧪 Mode démo</button>
     <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
   </div>
@@ -348,6 +346,7 @@ section.vue.active{animation:vueIn .25s ease-out}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
       <button class="btn" id="btnProfRafraichir">↻ Rafraîchir</button>
       <button class="btn" id="btnProfExport">📄 Export suivi (CSV)</button>
+      <button class="btn" id="btnProfExportExcel">📊 Export suivi (Excel protégé)</button>
       <button class="btn" id="btnProfProfil">🏅 Créer mon profil prof (jouer les défis)</button>
       <button class="btn" id="btnFermerProf">Fermer</button>
     </div>
@@ -379,7 +378,7 @@ section.vue.active{animation:vueIn .25s ease-out}
     </div>
     <div id="aideContenu">
       <h3 style="margin:8px 0 4px">Questions fréquentes</h3>
-      <p style="font-size:.82rem"><b>« Le code mission ne marche pas »</b> — vérifie la saisie : <b>CMM-MARIN-2026</b> (clique sur l’indicateur 📡 en haut pour le ressaisir). Code enseignant : <b>CMM-PROF-2026</b> (réservé aux profs et au CMM).</p>
+      <p style="font-size:.82rem"><b>« Le code mission ne marche pas »</b> — vérifie la saisie : <b>CMM-MARIN-2026</b> (clique sur l’indicateur 📡 en haut pour le ressaisir). Code enseignant : réservé aux profs et au CMM (menu ☰ → 👨‍🏫 Espace Prof).</p>
       <p style="font-size:.82rem"><b>« Mes saisies ne partagent pas »</b> — la synchronisation est automatique toutes les 20 s quand l’indicateur affiche 📡 « En ligne ». Hors connexion, rien n’est perdu : tout repart dès le retour d’Internet.</p>
       <p style="font-size:.82rem"><b>« Je ne peux pas passer en « Vérifié » »</b> — la date et la source de vérification sont obligatoires. Enregistre + suivante (Ctrl+Entrée) préremplit la date du jour.</p>
       <p style="font-size:.82rem"><b>« Où est ma plage de fiches ? »</b> — elle est attribuée automatiquement à la création de ton profil élève (ouvre le menu ☰ → 👤 Mon profil élève). Le tableau de bord l’affiche avec ton pseudo.</p>
@@ -560,7 +559,7 @@ function parseXlsx(bytes){
   });
 }
 /* ---------- Écriture XLSX ---------- */
-function buildXlsx(headers,rows,sheetName){
+function buildXlsx(headers,rows,sheetName,protege){
   var enc=new TextEncoder();
   function refCol(ci){var s='';ci++;while(ci>0){var m=(ci-1)%26;s=String.fromCharCode(65+m)+s;ci=Math.floor((ci-1)/26);}return s;}
   function cell(ri,ci,v){
@@ -574,7 +573,9 @@ function buildXlsx(headers,rows,sheetName){
   rows.forEach(function(row,ri){
     xml+='<row r="'+(ri+2)+'">'+headers.map(function(h,ci){return cell(ri+2,ci,row[ci]!=null?row[ci]:'');}).join('')+'</row>';
   });
-  xml+='</sheetData></worksheet>';
+  xml+='</sheetData>';
+  if(protege)xml+='<sheetProtection sheet="1" objects="1" scenarios="1"/>';
+  xml+='</worksheet>';
   var files=[
     {name:'[Content_Types].xml',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>')},
     {name:'_rels/.rels',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')},
@@ -764,7 +765,7 @@ function sauvegarder(){
     document.getElementById('saveIndicator').textContent='💾 Sauvegardé à '+new Date().toLocaleTimeString('fr-FR');
   }catch(err){
     document.getElementById('saveIndicator').textContent='⚠️ Sauvegarde locale impossible (espace plein ?)';
-    toast("⚠️ Impossible de sauvegarder dans le navigateur. Exportez votre travail (bouton « Export complet ») pour ne rien perdre.");
+    toast("⚠️ Impossible de sauvegarder dans le navigateur (espace plein ?) — resynchronisez via l’indicateur 📡 ou prévenez l’enseignant.");
   }
 }
 function charger(){
@@ -831,16 +832,6 @@ function telecharger(blob,nom){
   a.href=URL.createObjectURL(blob); a.download=nom;
   document.body.appendChild(a); a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
-}
-function exporter(liste,nomBase){
-  var rows=lignesExport(liste);
-  return buildXlsx(HEADERS_ATTENDUS,rows,'Base à qualifier').then(function(xlsx){
-    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),nomBase+'.xlsx');
-    toast('📤 Export Excel : '+rows.length+' fiches. Transmettez ce fichier au CMM.');
-  }).catch(function(){
-    telecharger(new Blob([csvBuild(HEADERS_ATTENDUS,rows)],{type:'text/csv;charset=utf-8'}),nomBase+'.csv');
-    toast('📤 Export CSV (secours) : '+rows.length+' fiches.');
-  });
 }
 /* ===================== Tableau de bord ===================== */
 function rendreCompteurs(){
@@ -1205,7 +1196,7 @@ function ouvrirSession(){
    '<div class="cpt"><div class="n">'+st+'</div><div class="l">jours de s\u00e9rie \ud83d\udd25</div></div>'+
    '</div>'+
    (sessionStats.badges.length?'<p style="font-size:.85rem">Badges de la session : '+sessionStats.badges.join(' \u00b7 ')+'</p>':'')+
-   '<p style="font-size:.8rem;color:var(--gris)">Pense \u00e0 faire un \u00ab Export ma s\u00e9lection \u00bb (ta plage de fiches) ou \u00ab Export complet \u00bb pour transmettre ton travail au CMM.</p>'+
+   '<p style="font-size:.8rem;color:var(--gris)">Ton travail est transmis automatiquement au serveur du CMM (synchronisation 📡 toutes les 20 s) : travaille directement sur la plateforme, aucun export de la base.</p>'+
    '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="btnFermerSession">Fermer</button></div>';
   ouvrirModalGenerique(html);
   document.getElementById('btnFermerSession').addEventListener('click',function(){document.getElementById('modalGenerique').hidden=true;});
@@ -1733,15 +1724,15 @@ function rendreGuide(){
   '<li>Ouvrez la fiche, cliquez sur 🔎 <b>Recherche express</b> et 🏛️ <b>Registre national</b> (nouveaux onglets).</li>'+
   '<li>Vérifiez l\'existence, recoupez les coordonnées, saisissez, choisissez la source, mettez la date.</li>'+
   '<li>Passez le statut à <b>Vérifié</b> et enregistrez. La sauvegarde est automatique dans le navigateur.</li>'+
-  '<li>En fin de séance : <b>Export ma sélection</b> (votre plage de fiches) ou <b>Export complet</b>, et transmettez le fichier au CMM / au poste suivant.</li></ol>'+
+  '<li>En fin de séance : rien à transmettre, vos saisies sont déjà synchronisées sur la plateforme (indicateur 📡 « En ligne »).</li></ol>'+
   '<h3>5️⃣ Synchronisation en ligne 📡</h3><p>Au premier lancement, entrez le <b>code mission</b> donné par votre enseignant. Ensuite, chaque fiche enregistrée est <b>envoyée instantanément</b> au serveur du CMM, et le travail des autres groupes arrive automatiquement toutes les 20 secondes (indicateur 📡 en haut à droite). Aucun compte à créer — l\'export Excel reste disponible en secours.</p>'+
   '<h3>6️⃣ Règles absolues</h3><ul>'+
   '<li>⛔ <b>Jamais de suppression ni création de fiche</b> : doublons et introuvables se notent en Observations, décision finale au CMM.</li>'+
   '<li>🔒 Les colonnes du CMM (identité, activité, commune, priorité, coordonnées pré-remplies) sont <b>en lecture seule</b> : toute correction se note en Observations.</li>'+
   '<li>🧷 Bouton « Signaler un doublon » : indiquez le n° de l\'autre fiche, la mention s\'écrit automatiquement en Observations.</li></ul>'+
   '<h3>7️⃣ Confidentialité</h3><p>🤝 Aucune copie personnelle de la base, aucune extraction, aucun usage en dehors de la mission (charte signée). Vos saisies de vérification (téléphone, courriel, site, statut, source) sont envoyées <b>uniquement au serveur sécurisé du CMM</b>, protégé par le code mission — jamais de donnée personnelle, jamais d\'autre destinataire. La base complète reste la propriété du CMM.</p>'+
-  '<h3>7️⃣ Reprise du travail / échange entre postes</h3><p>Importez le fichier exporté par un camarade : les saisies fusionnent par n° de fiche et ne remplissent que les champs encore vides — aucune saisie existante n\'est perdue.</p>'+
-  '<h3>9\ufe0f\u20e3 Travailler sur son portable ou son PC personnel</h3><p>L\'application s\'ouvre sur n\'importe quel appareil (t\u00e9l\u00e9phone, tablette, PC), sans installation ni compte. Avec la synchronisation en ligne, votre travail suit automatiquement d\'un appareil \u00e0 l\'autre via le serveur du CMM.</p><ul><li>Le navigateur garde aussi une copie locale : en cas de coupure Internet, rien n\'est perdu \u2014 la synchronisation reprend \u00e0 la reconnexion.</li><li>En secours, <b>Export complet / Export ma s\u00e9lection</b> reste disponible (fusion sans rien \u00e9craser \u00e0 l\'import).</li><li>Entre \u00e9l\u00e8ves : respectez votre <b>plage de n\u00b0 de fiches</b> (filtre \u00ab de \u2026 \u00e0 \u2026 \u00bb) et utilisez \u00ab Export ma s\u00e9lection \u00bb.</li><li>\u26a0\ufe0f Pas de <b>navigation priv\u00e9e</b> : les saisies ne seraient pas conserv\u00e9es apr\u00e8s fermeture.</li><li>\u26a0\ufe0f Rappel confidentialit\u00e9 : la base reste la propri\u00e9t\u00e9 du CMM \u2014 pas de copie diffus\u00e9e hors mission.</li></ul>'+
+  '<h3>7️⃣ Reprise du travail entre appareils</h3><p>Pas de fichier à échanger : la synchronisation en ligne reprend automatiquement votre travail sur n’importe quel appareil via le serveur sécurisé du CMM.</p>'+
+  '<h3>9️⃣ Travailler sur son portable ou son PC personnel</h3><p>L’application s’ouvre sur n’importe quel appareil (téléphone, tablette, PC), sans installation ni compte. Avec la synchronisation en ligne, votre travail suit automatiquement d’un appareil à l’autre via le serveur du CMM.</p><ul><li>Le navigateur garde aussi une copie locale : en cas de coupure Internet, rien n’est perdu — la synchronisation reprend à la reconnexion.</li><li>Entre élèves : respectez votre <b>plage de n° de fiches</b> (filtre « de … à … »).</li><li>⚠️ Pas de <b>navigation privée</b> : les saisies ne seraient pas conservées après fermeture.</li><li>⚠️ <b>Aucun export de la base</b> : travaillez uniquement sur cette plateforme — la base reste la propriété du CMM (protection des données).</li></ul>'+
   '<h3>9\ufe0f\u20e3 R\u00e9compenses : points et badges</h3>'+
   '<p>Chaque fiche bien travaill\u00e9e rapporte des points : <b>+10</b> pour une fiche pass\u00e9e \u00ab V\u00e9rifi\u00e9 \u00bb (date + source), <b>+2</b> de bonus si le t\u00e9l\u00e9phone ET le courriel ou le site sont renseign\u00e9s, <b>+3</b> pour une fiche \u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb correctement document\u00e9e en Observations, et <b>+1</b> par coordonn\u00e9e saisie. Les points font grimper votre grade maritime (Mousse, Matelot, Gabier, Quartier-ma\u00eetre, Ma\u00eetre d\u2019\u00e9quipage, Second, Capitaine, Amiral) et d\u00e9bloquent des badges (Premier cap, \u00c9quipage, Cotisants au clair, Cartographe\u2026). Le score est celui du poste : il est recalcul\u00e9 \u00e0 chaque enregistrement \u2014 seule la qualit\u00e9 du travail compte !</p>'+
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
@@ -1844,8 +1835,8 @@ function lireCodeMission(){
     c=prompt('\U0001F511 Code de la mission (donn\u00e9 par votre enseignant) :');
     if(c===null)return null;
     c=(c||'').trim();
-    if(c&&c.toUpperCase()==='CMM-PROF-2026'){
-      alert('\u2139\ufe0f CMM-PROF-2026 est le code ENSEIGNANT : il ne sert pas ici.\n\n\u2022 Ici, pour la synchronisation : code mission CMM-MARIN-2026\n\u2022 Code enseignant : menu \u2630 \u2192 \U0001F468\u200D\U0001F3EB Espace Prof');
+    if(c&&c.toUpperCase().indexOf('PROF')>=0){
+      alert('\u2139\ufe0f Ce code est r\u00e9serv\u00e9 \u00e0 l\u2019espace enseignant : il ne sert pas ici.\n\n\u2022 Ici, pour la synchronisation : entre le code mission donn\u00e9 par votre enseignant.\n\u2022 Espace enseignant : menu \u2630 \u2192 \U0001F468\u200D\U0001F3EB Espace Prof');
       c='';
     }
   }
@@ -1925,16 +1916,12 @@ function journaliserEvenement(no,type,points){
     body:JSON.stringify({no_fiche:String(no),auteur:profil?profil.pseudo:'',type:type||'saisie',points:points||0})
   }).catch(function(){});
 }
-function chargerEvenements(){
-  var h=headersSync();
-  if(!h)return Promise.resolve(null);
-  h['X-Prof-Code']=PROF_CODE;
-  return fetch(SUPABASE_URL+'/rest/v1/evenements?select=*&order=horodatage.asc',{headers:h}).then(function(r){
+function appelProf(body){
+  return fetch(SUPABASE_URL+'/functions/v1/prof-data',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})}).then(function(r){
+    if(r.status===401||r.status===403)return null;
     if(!r.ok)throw new Error('http '+r.status);
     return r.json();
-  }).then(function(liste){
-    return Array.isArray(liste)?liste:null;
-  }).catch(function(){return null;});
+  });
 }
 function demarrerSync(){
   if(typeof fetch==='undefined'){syncIndic('📴 Navigateur ancien');return;}
@@ -1946,20 +1933,24 @@ function demarrerSync(){
   tirerSaisies();
   setInterval(tirerSaisies,20000);
 }
-/* ===================== Espace Prof (V2.1) ===================== */
-var PROF_CODE='CMM-PROF-2026';
+/* ===================== Espace Prof (V3 : code vérifié côté serveur) ===================== */
 var LS_PROF='cmm-prof-ok';
+var SS_PROF_CODE='cmm-prof-code';
+function lireCodeProf(){
+  try{return sessionStorage.getItem(SS_PROF_CODE)||'';}catch(err){return '';}
+}
 function profAutorise(){
   var ok=null;
   try{ok=localStorage.getItem(LS_PROF);}catch(err){}
-  if(ok==='1')return true;
-  var c=prompt("\U0001F468\u200d\U0001F3EB Code enseignant (donn\u00e9 par le CMM) :");
-  if(c&&c.trim()===PROF_CODE){
-    try{localStorage.setItem(LS_PROF,'1');}catch(err){}
+  if(ok==='1'&&lireCodeProf())return Promise.resolve(true);
+  var c=prompt('\U0001F468\u200D\U0001F3EB Code enseignant (donn\u00e9 par le CMM) :');
+  if(c===null)return Promise.resolve(false);
+  c=(c||'').trim();
+  return appelProf({code:c}).then(function(data){
+    if(!data)return false;
+    try{localStorage.setItem(LS_PROF,'1');sessionStorage.setItem(SS_PROF_CODE,c);}catch(err){}
     return true;
-  }
-  if(c!==null)alert("\u26A0\uFE0F Code enseignant incorrect.");
-  return false;
+  });
 }
 function plageDebut(n){var pl=plageEquipe(n);return pl?pl.a:0;}
 function plageFin(n){var pl=plageEquipe(n);return pl?pl.b:0;}
@@ -1971,22 +1962,21 @@ function pointsSaisie(e){
   return p;
 }
 function chargerProf(){
-  var h=headersSync();
-  if(!h){document.getElementById('profContenu').innerHTML="<p>\u26A0\uFE0F Entrez d'abord le code mission.</p>";return;}
-  document.getElementById('profContenu').innerHTML='<p>\u23f3 Chargement des saisies de la classe…</p>';
-  var pSaisies=fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
-    if(!r.ok)throw new Error('http '+r.status);
-    return r.json();
-  });
-  Promise.all([pSaisies,chargerEvenements()]).then(function(res){
-    rendreProf(res[0],res[1]);
+  var code=lireCodeProf();
+  if(!code){document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Code enseignant requis (menu \u2630 \u2192 Espace Prof).</p>';return;}
+  document.getElementById('profContenu').innerHTML='<p>\u23f3 Chargement des saisies de la classe\u2026</p>';
+  appelProf({code:code}).then(function(data){
+    if(!data){document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Code enseignant incorrect ou serveur indisponible.</p>';return;}
+    rendreProf(data.saisies||[],data.evenements||[]);
   }).catch(function(){
     document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Synchronisation impossible pour le moment. V\u00e9rifiez la connexion puis rafra\u00eechissez.</p>';
   });
 }
 var derniersEvts=null;
+var derniersSaisies=null;
 function rendreProf(liste,evts){
   derniersEvts=evts||null;
+  derniersSaisies=liste||null;
   var pp=pseudosParNumero();
   var total=liste.length,verif=0,eleves={},activite=liste.slice().sort(function(a,b){return String(b.maj).localeCompare(String(a.maj));}).slice(0,20);
   liste.forEach(function(e){
@@ -2127,13 +2117,44 @@ function exporterSuivi(){
   var a=document.createElement('a');a.href=URL.createObjectURL(bloc);a.download='suivi-mission-annuaire.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
-function ouvrirAide(){
+
+function exporterSuiviExcel(){
+  var code=lireCodeProf();
+  var saisies=derniersSaisies||[],evts=derniersEvts||[];
+  if(!saisies.length&&!evts.length){alert('Aucune donnée à exporter pour le moment.');return;}
+  var eleves={};
+  saisies.forEach(function(e){
+    var k=e.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={nom:k,emoji:'',num:0,s:0,v:0,p:0,pj:0,maj:''};
+    if(e.emoji)eleves[k].emoji=e.emoji;
+    if(e.numero)eleves[k].num=e.numero;
+    eleves[k].s++;
+    if(e.statut==='Vérifié')eleves[k].v++;
+    eleves[k].p+=pointsSaisie(e);
+    if(e.maj&&e.maj>eleves[k].maj)eleves[k].maj=e.maj;
+  });
+  evts.forEach(function(ev){
+    var k=ev.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={nom:k,emoji:'',num:0,s:0,v:0,p:0,pj:0,maj:''};
+    eleves[k].pj+=(ev.points||0);
+  });
+  var rows=Object.keys(eleves).map(function(k){var e=eleves[k];return [e.nom,e.emoji,e.num,e.s,e.v,e.p,e.pj,e.maj];})
+    .sort(function(a,b){return (b[5]+b[6])-(a[5]+a[6]);});
+  var headers=['Élève','Emoji','N° élève','Saisies','Vérifiées','Points (état actuel)','Points (journal)','Dernière activité'];
+  buildXlsx(headers,rows,'Suivi élèves',true).then(function(xlsx){
+    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats.officedocument.spreadsheetml.sheet'}),'suivi-eleves-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📊 Export Excel du suivi : '+rows.length+' élève(s) — feuille protégée (lecture seule).');
+  });
+  if(code)appelProf({code:code,action:'export',detail:'suivi-excel'}).catch(function(){});
+}function ouvrirAide(){
   document.getElementById('modalAide').hidden=false;
 }
 function ouvrirProf(){
-  if(!profAutorise())return;
-  document.getElementById('modalProf').hidden=false;
-  chargerProf();
+  profAutorise().then(function(ok){
+    if(!ok){alert('\u26A0\uFE0F Code enseignant incorrect.');return;}
+    document.getElementById('modalProf').hidden=false;
+    chargerProf();
+  });
   if(!ouvrirProf._tick){ouvrirProf._tick=setInterval(function(){
     if(!document.getElementById('modalProf').hidden)chargerProf();
   },20000);}
@@ -2170,16 +2191,6 @@ function init(){
       rendreFiches();
     });
   });
-  document.getElementById('btnExport').addEventListener('click',function(){
-    if(!etat.base){alert('Aucune base importée.');return;}
-    exporter(fiches,'base-qualifiee-cmm-'+new Date().toISOString().slice(0,10));
-  });
-  document.getElementById('btnExportSel').addEventListener('click',function(){
-    if(!etat.base){alert('Aucune base importée.');return;}
-    var liste=fichesFiltrees();
-    if(!liste.length){alert('Aucune fiche dans la sélection courante. Ajustez les filtres ou la plage de numéros.');return;}
-    exporter(liste,'selection-'+liste.length+'-fiches-'+new Date().toISOString().slice(0,10));
-  });
   document.getElementById('btnDemo').addEventListener('click',function(){
     if(etat.base&&!confirm('Remplacer la base affichée par les 20 fiches de démonstration ? (Vos saisies locales sont conservées.)'))return;
     activerDemo();
@@ -2194,6 +2205,7 @@ function init(){
   document.getElementById('btnFermerProfHaut').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
   document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
   document.getElementById('btnProfExport').addEventListener('click',exporterSuivi);
+  document.getElementById('btnProfExportExcel').addEventListener('click',exporterSuiviExcel);
   document.getElementById('btnProfProfil').addEventListener('click',function(){
     document.getElementById('modalProf').hidden=true;ouvrirModalProfil();
     toast("\U0001F3C5 Cr\u00e9ez votre profil prof : votre score entrera au classement face aux \u00e9l\u00e8ves !");

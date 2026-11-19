@@ -95,8 +95,6 @@ table.tbl{width:100%;border-collapse:collapse;background:var(--carte);border:1px
   </div>
   <div id="saveIndicator">—</div>
   <button class="btn" id="btnImport">📥 Importer / mettre à jour la base</button>
-  <button class="btn primary" id="btnExportExcel">📤 Export Excel</button>
-  <button class="btn" id="btnExportJson">💾 Sauvegarde complète (JSON)</button>
   <button class="btn" id="btnImportJson">📂 Restaurer une sauvegarde</button>
 </header>
 
@@ -566,43 +564,6 @@ function importerBase(file){
     toast('✅ '+rows.length+' organisations importées.'+(recup?' ('+recup+' fiches CRM existantes conservées)':''));
   });
 }
-/* ===================== Exports ===================== */
-function telecharger(blob,nom){
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=nom;
-  document.body.appendChild(a);a.click();
-  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
-}
-function exporterExcel(){
-  var I={no:idxCol('N° fiche'),st:idxCol('Statut')};
-  var colsCRM=['Pipeline','Cotisant (année)','Cotisant (montant €)','Étiquettes','Contacts','Nb interactions','Dernière interaction','Prochaine relance','Notes CRM'];
-  var headers=HEADERS_ATTENDUS.concat(colsCRM);
-  var rows=fiches.map(function(f){
-    var r=etat.base.rows[f.ligne].slice();
-    r[21]=f.stage;
-    r[22]=f.cotisant?f.cotisant.annee:'';
-    r[23]=f.cotisant?f.cotisant.montant:'';
-    r[24]=f.tags.join(' · ');
-    r[25]=f.org.contacts.map(function(c){return [c.nom,c.role,c.tel,c.email].filter(Boolean).join(' — ');}).join(' | ');
-    r[26]=f.org.interactions.length;
-    r[27]=f.derniereInter?(f.derniereInter.d+' '+f.derniereInter.type):'';
-    r[28]=f.prochaineRelance?f.prochaineRelance.d:'';
-    r[29]=f.org.notes;
-    return r;
-  });
-  return buildXlsx(headers,rows,'CRM CMM').then(function(xlsx){
-    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'crm-cmm-export-'+new Date().toISOString().slice(0,10)+'.xlsx');
-    toast('📤 Export Excel : '+rows.length+' organisations (21 colonnes base + 9 colonnes CRM).');
-  }).catch(function(){
-    telecharger(new Blob([csvBuild(headers,rows)],{type:'text/csv;charset=utf-8'}),'crm-cmm-export.csv');
-    toast('📤 Export CSV (secours).');
-  });
-}
-function exporterJson(){
-  var data=JSON.stringify(etat);
-  telecharger(new Blob([data],{type:'application/json'}),'sauvegarde-crm-cmm-'+new Date().toISOString().slice(0,10)+'.json');
-  toast('💾 Sauvegarde complète téléchargée (base + pipeline, contacts, interactions, relances).');
-}
 function importerJson(file){
   return file.text().then(function(txt){
     var e=JSON.parse(txt);
@@ -871,8 +832,8 @@ function rendreAide(){
   '<li><b>Prospect</b> : pas encore démarché · <b>À contacter</b> : identifié comme cible · <b>En discussion</b> : échange en cours · <b>Cotisant</b> : adhérent à jour · <b>Inactif</b> : fermé ou sans suite.</li></ul>'+
   '<h3>Sauvegarde — important</h3><ul>'+
   '<li>La sauvegarde est <b>automatique dans ce navigateur</b> à chaque modification.</li>'+
-  '<li>Faites régulièrement une <b>« Sauvegarde complète (JSON) »</b> : elle contient tout (base + CRM) et se restaure sur n\'importe quel poste via « Restaurer une sauvegarde ».</li>'+
-  '<li><b>Export Excel</b> : la base (21 colonnes) enrichie de 9 colonnes CRM (pipeline, cotisation, étiquettes, contacts, interactions, relances, notes) — pratique pour partager un extrait.</li></ul>'+
+  '<li>Sauvegarde <b>automatique dans ce navigateur</b> à chaque modification — <b>aucun export de la base</b> n’est possible depuis cette plateforme (protection des données du CMM).</li>'+
+  '<li>En secours, restaurez une sauvegarde existante via « Restaurer une sauvegarde » (import uniquement).</li></ul>'+
   '<h3>Bonnes pratiques</h3><ul>'+
   '<li>Notez chaque appel, email ou rendez-vous dans <b>Historique des interactions</b> : c\'est la mémoire du cluster.</li>'+
   '<li>Planifiez vos <b>relances</b> avec des dates : elles remontent au tableau de bord (retard en rouge, sous 7 jours en orange).</li>'+
@@ -910,8 +871,6 @@ function init(){
     document.getElementById('fCotisants').checked=false;document.getElementById('fActives').checked=false;
     page=1;rendreFiches();
   });
-  document.getElementById('btnExportExcel').addEventListener('click',function(){if(!etat.base){alert('Aucune base importée.');return;}exporterExcel();});
-  document.getElementById('btnExportJson').addEventListener('click',function(){if(!etat.base){alert('Aucune base importée.');return;}exporterJson();});
   var overlay=document.getElementById('overlay'),dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput');
   document.getElementById('btnImport').addEventListener('click',function(){overlay.hidden=false;});
   dropZone.addEventListener('click',function(){fileInput.click();});
