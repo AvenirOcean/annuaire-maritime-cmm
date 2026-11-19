@@ -1,6 +1,6 @@
 # Annuaire Maritime de Martinique — Qualification de la base
 
-Application pédagogique réalisée pour le **Cluster Maritime de Martinique (CMM)** avec le **Lycée Professionnel Raymond Néris (Le Marin)** : qualification de la base de 1 291 contacts de la filière maritime martiniquaise par les élèves de 1ère Bac Pro AGOrA.
+Application pédagogique réalisée pour le **Cluster Maritime de Martinique (CMM)** avec le **Lycée Professionnel Raymond Néris (Le Marin)** : qualification de la base de 1 291 contacts de la filière maritime martiniquaise par les élèves de Terminale AGOrA.
 
 ## 🚀 Utilisation
 

@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Annuaire Maritime de Martinique — Qualification de la base (CMM × LP Raymond Néris)</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
   --bleu:#0b3d5c; --bleu2:#0e7490; --vert:#15803d; --ambre:#b45309; --rouge:#be123c;
@@ -89,7 +92,9 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 .groupeChamps h3{margin:0 0 10px;font-size:.85rem;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
 .modal{position:fixed;inset:0;background:rgba(2,20,35,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal[hidden]{display:none}
-.modal .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto}
+.modal .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal .panneau table{min-width:420px}
+.modal .panneau>table,.modal .panneau>div>table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .modal h2{margin:0 0 4px;color:var(--bleu);font-size:1.05rem}
 .modal p{font-size:.82rem;color:#4b5563;margin:.3em 0 .8em}
 .emojiChoix{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
@@ -112,6 +117,23 @@ table#tblFiches{width:100%;border-collapse:collapse;background:var(--carte);bord
 @keyframes popScore{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
 .recompense .score.pop{animation:popScore .5s}
 .qr{border-left:4px solid #f59e0b}
+#barreJeu{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;padding:10px 16px;max-width:1400px;margin:0 auto}
+#barreJeu .recompense{flex:1 1 340px;margin:0}
+#barreJeu #blocQuete{flex:1 1 300px;margin:0}
+#barreJeu #blocDefisEquipe{flex:1 1 300px;margin:0}
+#menuFond{position:fixed;inset:0;background:rgba(2,20,35,.55);z-index:98}
+#menuFond[hidden]{display:none}
+#menuLateral{position:fixed;top:0;right:0;bottom:0;width:min(320px,88vw);background:#fff;z-index:99;box-shadow:-6px 0 24px rgba(2,20,35,.25);padding:14px;overflow:auto}
+#menuLateral[hidden]{display:none}
+#menuLateral .enteteMenu{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+#menuLateral .enteteMenu b{color:var(--bleu)}
+#menuLateral .enteteMenu button{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--gris)}
+.menuNav{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.menuNav button{background:transparent;border:none;text-align:left;padding:10px 12px;border-radius:8px;font-size:.95rem;cursor:pointer;color:#1f2937}
+.menuNav button.actif{background:var(--bleu);color:#fff;font-weight:600}
+.menuSep{border-top:1px solid var(--bord);margin:10px 0}
+.menuOutils{display:flex;flex-direction:column;gap:8px}
+.menuOutils .btn{text-align:left}
 #modalGenerique{position:fixed;inset:0;background:rgba(2,20,35,.6);z-index:95;display:flex;align-items:center;justify-content:center;padding:16px}
 #modalGenerique[hidden]{display:none}
 #modalGenerique .panneau{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:22px;max-height:92vh;overflow:auto}
@@ -166,38 +188,82 @@ details{margin:8px 0}
   #drawer{width:100vw;right:-100vw}
   header h1{font-size:1rem}
 }
+
+/* ===================== Motion design ===================== */
+.btn{transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{box-shadow:0 1px 3px rgba(13,58,110,.25)}
+.btn.primary:hover{box-shadow:0 3px 10px rgba(13,58,110,.32)}
+nav button{transition:background .15s,color .15s}
+.modal .panneau{animation:panneauIn .25s ease-out}
+@keyframes panneauIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+#menuLateral{animation:menuIn .22s ease-out}
+@keyframes menuIn{from{transform:translateX(50px);opacity:.4}to{transform:none;opacity:1}}
+section.vue.active{animation:vueIn .25s ease-out}
+@keyframes vueIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#tblFiches tbody tr{transition:background .18s}
+#tblFiches tbody tr:hover{background:rgba(56,189,248,.09)}
+.cpt{transition:transform .2s ease,box-shadow .2s ease}
+.cpt:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(2,20,35,.10)}
+#svgMap .commune{animation:fadeIn .5s ease-out backwards}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.toast{animation:toastIn .3s ease-out}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
 <header>
+  <img src="logo-cmm.png" alt="Cluster Maritime de Martinique" style="height:42px;width:auto;background:#fff;border-radius:8px;padding:4px 8px;flex:0 0 auto">
   <div>
     <h1>⚓ Qualification de la base — Filière maritime de Martinique</h1>
     <div class="sous">Cluster Maritime de Martinique × Lycée Pro Raymond Néris (Le Marin) · Mission annuaire professionnel</div>
   </div>
+  <div id="syncIndicator" style="font-size:.75rem;opacity:.9;white-space:nowrap;cursor:pointer" title="Cliquez pour changer le code mission">📡 …</div>
   <div id="saveIndicator">—</div>
-  <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
-  <button class="btn primary" id="btnExport">📤 Export complet</button>
-  <button class="btn" id="btnExportSel">📤 Export ma sélection</button>
-  <button class="btn" id="btnDemo">🧪 Mode démo</button>
-  <button class="btn" id="btnProfil">👤 Élève</button>
-  <button class="btn" id="btnSession">🏁 Ma session</button>
-  <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
-  <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
-  <button class="btn" id="btnTheme">🌙 Sombre</button>
+  <button class="btn" id="btnMenu">☰ Menu</button>
 </header>
+<div id="menuFond" hidden></div>
+<aside id="menuLateral" hidden aria-label="Menu de l'application">
+  <div class="enteteMenu"><b>⚓ Menu</b><button id="btnFermerMenu" title="Fermer">✕</button></div>
+  <nav class="menuNav">
+    <button data-vue="carte">🗺 Carte des fiches</button>
+    <button data-vue="fiches">📋 Liste des fiches</button>
+    <button data-vue="dashboard">📊 Tableau de bord (compteurs, 24 groupes)</button>
+    <button data-vue="guide">📖 Mode d'emploi</button>
+  </nav>
+  <div class="menuSep"></div>
+  <div class="menuOutils">
+    <button class="btn" id="btnProfil">👤 Mon profil élève</button>
+    <button class="btn" id="btnSession">🏁 Ma session (points, badges)</button>
+    <button class="btn" id="btnDefi">⚡ Défi 10 min</button>
+    <button class="btn" id="btnProf">👨‍🏫 Espace Prof</button>
+    <button class="btn" id="btnAide">❓ Aide & retours</button>
+    <button class="btn" id="btnTheme">🌙 Sombre / clair</button>
+    <button class="btn" id="btnImport">📥 Mettre à jour (Excel/CSV)</button>
+    <button class="btn" id="btnDemo">🧪 Mode démo</button>
+    <button class="btn" id="btnBaseCMM">♻️ Base CMM</button>
+  </div>
+</aside>
+<div id="bandeauLancement" hidden style="background:linear-gradient(90deg,#0d3a6e,#0a7ea4);color:#fff;padding:8px 14px;text-align:center;font-size:.85rem"></div>
 
 <nav>
-  <button data-vue="dashboard" class="actif">Tableau de bord</button>
-  <button data-vue="carte">Carte</button>
+  <button data-vue="carte" class="actif">🗺 Carte</button>
   <button data-vue="fiches">Fiches</button>
+  <button data-vue="dashboard">Tableau de bord</button>
   <button data-vue="guide">Mode d'emploi</button>
 </nav>
 
+<div id="barreJeu">
+  <div class="recompense" id="blocRecompense"></div>
+  <div id="blocQuete"></div>
+  <div id="blocDefisEquipe"></div>
+</div>
+
 <main>
-  <section id="vue-dashboard" class="vue active">
-    <div class="recompense" id="blocRecompense"></div>
-    <div id="blocQuete"></div>
+  <section id="vue-dashboard" class="vue">
     <div class="compteurs" id="compteurs"></div>
     <div class="progressWrap">
       <h3>Avancement de la mission</h3>
@@ -205,18 +271,22 @@ details{margin:8px 0}
       <div class="legendDash" id="legendDash"></div>
     </div>
     <div class="progressWrap" style="margin-top:12px">
-      <h3>Par groupe de travail (plages de 100 fiches)</h3>
+      <h3>Par équipe de classe (6 équipes de 4 élèves)</h3>
       <div id="groupesAvancement"></div>
     </div>
     <div class="progressWrap" style="margin-top:12px">
       <h3>👥 L'équipage du poste (travail par élève)</h3>
       <div id="blocEquipage"></div>
     </div>
+    <div class="progressWrap" style="margin-top:12px">
+      <h3>🏆 Mon compteur (fiches réalisées, statut et grade)</h3>
+      <div id="blocClassement"></div>
+    </div>
   </section>
 
-  <section id="vue-carte" class="vue">
+  <section id="vue-carte" class="vue active">
     <div class="carteBox">
-      <svg id="svgMap" viewBox="0 0 450 540" role="img" aria-label="Carte de la Martinique par commune"></svg>
+      <svg id="svgMap" viewBox="0 0 600 690" role="img" aria-label="Carte de la Martinique par commune"></svg>
       <div class="mapInfo">
         <h3>Répartition par commune</h3>
         <p style="font-size:.78rem;color:var(--gris);margin:.2em 0 .6em">Cliquez sur un cercle ou une ligne pour filtrer la liste. La couleur indique le secteur dominant, la taille le nombre de fiches.</p>
@@ -270,6 +340,22 @@ details{margin:8px 0}
   <div class="panneau" id="panneauGenerique"></div>
 </div>
 
+<div id="modalProf" class="modal" hidden>
+  <div class="panneau" style="max-width:880px;width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h2 style="margin:0">👨‍🏫 Espace Prof — pilotage de la classe en direct</h2>
+      <button class="fermerModal" id="btnFermerProfHaut" title="Fermer" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gris);padding:4px 8px">✕</button>
+    </div>
+    <div id="profContenu"><p>Chargement…</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn" id="btnProfRafraichir">↻ Rafraîchir</button>
+      <button class="btn" id="btnProfExport">📄 Export suivi (CSV)</button>
+      <button class="btn" id="btnProfExportExcel">📊 Export suivi (Excel protégé)</button>
+      <button class="btn" id="btnProfProfil">🏅 Créer mon profil prof (jouer les défis)</button>
+      <button class="btn" id="btnFermerProf">Fermer</button>
+    </div>
+  </div>
+</div>
 <div id="modalProfil" class="modal" hidden>
   <div class="panneau">
     <h2>👤 Profil élève</h2>
@@ -278,6 +364,8 @@ details{margin:8px 0}
     <div class="champP"><label for="inPseudo">Mon pseudo (prénom ou surnom de classe)</label><input id="inPseudo" maxlength="30" placeholder="ex. Jean-Baptiste, Groupe A…"></div>
     <div class="champP"><label>Mon emoji (visible sur la carte)</label><div class="emojiChoix" id="emojiGrid"></div></div>
     <div class="champP"><label for="inStatut">Mon statut (facultatif — ex. « Groupe A · chef de bord »)</label><input id="inStatut" maxlength="60" placeholder="ex. Groupe B · fiches 101 à 200"></div>
+    <div class="champP"><label for="inNumero">Ma plage de fiches (n° d’élève 1 à 24) — attribuée automatiquement si vide</label><input id="inNumero" type="number" min="1" max="24" placeholder="attribué automatiquement"></div>
+    <div class="champP"><label class="chk"><input type="checkbox" id="inProf"> Je suis enseignant — je joue les défis sans prendre de plage de fiches</label></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button class="btn primary" id="btnCreerProfil">✅ Créer / utiliser ce profil</button>
       <button class="btn" id="btnFermerProfil">Fermer</button>
@@ -286,6 +374,30 @@ details{margin:8px 0}
   </div>
 </div>
 
+<div id="modalAide" class="modal" hidden>
+  <div class="panneau" style="max-width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h2 style="margin:0">❓ Aide & retours</h2>
+      <button class="fermerModal" id="btnFermerAideHaut" title="Fermer" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gris);padding:4px 8px">✕</button>
+    </div>
+    <div id="aideContenu">
+      <h3 style="margin:8px 0 4px">Questions fréquentes</h3>
+      <p style="font-size:.82rem"><b>« Le code mission ne marche pas »</b> — vérifie la saisie : <b>CMM-MARIN-2026</b> (clique sur l’indicateur 📡 en haut pour le ressaisir). Code enseignant : réservé aux profs et au CMM (menu ☰ → 👨‍🏫 Espace Prof).</p>
+      <p style="font-size:.82rem"><b>« Mes saisies ne partagent pas »</b> — la synchronisation est automatique toutes les 20 s quand l’indicateur affiche 📡 « En ligne ». Hors connexion, rien n’est perdu : tout repart dès le retour d’Internet.</p>
+      <p style="font-size:.82rem"><b>« Je ne peux pas passer en « Vérifié » »</b> — la date et la source de vérification sont obligatoires. Enregistre + suivante (Ctrl+Entrée) préremplit la date du jour.</p>
+      <p style="font-size:.82rem"><b>« Où est ma plage de fiches ? »</b> — elle est attribuée automatiquement à la création de ton profil élève (ouvre le menu ☰ → 👤 Mon profil élève). Le tableau de bord l’affiche avec ton pseudo.</p>
+      <p style="font-size:.82rem"><b>« Puis-je corriger une erreur ? »</b> — oui, rouvre la fiche et corrige ; note les précisions en Observations. Jamais de création ni suppression de fiche.</p>
+      <h3 style="margin:12px 0 4px">Nous contacter</h3>
+      <p style="font-size:.82rem">Un bug, une idée d’amélioration, une question ? Écris-nous directement :</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+        <a class="btn primary" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/596696057669?text=Bonjour%20CMM%2C%20je%20vous%20écris%20au%20sujet%20de%20la%20Mission%20Annuaire%20Maritime%20%3A">📲 WhatsApp CMM</a>
+        <a class="btn" style="text-decoration:none" href="mailto:clustermaritimemartinique@gmail.com?subject=Retour%20Mission%20Annuaire%20Maritime">✉️ Email CMM</a>
+      </div>
+      <p style="font-size:.75rem;color:var(--gris)">Réponse rapide en journée. Pour un problème technique, précise si possible : le n° de fiche, l’appareil (téléphone/PC) et ce que tu faisais.</p>
+    </div>
+    <div style="margin-top:10px"><button class="btn" id="btnFermerAide">Fermer</button></div>
+  </div>
+</div>
 <div id="overlay" hidden>
   <div class="panneau">
     <h2>⚓ Mise à jour de la base</h2>
@@ -451,7 +563,7 @@ function parseXlsx(bytes){
   });
 }
 /* ---------- Écriture XLSX ---------- */
-function buildXlsx(headers,rows,sheetName){
+function buildXlsx(headers,rows,sheetName,protege){
   var enc=new TextEncoder();
   function refCol(ci){var s='';ci++;while(ci>0){var m=(ci-1)%26;s=String.fromCharCode(65+m)+s;ci=Math.floor((ci-1)/26);}return s;}
   function cell(ri,ci,v){
@@ -465,7 +577,9 @@ function buildXlsx(headers,rows,sheetName){
   rows.forEach(function(row,ri){
     xml+='<row r="'+(ri+2)+'">'+headers.map(function(h,ci){return cell(ri+2,ci,row[ci]!=null?row[ci]:'');}).join('')+'</row>';
   });
-  xml+='</sheetData></worksheet>';
+  xml+='</sheetData>';
+  if(protege)xml+='<sheetProtection sheet="1" objects="1" scenarios="1"/>';
+  xml+='</worksheet>';
   var files=[
     {name:'[Content_Types].xml',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>')},
     {name:'_rels/.rels',data:enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')},
@@ -505,16 +619,22 @@ function csvParse(text){
 /* ---------- Métier ---------- */
 var SECTEURS=['Activités nautiques','Industrie nautique','Services connexes','Ports et capitaineries','Événements nautiques','Non renseigné'];
 var STATUTS=['Non vérifié','Pré-rempli — à confirmer','Vérifié','À valider','Structure introuvable'];
-var SOURCES=['','Site officiel','Annuaire pro','Registre national','Page professionnelle'];
+var SOURCES=['','Site officiel','Annuaire pro','Registre national','Page professionnelle','Contact t\u00e9l\u00e9phonique','Contact WhatsApp','Visite terrain','Email envoy\u00e9','R\u00e9seaux sociaux'];
 var COULEURS_SECTEUR={'Activités nautiques':'#0e7490','Industrie nautique':'#b45309','Services connexes':'#6d28d9','Ports et capitaineries':'#15803d','Événements nautiques':'#be123c','Non renseigné':'#6b7280'};
-var COMMUNES_GEO=[["Grand'Rivière", 14.875, -61.18],["Macouba", 14.855, -61.155],["Basse-Pointe", 14.87, -61.125],["Le Marigot", 14.825, -61.01],["Le Lorrain", 14.84, -61.06],["Ajoupa-Bouillon", 14.815, -61.025],["Sainte-Marie", 14.795, -60.995],["Le Morne-Rouge", 14.76, -61.135],["Le Prêcheur", 14.8, -61.195],["Le Carbet", 14.77, -61.185],["Saint-Pierre", 14.745, -61.175],["Le Morne-Vert", 14.715, -61.18],["Bellefontaine", 14.685, -61.155],["Case-Pilote", 14.665, -61.14],["Schoelcher", 14.608, -61.095],["Fonds-Saint-Denis", 14.715, -61.145],["Saint-Joseph", 14.665, -61.035],["Fort-de-France", 14.595, -61.075],["Le Lamentin", 14.61, -60.99],["Gros-Morne", 14.705, -61.0],["La Trinité", 14.74, -60.965],["Le Robert", 14.675, -60.94],["Le Ducos", 14.57, -60.97],["Rivière-Salée", 14.53, -60.975],["Saint-Esprit", 14.48, -60.93],["Le François", 14.615, -60.9],["Le Vauclin", 14.545, -60.835],["Sainte-Luce", 14.475, -60.922],["Les Trois-Îlets", 14.535, -61.04],["Les Anses-d'Arlet", 14.487, -61.055],["Le Diamant", 14.48, -61.025],["Rivière-Pilote", 14.49, -60.9],["Le Marin", 14.47, -60.87],["Sainte-Anne", 14.43, -60.885]];
-var COTE_MQ=[[14.878, -61.18],[14.866, -61.17],[14.862, -61.15],[14.872, -61.122],[14.856, -61.105],[14.848, -61.07],[14.835, -61.03],[14.827, -61.003],[14.8, -60.985],[14.77, -60.965],[14.758, -60.945],[14.757, -60.912],[14.745, -60.938],[14.725, -60.94],[14.7, -60.935],[14.672, -60.928],[14.645, -60.905],[14.618, -60.888],[14.59, -60.878],[14.562, -60.838],[14.535, -60.828],[14.505, -60.848],[14.472, -60.868],[14.442, -60.872],[14.385, -60.878],[14.383, -60.912],[14.405, -60.945],[14.445, -60.95],[14.475, -60.928],[14.47, -60.96],[14.462, -61.0],[14.455, -61.03],[14.475, -61.055],[14.487, -61.062],[14.52, -61.075],[14.552, -61.1],[14.592, -61.112],[14.618, -61.088],[14.622, -61.108],[14.655, -61.138],[14.687, -61.158],[14.715, -61.183],[14.742, -61.18],[14.78, -61.197],[14.83, -61.2]];
-function projeterMQ(lat,lon){var k=1000;return [Math.round((lon+61.25)*k),Math.round((14.90-lat)*k)];}
-function adoucierMQ(pts){var out=[];for(var i=0;i<pts.length;i++){var a=pts[i],b=pts[(i+1)%pts.length];
-  out.push([a[0]*0.75+b[0]*0.25,a[1]*0.75+b[1]*0.25]);out.push([a[0]*0.25+b[0]*0.75,a[1]*0.25+b[1]*0.75]);}return out;}
-var PATH_COTE=(function(){var c=adoucierMQ(adoucierMQ(COTE_MQ));var d='';for(var i=0;i<c.length;i++){var q=projeterMQ(c[i][0],c[i][1]);d+=(i?'L':'M')+q[0]+','+q[1]+' ';}return d+'Z';})();
-var COMMUNES_MQ=COMMUNES_GEO.map(function(c){var q=projeterMQ(c[1],c[2]);return [c[0],q[0],q[1]];});
-var CLE_COMMUNE_MQ={};COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
+var GEO_MQ={"contour":[[-61.18492,14.88573],[-61.22131,14.86914],[-61.23917,14.82202],[-61.23093,14.78219],[-61.18835,14.74567],[-61.19728,14.7025],[-61.16226,14.64205],[-61.12175,14.61481],[-61.10458,14.59621],[-61.06819,14.58558],[-61.04141,14.58691],[-61.02287,14.57295],[-61.00914,14.55966],[-61.03043,14.56165],[-61.05034,14.57096],[-61.0778,14.55899],[-61.10184,14.54039],[-61.11626,14.51446],[-61.10252,14.49651],[-61.10321,14.4779],[-61.07712,14.45263],[-61.05446,14.44532],[-61.03798,14.43335],[-61.03317,14.44465],[-61.02905,14.4646],[-61.01051,14.45795],[-60.97755,14.45995],[-60.92606,14.45263],[-60.89722,14.44133],[-60.90271,14.42138],[-60.88486,14.3868],[-60.86151,14.37616],[-60.84709,14.38813],[-60.82924,14.39877],[-60.81825,14.42338],[-60.8004,14.4513],[-60.80177,14.47856],[-60.81207,14.49984],[-60.81963,14.5231],[-60.82375,14.54903],[-60.81757,14.57162],[-60.83611,14.58026],[-60.8416,14.59953],[-60.84023,14.61083],[-60.83954,14.62877],[-60.85121,14.64006],[-60.87044,14.63076],[-60.87524,14.64272],[-60.87456,14.66331],[-60.87387,14.68125],[-60.87112,14.69652],[-60.89035,14.70383],[-60.90614,14.7191],[-60.92537,14.73637],[-60.90614,14.72774],[-60.88211,14.7284],[-60.87799,14.74567],[-60.86975,14.75496],[-60.86494,14.7782],[-60.88348,14.78949],[-60.91507,14.77488],[-60.94803,14.76492],[-60.95284,14.77754],[-60.97549,14.79679],[-61.01738,14.83463],[-61.06133,14.85852],[-61.11763,14.88573],[-61.18492,14.88573]],"communes":[["L'Ajoupa-Bouillon",14.82094,-61.11749],["Les Anses-d'Arlet",14.4884,-61.0847],["Basse-Pointe",14.86935,-61.11521],["Le Carbet",14.7119,-61.1811],["Case-Pilote",14.6396,-61.1385],["Le Diamant",14.4816,-61.0263],["Ducos",14.57529,-60.97453],["Fonds-Saint-Denis",14.7328,-61.1421],["Fort-de-France",14.60365,-61.07418],["Le François",14.61513,-60.90311],["Grand'Rivière",14.87383,-61.17954],["Gros-Morne",14.7,-61],["Le Lamentin",14.61341,-60.99964],["Le Lorrain",14.83257,-61.05553],["Macouba",14.871,-61.1367],["Le Marigot",14.803,-61.0405],["Le Marin",14.47158,-60.86989],["Le Morne-Rouge",14.7761,-61.13564],["Le Prêcheur",14.8027,-61.2256],["Rivière-Pilote",14.48738,-60.90257],["Rivière-Salée",14.5336,-60.974],["Le Robert",14.67751,-60.94228],["Saint-Esprit",14.55,-60.93333],["Saint-Joseph",14.67099,-61.03905],["Saint-Pierre",14.74309,-61.17541],["Sainte-Anne",14.43452,-60.88078],["Sainte-Luce",14.46848,-60.92138],["Sainte-Marie",14.78352,-60.99227],["Schœlcher",14.61774,-61.099],["La Trinité",14.73807,-60.96319],["Les Trois-Îlets",14.53912,-61.03354],["Le Vauclin",14.5454,-60.83831],["Le Morne-Vert",14.6968,-61.1516],["Bellefontaine",14.6685,-61.156]]};
+/* Projection : longitude corrigee du cosinus de la latitude moyenne */
+var CARTO_LARG=600,CARTO_MARGE=46;
+var _pts=GEO_MQ.contour,_lngs=_pts.map(function(p){return p[0];}),_lats=_pts.map(function(p){return p[1];});
+var _lngMin=Math.min.apply(null,_lngs),_lngMax=Math.max.apply(null,_lngs);
+var _latMin=Math.min.apply(null,_lats),_latMax=Math.max.apply(null,_lats);
+var _kLng=Math.cos((_latMin+_latMax)/2*Math.PI/180);
+var CARTO_ECH=(CARTO_LARG-2*CARTO_MARGE)/((_lngMax-_lngMin)*_kLng);
+var CARTO_HAUT=Math.round((_latMax-_latMin)*CARTO_ECH+2*CARTO_MARGE);
+function projeterMQ(lng,lat){return [CARTO_MARGE+(lng-_lngMin)*_kLng*CARTO_ECH,CARTO_MARGE+(_latMax-lat)*CARTO_ECH];}
+var PATH_COTE=(function(){var d='';GEO_MQ.contour.forEach(function(p,i){var q=projeterMQ(p[0],p[1]);d+=(i?'L':'M')+q[0].toFixed(1)+','+q[1].toFixed(1)+' ';});return d+'Z';})();
+var CLE_COMMUNE_MQ={};
+var COMMUNES_MQ=GEO_MQ.communes.map(function(c){var q=projeterMQ(c[2],c[1]);return [normaliserCommune(c[0]),q[0],q[1]];});
+COMMUNES_MQ.forEach(function(c){CLE_COMMUNE_MQ[normaliserCle(c[0])]=c[0];});
 var CLE_SECTEUR={'activitesnautiques':'Activités nautiques','industrienautique':'Industrie nautique','servicesconnexes':'Services connexes','portsetcapitaineries':'Ports et capitaineries','evenementsnautiques':'Événements nautiques'};
 function normaliserCommune(raw){
   var s=normaliserTexte(raw);
@@ -649,7 +769,7 @@ function sauvegarder(){
     document.getElementById('saveIndicator').textContent='💾 Sauvegardé à '+new Date().toLocaleTimeString('fr-FR');
   }catch(err){
     document.getElementById('saveIndicator').textContent='⚠️ Sauvegarde locale impossible (espace plein ?)';
-    toast("⚠️ Impossible de sauvegarder dans le navigateur. Exportez votre travail (bouton « Export complet ») pour ne rien perdre.");
+    toast("⚠️ Impossible de sauvegarder dans le navigateur (espace plein ?) — resynchronisez via l’indicateur 📡 ou prévenez l’enseignant.");
   }
 }
 function charger(){
@@ -717,16 +837,6 @@ function telecharger(blob,nom){
   document.body.appendChild(a); a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
 }
-function exporter(liste,nomBase){
-  var rows=lignesExport(liste);
-  return buildXlsx(HEADERS_ATTENDUS,rows,'Base à qualifier').then(function(xlsx){
-    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),nomBase+'.xlsx');
-    toast('📤 Export Excel : '+rows.length+' fiches. Transmettez ce fichier au CMM.');
-  }).catch(function(){
-    telecharger(new Blob([csvBuild(HEADERS_ATTENDUS,rows)],{type:'text/csv;charset=utf-8'}),nomBase+'.csv');
-    toast('📤 Export CSV (secours) : '+rows.length+' fiches.');
-  });
-}
 /* ===================== Tableau de bord ===================== */
 function rendreCompteurs(){
   var total=fiches.length;
@@ -742,7 +852,7 @@ function rendreCompteurs(){
   });
   var pct=total?Math.round(100*c.verif/total):0;
   var defs=[['Total fiches',total,''],['Vérifié',c.verif,'vert'],['Pré-rempli — à confirmer',c.prem,'bleu'],['Non vérifié',c.non,'gris'],['À valider',c.avalider,''],['Structure introuvable',c.introuvable,'roug'],['Cotisants CMM (priorité 1)',c.cotisants,'ambr'],['Fermées (registre)',c.fermees,'roug']];
-  rendreRecompenses();rendreEquipage();rendreQuete();
+  rendreRecompenses();rendreEquipage();rendreClassementEleves();rendreDefisEquipe();rendreQuete();
   document.getElementById('compteurs').innerHTML=defs.map(function(x){return '<div class="cpt '+x[2]+'"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';}).join('');
   var pf=document.getElementById('progressFill');
   pf.style.width=Math.max(pct,3)+'%'; pf.textContent=pct+' %';
@@ -752,26 +862,47 @@ function rendreCompteurs(){
     '<span>❓ Non vérifié : <b>'+c.non+'</b></span>'+
     '<span>❗ Introuvables : <b>'+c.introuvable+'</b></span>';
   var lots=[];
-  var G=Math.ceil(total/100);
-  for(var g=0;g<G;g++){
-    var a=g*100+1,b=Math.min((g+1)*100,total);
+  var NBE=24;
+  var deja=0;
+  for(var g=0;g<NBE&&deja<total;g++){
+    var taille=Math.floor(total/NBE)+(g<(total%NBE)?1:0);
+    var a=deja+1,b=deja+taille;
     var n=0,v=0;
     fiches.forEach(function(f){var x=+f.no;if(x>=a&&x<=b){n++;if(f.statut==='Vérifié')v++;}});
     lots.push({a:a,b:b,n:n,v:v,p:n?Math.round(100*v/n):0});
+    deja+=taille;
   }
-  var tries=lots.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
+  var equipes=[],NBQ=6,PAR=4;
+  for(var q=0;q<NBQ;q++){
+    var ls=lots.slice(q*PAR,(q+1)*PAR);
+    if(!ls.length)break;
+    var n=0,v=0;
+    ls.forEach(function(t){n+=t.n;v+=t.v;});
+    equipes.push({a:ls[0].a,b:ls[ls.length-1].b,n:n,v:v,p:n?Math.round(100*v/n):0});
+  }
+  var pp=pseudosParNumero();
+  var tries=equipes.slice().sort(function(x,y){return y.p-x.p;}).slice(0,3);
   var medailles=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
   var gh='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">';
   tries.forEach(function(t,i){
     gh+='<div style="flex:1 1 140px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #f59e0b;border-radius:8px;padding:10px;text-align:center">'+
-      '<div class="medaille">'+medailles[i]+'</div><b style="font-size:.8rem">Fiches '+t.a+'\u2013'+t.b+'</b>'+
+      '<div class="medaille">'+medailles[i]+'</div><b style="font-size:.8rem">\u00c9quipe fiches '+t.a+'\u2013'+t.b+'</b>'+
       '<div style="font-size:1.4rem;font-weight:800;color:var(--ambre)">'+t.p+' %</div>'+
       '<div style="font-size:.7rem;color:var(--gris)">'+t.v+'/'+t.n+' v\u00e9rifi\u00e9es</div></div>';
   });
-  gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
-  lots.forEach(function(t){
+  gh+='</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+  equipes.forEach(function(t,qi){
+    gh+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:.75rem">'+
+      (function(){var mb=[];for(var k=qi*PAR+1;k<=(qi+1)*PAR;k++){if(pp[k])mb.push(pp[k]);}return '<b>\u00c9quipe '+(qi+1)+(mb.length?' \u00b7 '+mb.join(', '):' \u00b7 \u00e9l\u00e8ves '+(qi*PAR+1)+'\u2013'+((qi+1)*PAR))+'</b>';})()+
+      '<div style="background:#e5e7eb;border-radius:999px;height:9px;margin-top:5px;overflow:hidden">'+
+      '<div style="height:9px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+
+      t.p+' % ('+t.v+'/'+t.n+') \u00b7 fiches '+t.a+'\u2013'+t.b+'</div>';
+  });
+  gh+='</div><p style="font-size:.72rem;color:var(--gris);margin:0 0 8px">D\u00e9tail des 24 plages individuelles (une par \u00e9l\u00e8ve) :</p><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  lots.forEach(function(t,li){
     gh+='<div style="flex:1 1 100px;min-width:100px;background:var(--grisclair);border-radius:6px;padding:6px 8px;font-size:.72rem">'+
-      '<b>Fiches '+t.a+'\u2013'+t.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
+      '<b>'+(pp[li+1]?pp[li+1]+' \u00b7 ':'')+'fiches '+t.a+'\u2013'+t.b+'</b>'+''+
+      '<div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden">'+
       '<div style="height:8px;width:'+t.p+'%;background:'+(t.p===100?'#15803d':'#22c55e')+'"></div></div>'+t.p+' % ('+t.v+'/'+t.n+')</div>';
   });
   gh+='</div>';
@@ -794,9 +925,33 @@ function rendreEquipage(){
       '<span class="info"><b>'+echapperHtml(r.p.pseudo)+'</b>'+(r.p.statut?'<div class="st">'+echapperHtml(r.p.statut)+'</div>':'')+'</span>'+
       '<span class="pts">'+r.pts+' pts \u00b7 '+r.verif+' v\u00e9rifi\u00e9e(s) \u00b7 '+r.nb+' fiche(s) travaill\u00e9e(s)</span></div>';
   }).join('');
-  if(!rows.length)html='<p style="font-size:.8rem;color:var(--gris)">Aucun profil \u00e9l\u00e8ve sur ce poste. Cliquez sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut pour cr\u00e9er votre profil (pseudo + emoji) : votre travail appara\u00eetra alors sur la carte !</p>';
+  if(!rows.length)html='<p style="font-size:.8rem;color:var(--gris)">Aucun profil \u00e9l\u00e8ve sur ce poste. Ouvrez le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb pour cr\u00e9er votre profil (pseudo + emoji) : votre travail appara\u00eetra alors sur la carte !</p>';
   if(nonAttribue)html+='<p style="font-size:.72rem;color:var(--gris)">'+nonAttribue+' fiche(s) travaill\u00e9e(s) avant la cr\u00e9ation des profils (non attribu\u00e9es).</p>';
   document.getElementById('blocEquipage').innerHTML=html;
+}
+function rendreClassementEleves(){
+  var el=document.getElementById('blocClassement');
+  if(!el)return;
+  var pr=profilActif();
+  if(!pr){
+    el.innerHTML='<p style="font-size:.8rem;color:var(--gris)">Crée ton profil élève (menu ☰ → 👤 Élève) pour voir ici ton compteur individuel.</p>';
+    return;
+  }
+  var pts=0,nb=0,verif=0;
+  fiches.forEach(function(f){
+    if(f.saisi&&f.auteur===pr.pseudo){nb++;pts+=pointsFiche(f);if(f.statut==='Vérifié'&&f.dte&&f.src)verif++;}
+  });
+  var rang=RANGS[0],suivant=null;
+  for(var i=0;i<RANGS.length;i++)if(pts>=RANGS[i].pts)rang=RANGS[i];
+  for(var j=0;j<RANGS.length;j++)if(RANGS[j].pts>pts){suivant=RANGS[j];break;}
+  var pct=suivant?Math.min(100,Math.round(100*(pts-rang.pts)/(suivant.pts-rang.pts))):100;
+  el.innerHTML='<div class="equipageRow"><span class="emo">'+(pr.emoji||'👤')+'</span>'+
+    '<span class="info"><b>'+echapperHtml(pr.pseudo)+'</b>'+
+    (pr.statut?'<div class="st">'+echapperHtml(pr.statut)+'</div>':'')+
+    '<div class="st">'+verif+' vérifiée(s) · '+nb+' fiche(s) réalisée(s) · grade : <b>'+rang.nom+'</b></div></span>'+
+    '<span class="pts">'+pts+' pts</span></div>'+
+    '<div class="barre" style="margin-top:6px"><div style="width:'+pct+'%"></div></div>'+
+    '<div style="font-size:.72rem;color:var(--gris);margin-top:3px">'+(suivant?('Encore '+(suivant.pts-pts)+' pts pour '+suivant.nom):'Grade maximum atteint 🏆')+'</div>';
 }
 /* ===================== Profil \u00e9l\u00e8ve ===================== */
 var EMOJIS=['\u2693','\ud83d\udc2c','\ud83d\udc08','\ud83d\udc19','\ud83e\udd80','\ud83d\udc22','\u26f5','\ud83d\udea4','\ud83e\uddf3','\ud83c\udf0a','\ud83e\udd9e','\ud83d\udc0b','\ud83d\udea5','\ud83e\udd91','\ud83c\udf1e','\ud83e\uddad'];
@@ -818,7 +973,9 @@ function ouvrirModalProfil(){
     b.addEventListener('click',function(){emojiChoisi=b.getAttribute('data-e');Array.prototype.forEach.call(grid.querySelectorAll('button'),function(x){x.classList.remove('sel');});b.classList.add('sel');});
   });
   var pr=profilActif();
-  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';}
+  if(pr){document.getElementById('inPseudo').value=pr.pseudo;document.getElementById('inStatut').value=pr.statut||'';document.getElementById('inNumero').value=pr.numero||'';document.getElementById('inProf').checked=!!pr.prof;}
+  var libre=numeroLibre();
+  document.getElementById('inNumero').placeholder=libre?('attribu\u00e9 automatiquement (ex. '+libre+')'):'attribu\u00e9 automatiquement';
   rendreListeProfils();
   document.getElementById('modalProfil').hidden=false;
 }
@@ -945,6 +1102,113 @@ function rendreQuete(){
     '<p style="font-size:.85rem;margin:.2em 0 .6em"><b>'+q.titre+'</b> \u2014 '+Math.min(q.n,q.cible)+'/'+q.cible+' \u00b7 r\u00e9compense : <b>+20 pts</b></p>'+
     '<div class="progressBar"><div class="progressFill" style="width:'+pct+'%;background:'+(fait?'#15803d':'linear-gradient(90deg,#f59e0b,#fbbf24)')+'">'+pct+' %</div></div></div>';
 }
+function plageEquipe(num){
+  var TOT=1291,NBE=24,deja=0;
+  for(var g=0;g<NBE;g++){
+    var t=Math.floor(TOT/NBE)+(g<(TOT%NBE)?1:0);
+    if(num===g+1)return {a:deja+1,b:deja+t};
+    deja+=t;
+  }
+  return null;
+}
+function pseudosParNumero(){
+  var m={};
+  for(var no in etat.entries){
+    var e=etat.entries[no];
+    if(!e.auteur||!e.numero)continue;
+    var cur=m[e.numero];
+    if(!cur){m[e.numero]=(e.emoji?e.emoji+' ':'')+e.auteur;}
+    else if(e.emoji&&cur===e.auteur){m[e.numero]=e.emoji+' '+e.auteur;}
+  }
+  return m;
+}
+function numerosPris(){
+  var pris={};
+  for(var no in etat.entries){var e=etat.entries[no];if(e.auteur&&e.numero)pris[e.numero]=1;}
+  Object.keys(etat.profils||{}).forEach(function(id){var pr=etat.profils[id];if(pr.numero)pris[pr.numero]=1;});
+  return pris;
+}
+function numeroLibre(){
+  var pris=numerosPris();
+  for(var n=1;n<=24;n++)if(!pris[n])return n;
+  return 0;
+}
+function plageTexte(n){
+  var pl=plageEquipe(n);
+  return pl?('fiches '+pl.a+' \u00e0 '+pl.b):'';
+}
+function monNumero(){
+  var pr=profilActif();
+  var n=pr?parseInt(pr.numero,10):NaN;
+  return (n>=1&&n<=24)?n:0;
+}
+function defisEquipe(){
+  var n=monNumero();
+  if(!n)return null;
+  var pl=plageEquipe(n);
+  if(!pl)return null;
+  var auj=aujourdhuiISO();
+  var verifJour=0,membres={};
+  fiches.forEach(function(f){
+    var x=+f.no;
+    if(x>=pl.a&&x<=pl.b&&f.dte===auj){
+      if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)verifJour++;
+      if(f.auteur)membres[f.auteur]=1;
+    }
+  });
+  return {n:n,eq:Math.ceil(n/4),a:pl.a,b:pl.b,verifJour:verifJour,membres:Object.keys(membres).length};
+}
+function verifierDefisEquipe(){
+  var d=defisEquipe();
+  if(!d)return;
+  var auj=aujourdhuiISO();
+  etat.defisEq=etat.defisEq||{};
+  if(d.membres>=3&&etat.defisEq.coop!==auj){
+    etat.defisEq.coop=auj;
+    toast('\ud83e\udd1d D\u00e9fi coop accompli : 3 membres de ton \u00e9quipe ont saisi aujourd\u2019hui ! +20 pts');
+    lancerConfettis();sauvegarder();
+  }
+  if(d.verifJour>=12&&etat.defisEq.obj!==auj){
+    etat.defisEq.obj=auj;
+    toast('\ud83d\ude80 Objectif \u00e9quipage accompli : 12 fiches de l\u2019\u00e9quipe v\u00e9rifi\u00e9es aujourd\u2019hui ! +30 pts');
+    lancerConfettis();sauvegarder();
+  }
+}
+function rendreDefisEquipe(){
+  var el=document.getElementById('blocDefisEquipe');
+  if(!el)return;
+  var d=defisEquipe();
+  if(!d){
+    el.innerHTML='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</h3><p style="font-size:.8rem;margin:.2em 0">Cr\u00e9e ton profil \u00e9l\u00e8ve (menu \u2630) : ta plage de fiches est attribu\u00e9e automatiquement et d\u00e9bloque la coop\u00e9ration : qu\u00eate \u00e0 plusieurs, objectif \u00e9quipage et semaine des \u00e9quipages. (Profil enseignant : sans plage, les d\u00e9fis d\u2019\u00e9quipe sont d\u00e9sactiv\u00e9s.)</p></div>';
+    return;
+  }
+  verifierDefisEquipe();
+  var auj=aujourdhuiISO();
+  var g=etat.defisEq||{};
+  var p1=Math.min(100,Math.round(100*d.membres/3)),p2=Math.min(100,Math.round(100*d.verifJour/12));
+  var lundi=new Date();lundi.setDate(lundi.getDate()-((lundi.getDay()+6)%7));
+  var ref=lundi.toISOString().slice(0,10);
+  var ranges=[],scores=[];
+  for(var q=1;q<=6;q++){
+    var r1=plageEquipe(4*q-3),r2=plageEquipe(Math.min(24,4*q));
+    ranges.push({a:r1.a,b:r2.b});scores.push(0);
+  }
+  fiches.forEach(function(f){
+    if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src&&f.dte>=ref){
+      var x=+f.no;
+      for(var q=0;q<6;q++){if(x>=ranges[q].a&&x<=ranges[q].b){scores[q]++;break;}}
+    }
+  });
+  var monScore=scores[d.eq-1],rang=1;
+  scores.forEach(function(v){if(v>monScore)rang++;});
+  var h='<div class="progressWrap" style="margin:0"><h3>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe \u2014 \u00c9quipe '+d.eq+' (\u00e9l\u00e8ves '+((d.eq-1)*4+1)+' \u00e0 '+Math.min(24,d.eq*4)+', fiches '+d.a+' \u00e0 '+d.b+')</h3>';
+  h+='<p style="font-size:.8rem;margin:.2em 0 .5em"><b>Coop\u00e9ration du jour :</b> au moins <b>3 membres</b> de l\u2019\u00e9quipe saisissent une fiche aujourd\u2019hui \u2014 '+Math.min(d.membres,3)+'/3 \u00b7 r\u00e9compense : <b>+20 pts</b>'+(g.coop===auj?' \u2705':'')+'</p>';
+  h+='<div class="progressBar"><div class="progressFill" style="width:'+p1+'%;background:'+(g.coop===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p1+' %</div></div>';
+  h+='<p style="font-size:.8rem;margin:.6em 0 .5em"><b>Objectif \u00e9quipage :</b> <b>12 fiches</b> de la plage v\u00e9rifi\u00e9es aujourd\u2019hui \u2014 '+Math.min(d.verifJour,12)+'/12 \u00b7 r\u00e9compense : <b>+30 pts</b>'+(g.obj===auj?' \u2705':'')+'</p>';
+  h+='<div class="progressBar"><div class="progressFill" style="width:'+p2+'%;background:'+(g.obj===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p2+' %</div></div>';
+  h+='<p style="font-size:.78rem;margin:.6em 0 0">\u2694\ufe0f <b>Semaine des \u00e9quipages</b> : ton \u00e9quipe a v\u00e9rifi\u00e9 <b>'+monScore+'</b> fiche(s) cette semaine \u2014 rang <b>'+rang+'/6</b>'+(rang===1?' \ud83e\udd47':'')+'</p></div>';
+  el.innerHTML=h;
+}
 function ouvrirModalGenerique(html){
   document.getElementById('panneauGenerique').innerHTML=html;
   document.getElementById('modalGenerique').hidden=false;
@@ -960,7 +1224,7 @@ function ouvrirSession(){
    '<div class="cpt"><div class="n">'+st+'</div><div class="l">jours de s\u00e9rie \ud83d\udd25</div></div>'+
    '</div>'+
    (sessionStats.badges.length?'<p style="font-size:.85rem">Badges de la session : '+sessionStats.badges.join(' \u00b7 ')+'</p>':'')+
-   '<p style="font-size:.8rem;color:var(--gris)">Pense \u00e0 faire un \u00ab Export ma s\u00e9lection \u00bb (ta plage de fiches) ou \u00ab Export complet \u00bb pour transmettre ton travail au CMM.</p>'+
+   '<p style="font-size:.8rem;color:var(--gris)">Ton travail est transmis automatiquement au serveur du CMM (synchronisation 📡 toutes les 20 s) : travaille directement sur la plateforme, aucun export de la base.</p>'+
    '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn primary" id="btnFermerSession">Fermer</button></div>';
   ouvrirModalGenerique(html);
   document.getElementById('btnFermerSession').addEventListener('click',function(){document.getElementById('modalGenerique').hidden=true;});
@@ -1035,6 +1299,8 @@ function calculerScore(){
     if(f.prio.charAt(0)==='1'){cotisantsTotal++;if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)cotisantsVerifies++;}
   });
   if(etat.queteFait===aujourdhuiISO())total+=20;
+  if(etat.defisEq&&etat.defisEq.coop===aujourdhuiISO())total+=20;
+  if(etat.defisEq&&etat.defisEq.obj===aujourdhuiISO())total+=30;
   var score={points:total,verifiees:verifiees,nbCommunes:Object.keys(communes).length,introuvablesDoc:introuvablesDoc,telSaisis:telSaisis,cotisantsVerifies:cotisantsVerifies,cotisantsTotal:cotisantsTotal};
   score.badges=[
     {emo:'\ud83e\uded1',nom:'Premier cap',desc:'1 fiche v\u00e9rifi\u00e9e',ok:verifiees>=1},
@@ -1096,36 +1362,50 @@ function rendreCarte(){
       contributeurs[f.commune][f.emojiFiche+' '+f.auteur]=f.emojiFiche;
     }
   });
-  var cercles='';
+  var lieuxCarte=[];
   COMMUNES_MQ.forEach(function(c){
     var d=data[c[0]]; if(!d)return;
-    var r=6+16*Math.sqrt(d.n/maxN);
-    var sect=secteurDominant(d.secteurs);
-    var emos=contributeurs[c[0]]?Object.keys(contributeurs[c[0]]).map(function(k){return contributeurs[c[0]][k];}):[];
+    lieuxCarte.push({nom:c[0],x:c[1],y:c[2],n:d.n,r:6+20*Math.sqrt(d.n/maxN),sect:secteurDominant(d.secteurs)});
+  });
+  var occupes=lieuxCarte.map(function(l){return {l:l,x:l.x-l.r,y:l.y-l.r,w:2*l.r,h:2*l.r};});
+  var cercles='',nomsTxt='';
+  lieuxCarte.slice().sort(function(a2,b2){return b2.n-a2.n;}).forEach(function(l){
+    var sel=filtres.commune===l.nom;
+    var emos=contributeurs[l.nom]?Object.keys(contributeurs[l.nom]).map(function(k){return contributeurs[l.nom][k];}):[];
     var emosUniq=[];emos.forEach(function(e){if(emosUniq.indexOf(e)<0)emosUniq.push(e);});
     var emosTxt='';
-    emosUniq.slice(0,3).forEach(function(e,i){emosTxt+='<text x="'+(c[1]+r+4+i*13)+'" y="'+(c[2]+4)+'" font-size="11">'+e+'</text>';});
-    cercles+='<g class="commune" data-commune="'+echapperXml(c[0])+'">'+
-      '<circle cx="'+c[1]+'" cy="'+c[2]+'" r="'+r+'" fill="'+COULEURS_SECTEUR[sect]+'" fill-opacity=".78" stroke="#fff" stroke-width="1.5"></circle>'+
-      '<text x="'+c[1]+'" y="'+(c[2]-r-3)+'" text-anchor="middle" font-size="9" fill="#374151">'+d.n+'</text>'+emosTxt+'</g>';
+    emosUniq.slice(0,3).forEach(function(e,i){emosTxt+='<text x="'+(l.x+l.r+4+i*13).toFixed(1)+'" y="'+(l.y+4).toFixed(1)+'" font-size="11">'+e+'</text>';});
+    cercles+='<g class="commune" data-commune="'+echapperXml(l.nom)+'" style="cursor:pointer">'+
+      '<title>'+echapperXml(l.nom)+' · '+l.n+' fiche(s) · secteur dominant : '+echapperXml(l.sect)+'</title>'+
+      '<circle cx="'+l.x.toFixed(1)+'" cy="'+l.y.toFixed(1)+'" r="'+l.r.toFixed(1)+'" fill="'+COULEURS_SECTEUR[l.sect]+'" fill-opacity="'+(sel?'1':'.86')+'" stroke="'+(sel?'#1c2530':'#ffffff')+'" stroke-width="'+(sel?'3':'2')+'"></circle>'+
+      '<text x="'+l.x.toFixed(1)+'" y="'+(l.y-l.r-3).toFixed(1)+'" text-anchor="middle" font-size="9" fill="#374151">'+l.n+'</text>'+emosTxt+'</g>';
+    var largeur=l.nom.length*6.7+6,hauteur=15,e=l.r+5;
+    var positions={droite:{ancre:'start',x:l.x+e,y:l.y+4,bx:l.x+e-3,by:l.y-9},gauche:{ancre:'end',x:l.x-e,y:l.y+4,bx:l.x-e-largeur+3,by:l.y-9},dessous:{ancre:'middle',x:l.x,y:l.y+l.r+14,bx:l.x-largeur/2,by:l.y+l.r+2},dessus:{ancre:'middle',x:l.x,y:l.y-l.r-6,bx:l.x-largeur/2,by:l.y-l.r-18}};
+    var ordre=l.x<200?['gauche','dessous','dessus','droite']:(l.x>420?['droite','dessous','dessus','gauche']:['dessous','droite','gauche','dessus']);
+    for(var i=0;i<ordre.length;i++){
+      var pos=positions[ordre[i]],bx=pos.bx,by=pos.by;
+      var horsCadre=bx<2||by<2||bx+largeur>CARTO_LARG-2||by+hauteur>CARTO_HAUT-2;
+      var gene=occupes.some(function(z){return z.l!==l&&bx<z.x+z.w&&bx+largeur>z.x&&by<z.y+z.h&&by+hauteur>z.y;});
+      if(horsCadre||gene)continue;
+      occupes.push({l:null,x:bx,y:by,w:largeur,h:hauteur});
+      nomsTxt+='<text x="'+pos.x.toFixed(1)+'" y="'+pos.y.toFixed(1)+'" text-anchor="'+pos.ancre+'" font-size="12" font-weight="600" fill="#1c2530" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">'+echapperXml(l.nom)+'</text>';
+      break;
+    }
   });
   var horsMq=0,nonRenseignee=0;
   fiches.forEach(function(f){
     if(f.commune==='Commune non renseignée')nonRenseignee++;
     else if(!estCommuneMartinique(f.commune))horsMq++;
   });
+  var yBox=CARTO_HAUT-70;
+  svg.setAttribute('viewBox','0 0 '+CARTO_LARG+' '+CARTO_HAUT);
   svg.innerHTML=
-   '<defs>'+
-   '<linearGradient id="gMer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ecf8"/><stop offset="1" stop-color="#b3d5ea"/></linearGradient>'+
-   '<linearGradient id="gIle" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#b5dfa8"/><stop offset="0.55" stop-color="#8cc98a"/><stop offset="1" stop-color="#5fae73"/></linearGradient>'+
-   '</defs>'+
-   '<rect x="0" y="0" width="450" height="540" fill="url(#gMer)"></rect>'+
-   '<path d="'+PATH_COTE+'" fill="#3e7d4f" opacity=".25" transform="translate(2,3)"></path>'+
-   '<path d="'+PATH_COTE+'" fill="url(#gIle)" stroke="#3e7d4f" stroke-width="1.5" stroke-linejoin="round"></path>'+
-   cercles+
-   '<g class="commune" data-commune="__HORSMQ__"><rect x="330" y="455" width="100" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="380" y="474" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="380" y="486" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="380" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
-   '<g class="commune" data-commune="Commune non renseign\u00e9e"><rect x="200" y="455" width="115" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3" style="cursor:pointer"></rect><text x="257" y="474" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="257" y="486" text-anchor="middle" font-size="10" fill="#374151">renseign\u00e9e</text><text x="257" y="501" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
-   '<text x="225" y="528" text-anchor="middle" font-size="10" fill="#4b6075">Martinique \u2014 nombre de fiches par commune (clic = filtrer)</text>';
+   '<rect x="0" y="0" width="'+CARTO_LARG+'" height="'+CARTO_HAUT+'" rx="10" fill="#b5dbea"></rect>'+
+   '<polygon points="'+GEO_MQ.contour.map(function(p){var q=projeterMQ(p[0],p[1]);return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' ')+'" fill="#c1dfa3" stroke="#4f8a2b" stroke-width="1.5" stroke-linejoin="round"></polygon>'+
+   cercles+nomsTxt+
+   '<g class="commune" data-commune="__HORSMQ__" style="cursor:pointer"><rect x="'+(CARTO_LARG-120)+'" y="'+yBox+'" width="100" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3"></rect><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+19)+'" text-anchor="middle" font-size="10" fill="#374151">Hors</text><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+31)+'" text-anchor="middle" font-size="10" fill="#374151">Martinique</text><text x="'+(CARTO_LARG-70)+'" y="'+(yBox+46)+'" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+horsMq+'</text></g>'+
+   '<g class="commune" data-commune="Commune non renseignée" style="cursor:pointer"><rect x="'+(CARTO_LARG-245)+'" y="'+yBox+'" width="115" height="52" rx="8" fill="#fff" stroke="#9ca3af" stroke-dasharray="4 3"></rect><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+19)+'" text-anchor="middle" font-size="10" fill="#374151">Commune non</text><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+31)+'" text-anchor="middle" font-size="10" fill="#374151">renseignée</text><text x="'+(CARTO_LARG-187)+'" y="'+(yBox+46)+'" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">'+nonRenseignee+'</text></g>'+
+   '<text x="'+(CARTO_LARG/2)+'" y="'+(CARTO_HAUT-8)+'" text-anchor="middle" font-size="10" fill="#4b6075">Martinique — nombre de fiches par commune (clic = filtrer)</text>';
   Array.prototype.forEach.call(svg.querySelectorAll('.commune'),function(g){
     g.addEventListener('click',function(){
       var c=g.getAttribute('data-commune');
@@ -1217,19 +1497,19 @@ function rendreFiches(){
     var badges=
       (f.prio.charAt(0)==='1'?'<span class="badge b-cotisant" title="Cotisant CMM">COTISANT</span>':'')+
       (f.statut==='Pré-rempli — à confirmer'?'<span class="badge b-prem">PRÉ-REMP</span>':'')+
-      (f.statut==='Vérifié'?'<span class="badge b-verif">VÉRIFIÉ</span>':'')+
+      (f.statut==='Vérifié'?(ficheVerrouillee(f)?'<span class="badge b-verif">\U0001F512 VÉRIFIÉ</span>':'<span class="badge b-verif">VÉRIFIÉ</span>'):'')+
       (f.statut==='À valider'?'<span class="badge b-avalider">À VALIDER</span>':'')+
       (f.statut==='Structure introuvable'?'<span class="badge b-introuvable">INTROUVABLE</span>':'')+
       (f.etatReg==='Fermée'?'<span class="badge b-fermee" title="Cessée au registre">FERMÉE</span>':'')+
       (f.saisi?' <span title="Saisies enregistrées">✏️</span>':'');
     var couleur=COULEURS_SECTEUR[f.secteur]||'#6b7280';
-    return '<tr data-no="'+echapperHtml(f.no)+'">'+
+    return '<tr data-no="'+echapperHtml(f.no)+'"'+(ficheVerrouillee(f)?' style="background:#f0fdf4"':'')+'>'+
       '<td><b>'+echapperHtml(f.no)+'</b></td>'+
       '<td style="font-size:.72rem;white-space:nowrap">'+echapperHtml(f.prio)+'</td>'+
       '<td>'+badges+'<span style="margin-left:4px">'+echapperHtml(f.nom)+'</span></td>'+
       '<td>'+echapperHtml(f.commune)+'</td>'+
       '<td><span class="pastille" style="background:'+couleur+'"></span><span style="font-size:.72rem">'+echapperHtml(f.secteur)+'</span></td>'+
-      '<td class="statutPuce">'+echapperHtml(f.statut)+'</td></tr>';
+      '<td class="statutPuce">'+echapperHtml(f.statut)+(ficheVerrouillee(f)&&f.auteur?' <span style="font-size:.68rem;color:#059669;white-space:nowrap">'+(f.emojiFiche||'\u270f\uFE0F')+' '+echapperHtml(f.auteur)+'</span>':'')+'</td></tr>';
   }).join('');
   Array.prototype.forEach.call(document.querySelectorAll('#tbodyFiches tr'),function(tr){
     tr.addEventListener('click',function(){ouvrirFiche(tr.getAttribute('data-no'));});
@@ -1245,12 +1525,64 @@ function rendreFiches(){
 }
 
 /* ===================== Fiche en édition ===================== */
+function ficheIncomplete(f){
+  if(!f||!f.saisi)return false;
+  if(f.statut==='V\u00e9rifi\u00e9'||f.statut==='Structure introuvable'||f.statut==='\u00c0 valider')return false;
+  return true;
+}
+function montrerBanniereIncomplete(f){
+  var d=document.getElementById('drawerCorps');
+  if(!d||document.getElementById('banniereIncomplete'))return;
+  var b=document.createElement('div');
+  b.id='banniereIncomplete';
+  b.style.cssText='background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.85rem';
+  b.innerHTML='<b>\u26a0\ufe0f Fiche non compl\u00e9t\u00e9e</b><br>'+
+    'Avez-vous pens\u00e9 \u00e0 <b>t\u00e9l\u00e9phoner au professionnel</b> pour obtenir les renseignements manquants (t\u00e9l\u00e9phone, email, site internet) ?<br>'+
+    '<span style="font-size:.75rem;color:#6b7280">La fiche reste ouverte et modifiable. Si le professionnel est injoignable apr\u00e8s plusieurs essais, notez vos recherches en Observations puis choisissez le statut adapt\u00e9 (\u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb).</span>'+
+    '<div style="margin-top:8px"><button class="btn" id="btnPasserQuandMeme">\u25b6 Passer quand m\u00eame \u00e0 la suivante</button></div>';
+  d.insertBefore(b,d.firstChild);
+  document.getElementById('btnPasserQuandMeme').addEventListener('click',function(){
+    var liste=fichesFiltrees();
+    var i=-1;
+    for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){i=j;break;}
+    var suiv=liste[i+1]||liste[0];
+    if(suiv&&suiv.no!==f.no)ouvrirFiche(suiv.no);
+  });
+}
+function ficheVerrouillee(f){return !!(f&&f.saisi&&f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src);}
 function ouvrirFiche(no){
   var f=null;
   for(var i=0;i<fiches.length;i++)if(fiches[i].no===no){f=fiches[i];break;}
   if(!f)return;
   ficheOuverte=f;
   document.getElementById('drawerTitre').innerHTML='Fiche n° '+echapperHtml(f.no)+' — '+echapperHtml(f.nom);
+  if(ficheVerrouillee(f)){
+    var qui=(f.emojiFiche?f.emojiFiche+' ':'')+(f.auteur||'un \u00e9l\u00e8ve');
+    function roL(label,val){return '<div class="champ"><label>'+label+'</label><div class="lecture">'+(val?echapperHtml(val):'<span style="color:#9ca3af">\u2014</span>')+'</div></div>';}
+    document.getElementById('drawerCorps').innerHTML=
+     '<div style="background:#ecfdf5;border:1px solid #10b981;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:.85rem">'+
+     '<b>\U0001F512 Fiche v\u00e9rifi\u00e9e \u2014 verrouill\u00e9e</b><br>'+
+     'Valid\u00e9e par <b>'+echapperHtml(qui)+'</b>'+(f.dte?' le '+echapperHtml(f.dte):'')+(f.src?' \u00b7 source : '+echapperHtml(f.src):'')+'.<br>'+
+     'Elle ne peut plus \u00eatre modifi\u00e9e par un autre \u00e9l\u00e8ve. Pour signaler une erreur : menu \u2630 \u2192 \u2753 Aide &amp; retours.</div>'+
+     '<div class="groupeChamps"><h3>Coordonn\u00e9es v\u00e9rifi\u00e9es (lecture seule)</h3>'+
+     roL('T\u00e9l\u00e9phone',f.tel)+roL('Email',f.eml)+roL('Site internet',f.web)+
+     roL('Statut',f.statut)+roL('Date de v\u00e9rification',f.dte)+roL('Source de v\u00e9rification',f.src)+roL('Observations',f.obs)+'</div>'+
+     '<div class="liens">'+
+     (f.rech?'<a href="'+echapperHtml(f.rech)+'" target="_blank" rel="noopener">\U0001F50E Recherche express</a>':'')+
+     (f.reg?'<a href="'+echapperHtml(f.reg)+'" target="_blank" rel="noopener">\U0001F3DB\uFE0F Fiche registre national</a>':'')+
+     '</div>'+
+     '<div class="actions"><button class="btn" id="btnFicheSuivante">Fiche suivante \u25B6</button></div>';
+    document.getElementById('drawer').classList.add('ouvert');
+    document.getElementById('drawer').setAttribute('aria-hidden','false');
+    document.getElementById('btnFicheSuivante').addEventListener('click',function(){
+      var liste=fichesFiltrees();
+      var i=-1;
+      for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){i=j;break;}
+      var suivante=liste[i+1]||liste[0];
+      if(suivante)ouvrirFiche(suivante.no);
+    });
+    return;
+  }
   function ro(label,val){return '<div class="champ"><label>'+label+' <span class="ro">(lecture seule)</span></label><div class="lecture">'+(val?echapperHtml(val):'<span style="color:#9ca3af">—</span>')+'</div></div>';}
   function opt(list,sel){return list.map(function(s){return '<option value="'+echapperHtml(s)+'"'+(s===sel?' selected':'')+'>'+echapperHtml(s)+'</option>';}).join('');}
   document.getElementById('drawerCorps').innerHTML=
@@ -1321,6 +1653,7 @@ function ouvrirFiche(no){
     var suivante=liste[i+1]||liste[0];
     if(suivante)ouvrirFiche(suivante.no);
   });
+  if(ficheIncomplete(f))montrerBanniereIncomplete(f);
 }
 function fermerDrawer(){
   document.getElementById('drawer').classList.remove('ouvert');
@@ -1328,6 +1661,7 @@ function fermerDrawer(){
   ficheOuverte=null;
 }
 function enregistrerFiche(f,passerSuivante){
+  if(ficheVerrouillee(f)){alert('\U0001F512 Cette fiche est v\u00e9rifi\u00e9e et verrouill\u00e9e : elle ne peut plus \u00eatre modifi\u00e9e. Signalez une erreur via \u2753 Aide & retours.');return;}
   var tel=document.getElementById('eTel').value.trim();
   var eml=document.getElementById('eEml').value.trim().toLowerCase();
   var web=normaliserSite(document.getElementById('eWeb').value);
@@ -1353,15 +1687,16 @@ function enregistrerFiche(f,passerSuivante){
   }
   var e=etat.entries[f.no]||(etat.entries[f.no]={});
   e.st=st;e.tel=tel;e.eml=eml;e.web=web;e.dte=dte;e.src=src;e.obs=obs;
-  e.auteur=profil.pseudo;e.emoji=profil.emoji;
+  e.auteur=profil.pseudo;e.emoji=profil.emoji;e.numero=profil.numero||0;
   var scoreAvant=calculerScore();
   var avant=pointsFiche(f);
-  construireFiches(); majStreak(); sauvegarder();
+  construireFiches(); majStreak(); sauvegarder(); pousserSaisie(f.no);
   var fApres=null;
   for(var i=0;i<fiches.length;i++)if(fiches[i].no===f.no){fApres=fiches[i];break;}
   var delta=fApres?(pointsFiche(fApres)-avant):0;
   var scoreApres=calculerScore();
   sessionStats.fiches++;sessionStats.points+=delta;
+  journaliserEvenement(f.no,'saisie',delta);
   if(defi.actif)defi.fiches++;
   scoreApres.badges.forEach(function(b){
     if(!b.ok)return;
@@ -1377,7 +1712,7 @@ function enregistrerFiche(f,passerSuivante){
   rendreCompteurs(); rendreFiches(); rendreCarte();
   if(st==='Vérifié'&&dte&&src)lancerConfettis();
   toast('💾 Fiche n° '+f.no+' enregistrée.'+(delta>0?' ⚓ +'+delta+' point(s) !':''));
-  if(passerSuivante){
+  if(passerSuivante&&!ficheIncomplete(fApres)){
     var liste=fichesFiltrees();
     var idx=-1;
     for(var j=0;j<liste.length;j++)if(liste[j].no===f.no){idx=j;break;}
@@ -1389,7 +1724,7 @@ function enregistrerFiche(f,passerSuivante){
 /* ===================== Guide ===================== */
 function rendreGuide(){
   document.getElementById('guideContent').innerHTML=
-  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. Vous travaillez par groupes, sur des plages de numéros de fiches (ex. fiches 1 à 100 = groupe A).</p>'+
+  '<h3>🎯 La mission</h3><p>Le Cluster Maritime de Martinique (CMM) prépare l\'annuaire professionnel de la filière maritime. Le LP Raymond Néris vérifie et complète les <b>1 291 fiches</b> : téléphone, courriel, site internet, statut de vérification. La classe compte 24 élèves : la base est divisée en 24 plages individuelles d\'environ 54 fiches (ex. élève 1 = fiches 1 à 54), regroupées en 6 équipes de 4 élèves (ex. équipe 1 = fiches 1 à 216).</p>'+
   '<h3>1️⃣ Les statuts et leur signification</h3><table><tr><th>Statut</th><th>Signification</th></tr>'+
   '<tr><td><b>Non vérifié</b></td><td>Rien n\'a encore été contrôlé sur cette fiche.</td></tr>'+
   '<tr><td><b>Pré-rempli — à confirmer</b></td><td>Des coordonnées existent déjà (issues du CRM du CMM) : recoupez-les avec une seconde source, corrigez si obsolètes, puis passez à « Vérifié ».</td></tr>'+
@@ -1417,24 +1752,28 @@ function rendreGuide(){
   '<li>Ouvrez la fiche, cliquez sur 🔎 <b>Recherche express</b> et 🏛️ <b>Registre national</b> (nouveaux onglets).</li>'+
   '<li>Vérifiez l\'existence, recoupez les coordonnées, saisissez, choisissez la source, mettez la date.</li>'+
   '<li>Passez le statut à <b>Vérifié</b> et enregistrez. La sauvegarde est automatique dans le navigateur.</li>'+
-  '<li>En fin de séance : <b>Export ma sélection</b> (votre plage de fiches) ou <b>Export complet</b>, et transmettez le fichier au CMM / au poste suivant.</li></ol>'+
-  '<h3>5️⃣ Règles absolues</h3><ul>'+
+  '<li>En fin de séance : rien à transmettre, vos saisies sont déjà synchronisées sur la plateforme (indicateur 📡 « En ligne »).</li></ol>'+
+  '<h3>5️⃣ Synchronisation en ligne 📡</h3><p>Au premier lancement, entrez le <b>code mission</b> donné par votre enseignant. Ensuite, chaque fiche enregistrée est <b>envoyée instantanément</b> au serveur du CMM, et le travail des autres groupes arrive automatiquement toutes les 20 secondes (indicateur 📡 en haut à droite). Aucun compte à créer — l\'export Excel reste disponible en secours.</p>'+
+  '<h3>6️⃣ Règles absolues</h3><ul>'+
   '<li>⛔ <b>Jamais de suppression ni création de fiche</b> : doublons et introuvables se notent en Observations, décision finale au CMM.</li>'+
   '<li>🔒 Les colonnes du CMM (identité, activité, commune, priorité, coordonnées pré-remplies) sont <b>en lecture seule</b> : toute correction se note en Observations.</li>'+
   '<li>🧷 Bouton « Signaler un doublon » : indiquez le n° de l\'autre fiche, la mention s\'écrit automatiquement en Observations.</li></ul>'+
-  '<h3>6️⃣ Confidentialité</h3><p>🤝 Aucune copie personnelle de la base, aucune extraction, aucun usage en dehors de la mission (charte signée). Toutes les données restent dans le navigateur du lycée ou dans le fichier transmis au CMM : <b>rien n\'est envoyé sur Internet</b>.</p>'+
-  '<h3>7️⃣ Reprise du travail / échange entre postes</h3><p>Importez le fichier exporté par un camarade : les saisies fusionnent par n° de fiche et ne remplissent que les champs encore vides — aucune saisie existante n\'est perdue.</p>'+
-  '<h3>8\ufe0f\u20e3 Travailler sur son portable ou son PC personnel</h3><p>L\'application est un simple fichier <b>.html</b> : ouvrable sur n\'importe quel appareil (t\u00e9l\u00e9phone, tablette, PC), sans installation. Points de vigilance :</p><ul><li>Chaque appareil garde ses saisies <b>dans son propre navigateur</b> : le travail fait sur votre t\u00e9l\u00e9phone n\'appara\u00eet pas automatiquement sur le PC du lyc\u00e9e, et inversement.</li><li>Pour regrouper : <b>Export complet</b> sur l\'appareil o\u00f9 vous avez travaill\u00e9, puis transmission du fichier au CMM (ou import sur un autre appareil : la fusion compl\u00e8te les champs vides sans rien \u00e9craser).</li><li>Entre \u00e9l\u00e8ves : respectez votre <b>plage de n\u00b0 de fiches</b> (filtre \u00ab de \u2026 \u00e0 \u2026 \u00bb) et utilisez \u00ab Export ma s\u00e9lection \u00bb.</li><li>\u26a0\ufe0f Pas de <b>navigation priv\u00e9e</b> : les saisies ne seraient pas conserv\u00e9es apr\u00e8s fermeture.</li><li>\u26a0\ufe0f Rappel confidentialit\u00e9 : la base reste la propri\u00e9t\u00e9 du CMM \u2014 pas de copie diffus\u00e9e hors mission.</li></ul>'+
+  '<h3>7️⃣ Confidentialité</h3><p>🤝 Aucune copie personnelle de la base, aucune extraction, aucun usage en dehors de la mission (charte signée). Vos saisies de vérification (téléphone, courriel, site, statut, source) sont envoyées <b>uniquement au serveur sécurisé du CMM</b>, protégé par le code mission — jamais de donnée personnelle, jamais d\'autre destinataire. La base complète reste la propriété du CMM.</p>'+
+  '<h3>7️⃣ Reprise du travail entre appareils</h3><p>Pas de fichier à échanger : la synchronisation en ligne reprend automatiquement votre travail sur n’importe quel appareil via le serveur sécurisé du CMM.</p>'+
+  '<h3>9️⃣ Travailler sur son portable ou son PC personnel</h3><p>L’application s’ouvre sur n’importe quel appareil (téléphone, tablette, PC), sans installation ni compte. Avec la synchronisation en ligne, votre travail suit automatiquement d’un appareil à l’autre via le serveur du CMM.</p><ul><li>Le navigateur garde aussi une copie locale : en cas de coupure Internet, rien n’est perdu — la synchronisation reprend à la reconnexion.</li><li>Entre élèves : respectez votre <b>plage de n° de fiches</b> (filtre « de … à … »).</li><li>⚠️ Pas de <b>navigation privée</b> : les saisies ne seraient pas conservées après fermeture.</li><li>⚠️ <b>Aucun export de la base</b> : travaillez uniquement sur cette plateforme — la base reste la propriété du CMM (protection des données).</li></ul>'+
   '<h3>9\ufe0f\u20e3 R\u00e9compenses : points et badges</h3>'+
   '<p>Chaque fiche bien travaill\u00e9e rapporte des points : <b>+10</b> pour une fiche pass\u00e9e \u00ab V\u00e9rifi\u00e9 \u00bb (date + source), <b>+2</b> de bonus si le t\u00e9l\u00e9phone ET le courriel ou le site sont renseign\u00e9s, <b>+3</b> pour une fiche \u00ab \u00c0 valider \u00bb ou \u00ab Structure introuvable \u00bb correctement document\u00e9e en Observations, et <b>+1</b> par coordonn\u00e9e saisie. Les points font grimper votre grade maritime (Mousse, Matelot, Gabier, Quartier-ma\u00eetre, Ma\u00eetre d\u2019\u00e9quipage, Second, Capitaine, Amiral) et d\u00e9bloquent des badges (Premier cap, \u00c9quipage, Cotisants au clair, Cartographe\u2026). Le score est celui du poste : il est recalcul\u00e9 \u00e0 chaque enregistrement \u2014 seule la qualit\u00e9 du travail compte !</p>'+
   '<h3>10\ufe0f\u20e3 Ton profil \u00e9l\u00e8ve et la carte de l\u2019\u00e9quipage</h3>'+
-  '<p>Clique sur \u00ab \ud83d\udc64 \u00c9l\u00e8ve \u00bb en haut de l\u2019application pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
+  '<p>Ouvre le menu \u2630 (en haut \u00e0 droite) puis \u00ab \ud83d\udc64 Mon profil \u00e9l\u00e8ve \u00bb pour cr\u00e9er ton profil : <b>pseudo</b>, <b>emoji</b> (\u2693 \ud83d\udc2c \ud83d\udc08 \u26f5 \ud83e\uddf3\u2026) et <b>statut</b> (ex. \u00ab Groupe A \u00b7 fiches 1 \u00e0 100 \u00bb). Ensuite, chaque fiche que tu passes \u00ab V\u00e9rifi\u00e9 \u00bb fait appara\u00eetre <b>ton emoji sur la carte</b>, sur la commune concern\u00e9e \u2014 tu vois ton travail avancer en direct, et celui des autres aussi ! Le tableau de bord affiche le classement de l\u2019\u00e9quipage du poste. Plusieurs \u00e9l\u00e8ves peuvent se relayer sur un m\u00eame poste : chacun cr\u00e9e son profil et le s\u00e9lectionne en d\u00e9but de s\u00e9ance. Le pseudo reste local au poste, il n\u2019est pas export\u00e9 vers le CMM.</p>'+
   '<h3>11\ufe0f\u20e3 C\u00e9l\u00e9brations, s\u00e9rie et d\u00e9fis</h3>'+
-  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton en haut \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. Le tableau de bord affiche aussi le <b>podium des groupes</b> (plages de 100 fiches) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
-  '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement avec le bouton \u00ab \ud83c\udf19 Sombre / \u2600\ufe0f Clair \u00bb en haut \u00e0 droite.</p>';
+  '<p><b>\ud83c\udf89 Confettis</b> \u00e0 chaque fiche \u00ab V\u00e9rifi\u00e9 \u00bb et chaque badge d\u00e9bloqu\u00e9. <b>\ud83d\udd25 S\u00e9rie</b> : travaille au moins une fiche par jour pour faire grimper ta s\u00e9rie (3 jours = badge \u00ab Feu sacr\u00e9 \u00bb). <b>\ud83c\udfaf Qu\u00eate du jour</b> : un objectif renouvel\u00e9 chaque jour sur le tableau de bord (+20 pts de bonus). <b>\u26a1 D\u00e9fi 10 minutes</b> : bouton dans le menu \u2630 \u2014 traite un maximum de fiches en 10 min, ton score s\u2019affiche \u00e0 la fin. <b>\ud83c\udfc1 Ma session</b> : ton bilan (fiches, points, badges) \u00e0 tout moment. <b>\u23ed Flux rapide</b> : dans une fiche, <b>Ctrl+Entr\u00e9e</b> (ou bouton \u00ab Enregistrer + suivante \u00bb) enregistre et ouvre la fiche suivante de ta s\u00e9lection \u2014 la date du jour est d\u00e9j\u00e0 remplie. <b>\ud83e\udd1d D\u00e9fis d\u2019\u00e9quipe</b> : ta plage de fiches (n\u00b0 d\u2019\u00e9l\u00e8ve 1 \u00e0 24) est attribu\u00e9e automatiquement \u00e0 la cr\u00e9ation de ton profil \u2014 coop\u00e9ration du jour (3 membres actifs, +20 pts), objectif \u00e9quipage (12 fiches v\u00e9rifi\u00e9es, +30 pts) et classement de la semaine des \u00e9quipages. Le tableau de bord affiche aussi le <b>podium des \u00e9quipes</b> (6 \u00e9quipes de 4 \u00e9l\u00e8ves) : \ud83e\udd47 \ud83e\udd48 \ud83e\udd49 !</p>'+
+  '<p>\ud83c\udf19 <b>Mode sombre</b> : l\u2019application suit automatiquement le r\u00e9glage de ton appareil, ou bascule manuellement via le menu \u2630 puis \u00ab \ud83c\udf19 Sombre / clair \u00bb.</p>';
 }
 /* ===================== Navigation / divers ===================== */
+function ouvrirMenu(){document.getElementById('menuFond').hidden=false;document.getElementById('menuLateral').hidden=false;}
+function fermerMenu(){document.getElementById('menuFond').hidden=true;document.getElementById('menuLateral').hidden=true;}
 function allerVue(id){
+  fermerMenu();
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.classList.toggle('actif',b.dataset.vue===id);});
   Array.prototype.forEach.call(document.querySelectorAll('.vue'),function(v){v.classList.toggle('active',v.id==='vue-'+id);});
   if(id==='carte')rendreCarte();
@@ -1500,11 +1839,363 @@ function basculerTheme(){
   try{localStorage.setItem('cmm-theme',sombre?'clair':'sombre');}catch(e){}
   appliquerTheme();
 }
+/* ===================== Lancement officiel ===================== */
+var LANCEMENT_OFFICIEL='2026-11-16T11:00:00Z';
+function avantLancement(){return Date.now()<Date.parse(LANCEMENT_OFFICIEL);}
+function majBandeau(){
+  var b=document.getElementById('bandeauLancement');
+  if(!b)return;
+  if(!avantLancement()){b.hidden=true;return;}
+  var ms=Date.parse(LANCEMENT_OFFICIEL)-Date.now();
+  var j=Math.floor(ms/86400000),h=Math.floor(ms/3600000)%24,m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60;
+  b.hidden=false;
+  b.innerHTML='🚀 <b>Lancement officiel : lundi 16 novembre à 7 h</b> (heure Martinique) — dans <b>'+
+    (j>0?j+' j ':'')+(h<10?'0':'')+h+' h '+(m<10?'0':'')+m+' min '+(s<10?'0':'')+s+' s</b> · en attendant, entra\u00eenez-vous sur le <b>mode démo</b> (bouton 🧪) !';
+}
+/* ===================== Synchronisation en ligne (Supabase) ===================== */
+var SUPABASE_URL='https://gjbglgegjlfhwkeniaal.supabase.co';
+var SUPABASE_KEY='sb_publishable_qZoScyZFhv39QMRZn4mnMw_iYVnCR2g';
+var LS_CODE='cmm-code-mission';
+function lireCodeMission(){
+  var c=null;
+  try{c=localStorage.getItem(LS_CODE);}catch(err){}
+  while(!(c&&c.trim())){
+    c=prompt('\U0001F511 Code de la mission (donn\u00e9 par votre enseignant) :');
+    if(c===null)return null;
+    c=(c||'').trim();
+    if(c&&c.toUpperCase().indexOf('PROF')>=0){
+      alert('\u2139\ufe0f Ce code est r\u00e9serv\u00e9 \u00e0 l\u2019espace enseignant : il ne sert pas ici.\n\n\u2022 Ici, pour la synchronisation : entre le code mission donn\u00e9 par votre enseignant.\n\u2022 Espace enseignant : menu \u2630 \u2192 \U0001F468\u200D\U0001F3EB Espace Prof');
+      c='';
+    }
+  }
+  try{localStorage.setItem(LS_CODE,c);}catch(err){}
+  return c;
+}
+function syncIndic(txt){
+  var el=document.getElementById('syncIndicator');
+  if(el)el.textContent=txt;
+}
+function headersSync(){
+  var c=lireCodeMission();
+  if(!c){syncIndic('📴 Hors ligne');return null;}
+  return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Mission-Code':c,'Content-Type':'application/json'};
+}
+function tirerSaisies(){
+  if(estDemo()){syncIndic('🧪 Démo — synchro au lancement');return Promise.resolve(false);}
+  var h=headersSync();
+  if(!h)return Promise.resolve(false);
+  syncIndic('📡 Synchronisation…');
+  return fetch(SUPABASE_URL+'/rest/v1/saisies?select=*',{headers:h}).then(function(r){
+    if(r.status===401||r.status===403){throw new Error('code');}
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  }).then(function(liste){
+    if(!Array.isArray(liste))throw new Error('reponse');
+    var nouvelles=0,i,e,s;
+    var connus={};
+    for(i=0;i<liste.length;i++)connus[liste[i].no_fiche]=true;
+    for(i=0;i<liste.length;i++){
+      s=liste[i];
+      e=etat.entries[s.no_fiche];
+      if(!e){e=etat.entries[s.no_fiche]={};nouvelles++;}
+      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||'';e.emoji=s.emoji||'';e.numero=s.numero||0;
+    }
+    for(var no in etat.entries){
+      if(!connus[no])pousserSaisie(no);
+    }
+    construireFiches();rendreCompteurs();rendreFiches();rendreCarte();
+    if(nouvelles>0){sauvegarder();toast('📡 '+nouvelles+' saisie(s) récupérée(s) du serveur.');}
+    syncIndic('📡 En ligne · '+liste.length+' saisies');
+    return true;
+  }).catch(function(err){
+    if(String((err&&err.message)||err).indexOf('code')>=0){
+      try{localStorage.removeItem(LS_CODE);}catch(e2){}
+      syncIndic('🔑 Code invalide');
+      alert('⛔ Code mission invalide. Redemandez le bon code à votre enseignant, puis cliquez ici.');
+      return false;
+    }
+    syncIndic('📴 Hors ligne (réessai auto)');
+    return false;
+  });
+}
+function pousserSaisie(no){
+  if(estDemo())return;
+  var h=headersSync();
+  if(!h)return;
+  var e=etat.entries[no];
+  if(!e)return;
+  h['Prefer']='resolution=merge-duplicates';
+  fetch(SUPABASE_URL+'/rest/v1/saisies',{
+    method:'POST',headers:h,
+    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||'',numero:e.numero||0})
+  }).then(function(r){
+    if(!r.ok)throw new Error('http '+r.status);
+    syncIndic('📡 En ligne · synchronisé');
+  }).catch(function(){
+    syncIndic('📴 Envoi en attente (réessai auto)');
+  });
+}
+function journaliserEvenement(no,type,points){
+  if(estDemo())return;
+  var h=headersSync();
+  if(!h)return;
+  var profil=profilActif();
+  fetch(SUPABASE_URL+'/rest/v1/evenements',{method:'POST',headers:h,
+    body:JSON.stringify({no_fiche:String(no),auteur:profil?profil.pseudo:'',type:type||'saisie',points:points||0})
+  }).catch(function(){});
+}
+function appelProf(body){
+  return fetch(SUPABASE_URL+'/functions/v1/prof-data',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})}).then(function(r){
+    if(r.status===401||r.status===403)return null;
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  });
+}
+function demarrerSync(){
+  if(typeof fetch==='undefined'){syncIndic('📴 Navigateur ancien');return;}
+  var el=document.getElementById('syncIndicator');
+  if(el)el.addEventListener('click',function(){
+    try{localStorage.removeItem(LS_CODE);}catch(err){}
+    tirerSaisies();
+  });
+  tirerSaisies();
+  setInterval(tirerSaisies,20000);
+}
+/* ===================== Espace Prof (V3 : code vérifié côté serveur) ===================== */
+var LS_PROF='cmm-prof-ok';
+var SS_PROF_CODE='cmm-prof-code';
+function lireCodeProf(){
+  try{return sessionStorage.getItem(SS_PROF_CODE)||'';}catch(err){return '';}
+}
+function profAutorise(){
+  var ok=null;
+  try{ok=localStorage.getItem(LS_PROF);}catch(err){}
+  if(ok==='1'&&lireCodeProf())return Promise.resolve(true);
+  var c=prompt('\U0001F468\u200D\U0001F3EB Code enseignant (donn\u00e9 par le CMM) :');
+  if(c===null)return Promise.resolve(false);
+  c=(c||'').trim();
+  return appelProf({code:c}).then(function(data){
+    if(!data)return false;
+    try{localStorage.setItem(LS_PROF,'1');sessionStorage.setItem(SS_PROF_CODE,c);}catch(err){}
+    return true;
+  });
+}
+function plageDebut(n){var pl=plageEquipe(n);return pl?pl.a:0;}
+function plageFin(n){var pl=plageEquipe(n);return pl?pl.b:0;}
+function pointsSaisie(e){
+  var p=0;
+  if(e.statut==='V\u00e9rifi\u00e9'&&e.dte&&e.src){p+=10;if(e.tel&&(e.eml||e.web))p+=2;}
+  else if((e.statut==='\u00c0 valider'||e.statut==='Structure introuvable')&&e.obs)p+=3;
+  if(e.tel)p+=1;if(e.eml)p+=1;if(e.web)p+=1;
+  return p;
+}
+function chargerProf(){
+  var code=lireCodeProf();
+  if(!code){document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Code enseignant requis (menu \u2630 \u2192 Espace Prof).</p>';return;}
+  document.getElementById('profContenu').innerHTML='<p>\u23f3 Chargement des saisies de la classe\u2026</p>';
+  appelProf({code:code}).then(function(data){
+    if(!data){document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Code enseignant incorrect ou serveur indisponible.</p>';return;}
+    rendreProf(data.saisies||[],data.evenements||[]);
+  }).catch(function(){
+    document.getElementById('profContenu').innerHTML='<p>\u26A0\uFE0F Synchronisation impossible pour le moment. V\u00e9rifiez la connexion puis rafra\u00eechissez.</p>';
+  });
+}
+var derniersEvts=null;
+var derniersSaisies=null;
+function rendreProf(liste,evts){
+  derniersEvts=evts||null;
+  derniersSaisies=liste||null;
+  var pp=pseudosParNumero();
+  var total=liste.length,verif=0,eleves={},activite=liste.slice().sort(function(a,b){return String(b.maj).localeCompare(String(a.maj));}).slice(0,20);
+  liste.forEach(function(e){
+    if(e.statut==='V\u00e9rifi\u00e9')verif++;
+    var k=e.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={s:0,v:0,p:0,emoji:e.emoji||'',num:0};
+    if(e.numero)eleves[k].num=e.numero;
+    eleves[k].s++;if(e.statut==='V\u00e9rifi\u00e9')eleves[k].v++;
+    eleves[k].p+=pointsSaisie(e);
+  });
+  var classe=Object.keys(eleves).map(function(k){return {nom:k,d:eleves[k]};}).sort(function(a,b){return b.d.p-a.d.p;});
+  var plages=[],deja=0,TOT=1291,NBE=24;
+  for(var g=0;g<NBE;g++){
+    var t=Math.floor(TOT/NBE)+(g<(TOT%NBE)?1:0);
+    plages.push({a:deja+1,b:deja+t,n:t,v:0});deja+=t;
+  }
+  liste.forEach(function(e){
+    var x=+e.no_fiche;
+    if(isNaN(x))return;
+    plages.forEach(function(pl){if(x>=pl.a&&x<=pl.b&&e.statut==='V\u00e9rifi\u00e9')pl.v++;});
+  });
+  var h='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">'+
+    profKpi('\u00c9l\u00e8ves actifs',classe.length)+
+    profKpi('Fiches saisies',total)+
+    profKpi('Fiches v\u00e9rifi\u00e9es',verif)+
+    profKpi('Avancement global',Math.round(100*verif/1291)+' %')+'</div>';
+  h+='<h3 style="margin:10px 0 6px">\U0001F3C6 Classement live (par \u00e9l\u00e8ve)</h3><table style="width:100%;border-collapse:collapse;font-size:.85rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:6px">#</th><th style="text-align:left;padding:6px">\u00c9l\u00e8ve</th><th style="text-align:left;padding:6px">Plage</th><th style="text-align:right;padding:6px">Saisies</th><th style="text-align:right;padding:6px">V\u00e9rifi\u00e9es</th><th style="text-align:right;padding:6px">Points</th></tr>';
+  classe.forEach(function(e,i){
+    var plTxt=e.d.num?('\u00e9l\u00e8ve '+e.d.num+' \u00b7 fiches '+plageDebut(e.d.num)+'\u2013'+plageFin(e.d.num)):'\u2014';
+    h+='<tr><td style="padding:5px 6px">'+(i+1)+'</td><td style="padding:5px 6px">'+e.d.emoji+' '+e.nom+'</td><td style="padding:5px 6px;font-size:.75rem">'+plTxt+'</td><td style="text-align:right;padding:5px 6px">'+e.d.s+'</td><td style="text-align:right;padding:5px 6px">'+e.d.v+'</td><td style="text-align:right;padding:5px 6px"><b>'+e.d.p+'</b></td></tr>';
+  });
+  h+='</table>';
+  h+='<h3 style="margin:14px 0 6px">\u2705 Avancement des 6 \u00e9quipes de 4 \u00e9l\u00e8ves (fiches v\u00e9rifi\u00e9es)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  for(var q=0;q<plages.length;q+=4){
+    var ls=plages.slice(q,q+4);
+    if(!ls.length)break;
+    var vn=0,tn=0;
+    ls.forEach(function(pl){vn+=pl.v;tn+=pl.n;});
+    var qc=tn?Math.round(100*vn/tn):0;
+    var mb=[];for(var k=q+1;k<=q+4;k++){if(pp[k])mb.push(pp[k]);}
+    h+='<div style="flex:1 1 150px;min-width:150px;background:var(--carte);border:1px solid var(--bord);border-radius:8px;padding:6px 9px;font-size:.72rem"><b>\u00c9quipe '+(q/4+1)+(mb.length?' \u00b7 '+mb.join(', '):' \u00b7 \u00e9l\u00e8ves '+(q+1)+'\u2013'+(q+4))+'</b><div style="background:#e5e7eb;border-radius:999px;height:8px;margin-top:4px;overflow:hidden"><div style="height:8px;width:'+qc+'%;background:'+(qc===100?'#15803d':'#22c55e')+'"></div></div>'+vn+'/'+tn+' \u00b7 fiches '+ls[0].a+'\u2013'+ls[ls.length-1].b+'</div>';
+  }
+  h+='</div><h3 style="margin:12px 0 6px">D\u00e9tail : 24 plages individuelles</h3><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  plages.forEach(function(pl,pi){
+    var pc=Math.round(100*pl.v/pl.n);
+    h+='<div style="flex:1 1 90px;min-width:90px;background:var(--grisclair);border-radius:6px;padding:5px 7px;font-size:.7rem"><b>'+(pp[pi+1]?pp[pi+1]+' · ':'')+pl.a+'–'+pl.b+'</b><div style="background:#e5e7eb;border-radius:999px;height:7px;margin-top:4px;overflow:hidden"><div style="height:7px;width:'+pc+'%;background:'+(pc===100?'#15803d':'#22c55e')+'"></div></div>'+pl.v+'/'+pl.n+'</div>';
+  });
+  h+='</div>';
+  h+='<h3 style="margin:14px 0 6px">📈 Évolution de la classe (V2.2)</h3>';
+  if(!evts){h+='<p style="font-size:.8rem">⚠️ Historisation pas encore active : le CMM doit exécuter le script SQL de la table evenements (fichier supabase-evenements.sql du dépôt) dans le SQL Editor Supabase.</p>';}
+  else if(!evts.length){h+='<p style="font-size:.8rem">Aucun événement encore enregistré : la courbe se remplira dès les premières saisies.</p>';}
+  else{h+=courbeClasse(evts)+courbeEleves(evts);}
+  h+='<h3 style="margin:14px 0 6px">\U0001F4E5 Derni\u00e8res saisies de la classe</h3><table style="width:100%;border-collapse:collapse;font-size:.8rem"><tr style="background:var(--grisclair)"><th style="text-align:left;padding:5px">Quand</th><th style="text-align:left;padding:5px">\u00c9l\u00e8ve</th><th style="text-align:left;padding:5px">Fiche</th><th style="text-align:left;padding:5px">Statut</th></tr>';
+  activite.forEach(function(e){
+    var d=e.maj?new Date(e.maj):null;
+    h+='<tr><td style="padding:4px 5px">'+(d?d.toLocaleString('fr-FR'):'\u2014')+'</td><td style="padding:4px 5px">'+(e.emoji||'')+' '+(e.auteur||'(anonyme)')+'</td><td style="padding:4px 5px">n\u00b0 '+e.no_fiche+'</td><td style="padding:4px 5px">'+e.statut+'</td></tr>';
+  });
+  h+='</table>';
+  h+='<p style="font-size:.72rem;color:var(--gris);margin-top:10px">\U0001F4E1 Actualis\u00e9 \u00e0 '+new Date().toLocaleTimeString('fr-FR')+' \u2014 rafra\u00eechissement automatique toutes les 20 s. Le prof peut rejoindre les d\u00e9fis : cr\u00e9ez votre profil avec le bouton ci-dessous, votre score entre au classement.</p>';
+  document.getElementById('profContenu').innerHTML=h;
+}
+function profKpi(titre,valeur){
+  return '<div style="flex:1 1 130px;background:var(--grisclair);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--accent)">'+valeur+'</div><div style="font-size:.72rem;color:var(--gris)">'+titre+'</div></div>';
+}
+function joursEvenements(evts){
+  var parJour={},jours=[];
+  evts.forEach(function(ev){
+    var j=String(ev.horodatage||'').slice(0,10);
+    if(!parJour[j]){parJour[j]=0;jours.push(j);}
+    parJour[j]+=(ev.points||0);
+  });
+  jours.sort();
+  return {parJour:parJour,jours:jours};
+}
+var COULEURS_COURBES=['#2563eb','#16a34a','#dc2626','#9333ea','#ea580c'];
+function courbeClasse(evts){
+  var d=joursEvenements(evts),jours=d.jours;
+  if(!jours.length)return '';
+  var cum=0,pts=jours.map(function(j){cum+=d.parJour[j];return cum;});
+  var W=760,H=170,P=34,n=pts.length,max=Math.max.apply(null,pts.concat([10]));
+  var xy=pts.map(function(v,i){return [P+(W-2*P)*(n===1?1:i/(n-1)),H-P-(H-2*P)*(v/max)];});
+  var ligne=xy.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+  var aire=ligne+' L'+xy[n-1][0].toFixed(1)+' '+(H-P)+' L'+xy[0][0].toFixed(1)+' '+(H-P)+' Z';
+  return '<div style="background:var(--grisclair);border-radius:8px;padding:8px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'+
+    '<path d="'+aire+'" fill="rgba(10,126,164,.15)"/>'+
+    '<path d="'+ligne+'" fill="none" stroke="#0a7ea4" stroke-width="2.5"/>'+
+    '<text x="'+P+'" y="16" font-size="11" fill="currentColor">Points cumulés de la classe</text>'+
+    '<text x="'+(W-P)+'" y="16" text-anchor="end" font-size="11" fill="currentColor">'+pts[n-1]+' pts</text>'+
+    '<text x="'+P+'" y="'+(H-8)+'" font-size="10" fill="currentColor">'+jours[0]+'</text>'+
+    '<text x="'+(W-P)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="currentColor">'+jours[n-1]+'</text>'+
+    '</svg></div>';
+}
+function courbeEleves(evts){
+  var d=joursEvenements(evts),jours=d.jours;
+  if(!jours.length)return '';
+  var parEleve={};
+  evts.forEach(function(ev){
+    var a=ev.auteur||'(anonyme)';
+    if(!parEleve[a])parEleve[a]={};
+    var j=String(ev.horodatage||'').slice(0,10);
+    parEleve[a][j]=(parEleve[a][j]||0)+(ev.points||0);
+  });
+  var noms=Object.keys(parEleve).map(function(a){
+    var t=0;jours.forEach(function(j){t+=(parEleve[a][j]||0);});
+    return {nom:a,total:t};
+  }).sort(function(x,y){return y.total-x.total;}).slice(0,5);
+  if(!noms.length)return '';
+  var W=760,H=170,P=34,n=jours.length,max=10;
+  noms.forEach(function(o){
+    var c=0;jours.forEach(function(j){c+=(parEleve[o.nom][j]||0);if(c>max)max=c;});
+  });
+  var h='<div style="background:var(--grisclair);border-radius:8px;padding:8px;margin-top:8px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  noms.forEach(function(o,idx){
+    var c=0,xy=jours.map(function(j,i){
+      c+=(parEleve[o.nom][j]||0);
+      return [P+(W-2*P)*(n===1?1:i/(n-1)),H-P-(H-2*P)*(c/max)];
+    });
+    var ligne=xy.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+    h+='<path d="'+ligne+'" fill="none" stroke="'+COULEURS_COURBES[idx]+'" stroke-width="2"/>';
+  });
+  h+='<text x="'+P+'" y="16" font-size="11" fill="currentColor">Top élèves (points cumulés)</text>';
+  h+='<text x="'+P+'" y="'+(H-8)+'" font-size="10" fill="currentColor">'+jours[0]+'</text>';
+  h+='<text x="'+(W-P)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="currentColor">'+jours[n-1]+'</text>';
+  h+='</svg><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.72rem;margin-top:4px">';
+  noms.forEach(function(o,idx){
+    h+='<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:'+COULEURS_COURBES[idx]+'"></span>'+o.nom+' ('+o.total+')</span>';
+  });
+  h+='</div></div>';
+  return h;
+}
+function exporterSuivi(){
+  if(!derniersEvts||!derniersEvts.length){alert('Aucun événement à exporter pour le moment.');return;}
+  var lignes=[['Date','Élève','Fiche','Type','Points'].join(';')];
+  derniersEvts.forEach(function(ev){
+    lignes.push([String(ev.horodatage||'').replace(/;/g,','),ev.auteur||'',ev.no_fiche||'',ev.type||'',ev.points||0].join(';'));
+  });
+  var bloc=new Blob(['\ufeff'+lignes.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(bloc);a.download='suivi-mission-annuaire.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function exporterSuiviExcel(){
+  var code=lireCodeProf();
+  var saisies=derniersSaisies||[],evts=derniersEvts||[];
+  if(!saisies.length&&!evts.length){alert('Aucune donnée à exporter pour le moment.');return;}
+  var eleves={};
+  saisies.forEach(function(e){
+    var k=e.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={nom:k,emoji:'',num:0,s:0,v:0,p:0,pj:0,maj:''};
+    if(e.emoji)eleves[k].emoji=e.emoji;
+    if(e.numero)eleves[k].num=e.numero;
+    eleves[k].s++;
+    if(e.statut==='Vérifié')eleves[k].v++;
+    eleves[k].p+=pointsSaisie(e);
+    if(e.maj&&e.maj>eleves[k].maj)eleves[k].maj=e.maj;
+  });
+  evts.forEach(function(ev){
+    var k=ev.auteur||'(anonyme)';
+    if(!eleves[k])eleves[k]={nom:k,emoji:'',num:0,s:0,v:0,p:0,pj:0,maj:''};
+    eleves[k].pj+=(ev.points||0);
+  });
+  var rows=Object.keys(eleves).map(function(k){var e=eleves[k];return [e.nom,e.emoji,e.num,e.s,e.v,e.p,e.pj,e.maj];})
+    .sort(function(a,b){return (b[5]+b[6])-(a[5]+a[6]);});
+  var headers=['Élève','Emoji','N° élève','Saisies','Vérifiées','Points (état actuel)','Points (journal)','Dernière activité'];
+  buildXlsx(headers,rows,'Suivi élèves',true).then(function(xlsx){
+    telecharger(new Blob([xlsx],{type:'application/vnd.openxmlformats.officedocument.spreadsheetml.sheet'}),'suivi-eleves-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📊 Export Excel du suivi : '+rows.length+' élève(s) — feuille protégée (lecture seule).');
+  });
+  if(code)appelProf({code:code,action:'export',detail:'suivi-excel'}).catch(function(){});
+}function ouvrirAide(){
+  document.getElementById('modalAide').hidden=false;
+}
+function ouvrirProf(){
+  profAutorise().then(function(ok){
+    if(!ok){alert('\u26A0\uFE0F Code enseignant incorrect.');return;}
+    document.getElementById('modalProf').hidden=false;
+    chargerProf();
+  });
+  if(!ouvrirProf._tick){ouvrirProf._tick=setInterval(function(){
+    if(!document.getElementById('modalProf').hidden)chargerProf();
+  },20000);}
+}
+
 function init(){
   appliquerTheme();
   rendreGuide();
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.addEventListener('click',function(){allerVue(b.dataset.vue);});});
   document.getElementById('btnFermerDrawer').addEventListener('click',fermerDrawer);
+  document.getElementById('btnMenu').addEventListener('click',ouvrirMenu);
+  document.getElementById('btnFermerMenu').addEventListener('click',fermerMenu);
+  document.getElementById('menuFond').addEventListener('click',fermerMenu);
   document.getElementById('fRecherche').addEventListener('input',function(e){filtres.recherche=e.target.value;page=1;rendreFiches();});
   ['fSecteur','fPriorite','fStatut','fCommune'].forEach(function(id){
     document.getElementById(id).addEventListener('change',function(e){
@@ -1528,22 +2219,25 @@ function init(){
       rendreFiches();
     });
   });
-  document.getElementById('btnExport').addEventListener('click',function(){
-    if(!etat.base){alert('Aucune base importée.');return;}
-    exporter(fiches,'base-qualifiee-cmm-'+new Date().toISOString().slice(0,10));
-  });
-  document.getElementById('btnExportSel').addEventListener('click',function(){
-    if(!etat.base){alert('Aucune base importée.');return;}
-    var liste=fichesFiltrees();
-    if(!liste.length){alert('Aucune fiche dans la sélection courante. Ajustez les filtres ou la plage de numéros.');return;}
-    exporter(liste,'selection-'+liste.length+'-fiches-'+new Date().toISOString().slice(0,10));
-  });
   document.getElementById('btnDemo').addEventListener('click',function(){
     if(etat.base&&!confirm('Remplacer la base affichée par les 20 fiches de démonstration ? (Vos saisies locales sont conservées.)'))return;
     activerDemo();
   });
   document.getElementById('btnDemoOverlay').addEventListener('click',activerDemo);
   document.getElementById('btnProfil').addEventListener('click',ouvrirModalProfil);
+  document.getElementById('btnProf').addEventListener('click',ouvrirProf);
+  document.getElementById('btnAide').addEventListener('click',function(){fermerMenu();ouvrirAide();});
+  document.getElementById('btnFermerAide').addEventListener('click',function(){document.getElementById('modalAide').hidden=true;});
+  document.getElementById('btnFermerAideHaut').addEventListener('click',function(){document.getElementById('modalAide').hidden=true;});
+  document.getElementById('btnFermerProf').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
+  document.getElementById('btnFermerProfHaut').addEventListener('click',function(){document.getElementById('modalProf').hidden=true;});
+  document.getElementById('btnProfRafraichir').addEventListener('click',chargerProf);
+  document.getElementById('btnProfExport').addEventListener('click',exporterSuivi);
+  document.getElementById('btnProfExportExcel').addEventListener('click',exporterSuiviExcel);
+  document.getElementById('btnProfProfil').addEventListener('click',function(){
+    document.getElementById('modalProf').hidden=true;ouvrirModalProfil();
+    toast("\U0001F3C5 Cr\u00e9ez votre profil prof : votre score entrera au classement face aux \u00e9l\u00e8ves !");
+  });
   document.getElementById('btnSession').addEventListener('click',ouvrirSession);
   document.getElementById('btnDefi').addEventListener('click',toggleDefi);
   document.getElementById('btnBaseCMM').addEventListener('click',function(){rechargerBaseCMM(false);});
@@ -1552,16 +2246,22 @@ function init(){
   document.getElementById('btnCreerProfil').addEventListener('click',function(){
     var pseudo=normaliserTexte(document.getElementById('inPseudo').value);
     var statut=normaliserTexte(document.getElementById('inStatut').value);
+    var numEl=document.getElementById('inNumero');
+    var numero=parseInt(numEl.value,10);
+    if(isNaN(numero)||numero<1||numero>24){numero=0;}
+    var estProf=document.getElementById('inProf').checked;
     var msg=document.getElementById('msgProfil');
     if(!pseudo){msg.textContent='Indique un pseudo pour continuer.';return;}
     if(!emojiChoisi){msg.textContent='Choisis un emoji.';return;}
+    if(estProf){numero=0;}
+    else if(!numero){numero=numeroLibre();if(!numero){msg.textContent='Les 24 plages sont d\u00e9j\u00e0 attribu\u00e9es. Indique ton n\u00b0 dans le champ.';return;}}
     var id=etat.profilActif&&etat.profils[etat.profilActif]?etat.profilActif:('p'+Date.now());
-    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut};
+    etat.profils[id]={id:id,pseudo:pseudo,emoji:emojiChoisi,statut:statut,numero:numero,prof:estProf};
     etat.profilActif=id;
     sauvegarder();construireFiches();rendreCompteurs();rendreCarte();rendreListeProfils();majBoutonProfil();
     document.getElementById('modalProfil').hidden=true;
     msg.textContent='';
-    toast('\ud83d\udc64 Profil enregistr\u00e9 : '+emojiChoisi+' '+pseudo+'. Ton travail va appara\u00eetre sur la carte !');
+    toast('\ud83d\udc64 Profil enregistr\u00e9 : '+emojiChoisi+' '+pseudo+(numero?'. Plage attribu\u00e9e : '+plageTexte(numero):'')+'. Ton travail va appara\u00eetra sur la carte !');
   });
   var overlay=document.getElementById('overlay'),dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput');
   document.getElementById('btnImport').addEventListener('click',function(){overlay.hidden=false;});
@@ -1578,13 +2278,13 @@ function init(){
     etat.profils=etat.profils||{};
     majBoutonProfil();
     if(estDemo()&&typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length>20){
-      if(confirm('Ce poste est encore en mode d\u00e9monstration (20 fiches fictives).\nRevenir maintenant \u00e0 la base compl\u00e8te du CMM (1 291 fiches) ?')){
+      if(avantLancement()){
+        toutRendre();
+        toast('🧪 Mode démo jusqu\'au lancement officiel (lundi 16 novembre, 7 h). Cliquez sur « ♻️ Base CMM » si vous voulez voir la vraie base.');
+      }else{
         rechargerBaseCMM(true);
         document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
-        toast('\u267b\ufe0f Retour \u00e0 la base du CMM : '+fiches.length+' fiches.');
-      }else{
-        toutRendre();
-        toast('\ud83e\uddea Mode d\u00e9mo actif (20 fiches). Cliquez sur \u00ab \u267b\ufe0f Base CMM \u00bb pour charger les 1 291 fiches.');
+        toast('\u267b\ufe0f Lancement officiel : retour automatique \u00e0 la base du CMM ('+fiches.length+' fiches). Bienvenue dans la mission !');
       }
     }else{
       toutRendre();
@@ -1592,14 +2292,23 @@ function init(){
     document.getElementById('saveIndicator').textContent='💾 Travail local restauré ('+new Date(etat.savedAt).toLocaleString('fr-FR')+')';
     toast('Bienvenue ! Votre travail sauvegardé a été restauré : '+fiches.length+' fiches.');
   }else if(typeof BASE_EMBARQUEE!=='undefined'&&BASE_EMBARQUEE&&BASE_EMBARQUEE.rows&&BASE_EMBARQUEE.rows.length){
-    etat={base:BASE_EMBARQUEE,entries:{},profils:{},savedAt:null};
-    construireFiches();toutRendre();
-    document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
-    toast('Bienvenue ! La base des '+fiches.length+' fiches du CMM est d\u00e9j\u00e0 int\u00e9gr\u00e9e : vous pouvez travailler imm\u00e9diatement, sans rien importer.');
+    if(avantLancement()){
+      activerDemo();
+      document.getElementById('saveIndicator').textContent='🧪 Démo — lancement le 16 nov';
+      toast('🚀 Bienvenue ! Entraîne-toi sur le mode démo jusqu\'au lancement officiel : lundi 16 novembre, 7 h (heure Martinique).');
+    }else{
+      etat={base:BASE_EMBARQUEE,entries:{},profils:{},savedAt:null};
+      construireFiches();toutRendre();
+      document.getElementById('saveIndicator').textContent='\ud83d\udcbe Base int\u00e9gr\u00e9e ('+fiches.length+' fiches)';
+      toast('Bienvenue ! La base des '+fiches.length+' fiches du CMM est d\u00e9j\u00e0 int\u00e9gr\u00e9e : vous pouvez travailler imm\u00e9diatement, sans rien importer.');
+    }
   }else{
     etat={base:null,entries:{},savedAt:null};
     overlay.hidden=false;
   }
+  demarrerSync();
+  majBandeau();
+  setInterval(majBandeau,1000);
 }
 function traiterFichier(file){
   toast('⏳ Lecture du fichier…');
@@ -1614,5 +2323,11 @@ document.addEventListener('keydown',function(e){
 });
 init();
 </script>
+
+<div style="border-top:1px solid #d5dee3;margin-top:18px;padding-top:10px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;font-size:.72rem;color:#5a6b75">
+  <span>© Cluster Maritime de Martinique — données protégées (RGPD)</span>
+  <a href="mentions-legales.html" style="color:inherit">⚖️ Mentions légales · RGPD · Confidentialité</a>
+  <span>Système conçu par <b>PositivBusiness SASU</b> — <b>Alexandrine MILESI</b>, fondatrice</span>
+</div>
 </body>
 </html>
