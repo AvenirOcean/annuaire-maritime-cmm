@@ -1165,11 +1165,13 @@ function verifierDefisEquipe(){
   etat.defisEq=etat.defisEq||{};
   if(d.membres>=3&&etat.defisEq.coop!==auj){
     etat.defisEq.coop=auj;
+    journaliserEvenement('','defi-coop',20,'Équipe '+d.eq);
     toast('\ud83e\udd1d D\u00e9fi coop accompli : 3 membres de ton \u00e9quipe ont saisi aujourd\u2019hui ! +20 pts');
     lancerConfettis();sauvegarder();
   }
   if(d.verifJour>=12&&etat.defisEq.obj!==auj){
     etat.defisEq.obj=auj;
+    journaliserEvenement('','defi-obj',30,'Équipe '+d.eq);
     toast('\ud83d\ude80 Objectif \u00e9quipage accompli : 12 fiches de l\u2019\u00e9quipe v\u00e9rifi\u00e9es aujourd\u2019hui ! +30 pts');
     lancerConfettis();sauvegarder();
   }
@@ -1299,8 +1301,6 @@ function calculerScore(){
     if(f.prio.charAt(0)==='1'){cotisantsTotal++;if(f.statut==='V\u00e9rifi\u00e9'&&f.dte&&f.src)cotisantsVerifies++;}
   });
   if(etat.queteFait===aujourdhuiISO())total+=20;
-  if(etat.defisEq&&etat.defisEq.coop===aujourdhuiISO())total+=20;
-  if(etat.defisEq&&etat.defisEq.obj===aujourdhuiISO())total+=30;
   var score={points:total,verifiees:verifiees,nbCommunes:Object.keys(communes).length,introuvablesDoc:introuvablesDoc,telSaisis:telSaisis,cotisantsVerifies:cotisantsVerifies,cotisantsTotal:cotisantsTotal};
   score.badges=[
     {emo:'\ud83e\uded1',nom:'Premier cap',desc:'1 fiche v\u00e9rifi\u00e9e',ok:verifiees>=1},
@@ -1687,7 +1687,7 @@ function enregistrerFiche(f,passerSuivante){
   }
   var e=etat.entries[f.no]||(etat.entries[f.no]={});
   e.st=st;e.tel=tel;e.eml=eml;e.web=web;e.dte=dte;e.src=src;e.obs=obs;
-  e.auteur=profil.pseudo;e.emoji=profil.emoji;e.numero=profil.numero||0;
+  e.auteur=profil.pseudo;e.emoji=profil.emoji;e.numero=profil.numero||0;e.maj=new Date().toISOString();
   var scoreAvant=calculerScore();
   var avant=pointsFiche(f);
   construireFiches(); majStreak(); sauvegarder(); pousserSaisie(f.no);
@@ -1897,8 +1897,9 @@ function tirerSaisies(){
     for(i=0;i<liste.length;i++){
       s=liste[i];
       e=etat.entries[s.no_fiche];
+      if(e&&e.maj&&s.maj&&s.maj<e.maj){pousserSaisie(s.no_fiche);continue;}
       if(!e){e=etat.entries[s.no_fiche]={};nouvelles++;}
-      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||'';e.emoji=s.emoji||'';e.numero=s.numero||0;
+      e.st=s.statut||'';e.tel=s.tel||'';e.eml=s.eml||'';e.web=s.web||'';e.dte=s.dte||'';e.src=s.src||'';e.obs=s.obs||'';e.auteur=s.auteur||e.auteur||'';e.emoji=s.emoji||e.emoji||'';e.numero=s.numero||0;e.maj=s.maj||e.maj||'';
     }
     for(var no in etat.entries){
       if(!connus[no])pousserSaisie(no);
@@ -1927,7 +1928,7 @@ function pousserSaisie(no){
   h['Prefer']='resolution=merge-duplicates';
   fetch(SUPABASE_URL+'/rest/v1/saisies',{
     method:'POST',headers:h,
-    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||'',numero:e.numero||0})
+    body:JSON.stringify({no_fiche:no,statut:e.st||'',tel:e.tel||'',eml:e.eml||'',web:e.web||'',dte:e.dte||'',src:e.src||'',obs:e.obs||'',auteur:e.auteur||'',emoji:e.emoji||'',numero:e.numero||0,maj:e.maj||new Date().toISOString()})
   }).then(function(r){
     if(!r.ok)throw new Error('http '+r.status);
     syncIndic('📡 En ligne · synchronisé');
@@ -1935,13 +1936,13 @@ function pousserSaisie(no){
     syncIndic('📴 Envoi en attente (réessai auto)');
   });
 }
-function journaliserEvenement(no,type,points){
+function journaliserEvenement(no,type,points,auteur){
   if(estDemo())return;
   var h=headersSync();
   if(!h)return;
   var profil=profilActif();
   fetch(SUPABASE_URL+'/rest/v1/evenements',{method:'POST',headers:h,
-    body:JSON.stringify({no_fiche:String(no),auteur:profil?profil.pseudo:'',type:type||'saisie',points:points||0})
+    body:JSON.stringify({no_fiche:String(no),auteur:auteur||(profil?profil.pseudo:''),type:type||'saisie',points:points||0})
   }).catch(function(){});
 }
 function appelProf(body){
