@@ -280,6 +280,10 @@ section.vue.active{animation:vueIn .25s ease-out}
       <h3>👥 L'équipage du poste (travail par élève)</h3>
       <div id="blocEquipage"></div>
     </div>
+    <div class="progressWrap" style="margin-top:12px">
+      <h3>🏆 Compteur par élève (score des fiches réalisées)</h3>
+      <div id="blocClassement"></div>
+    </div>
   </section>
 
   <section id="vue-carte" class="vue active">
@@ -857,7 +861,7 @@ function rendreCompteurs(){
   });
   var pct=total?Math.round(100*c.verif/total):0;
   var defs=[['Total fiches',total,''],['Vérifié',c.verif,'vert'],['Pré-rempli — à confirmer',c.prem,'bleu'],['Non vérifié',c.non,'gris'],['À valider',c.avalider,''],['Structure introuvable',c.introuvable,'roug'],['Cotisants CMM (priorité 1)',c.cotisants,'ambr'],['Fermées (registre)',c.fermees,'roug']];
-  rendreRecompenses();rendreEquipage();rendreDefisEquipe();rendreQuete();
+  rendreRecompenses();rendreEquipage();rendreClassementEleves();rendreDefisEquipe();rendreQuete();
   document.getElementById('compteurs').innerHTML=defs.map(function(x){return '<div class="cpt '+x[2]+'"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';}).join('');
   var pf=document.getElementById('progressFill');
   pf.style.width=Math.max(pct,3)+'%'; pf.textContent=pct+' %';
@@ -934,6 +938,35 @@ function rendreEquipage(){
   if(nonAttribue)html+='<p style="font-size:.72rem;color:var(--gris)">'+nonAttribue+' fiche(s) travaill\u00e9e(s) avant la cr\u00e9ation des profils (non attribu\u00e9es).</p>';
   document.getElementById('blocEquipage').innerHTML=html;
 }
+function rendreClassementEleves(){
+  var el=document.getElementById('blocClassement');
+  if(!el)return;
+  var eleves={};
+  fiches.forEach(function(f){
+    if(!f.saisi||!f.auteur)return;
+    var k=f.auteur;
+    if(!eleves[k])eleves[k]={pseudo:k,emoji:'',pts:0,nb:0,verif:0};
+    if(f.emojiFiche)eleves[k].emoji=f.emojiFiche;
+    eleves[k].nb++;
+    eleves[k].pts+=pointsFiche(f);
+    if(f.statut==='Vérifié'&&f.dte&&f.src)eleves[k].verif++;
+  });
+  var rows=Object.keys(eleves).map(function(k){return eleves[k];}).sort(function(a,b){return (b.pts-a.pts)||(b.verif-a.verif)||(b.nb-a.nb);});
+  var html='';
+  if(!rows.length){
+    html='<p style="font-size:.8rem;color:var(--gris)">Aucune fiche attribuée pour le moment : enregistre une fiche avec ton profil élève pour apparaître dans ce compteur.</p>';
+  }else{
+    html=rows.map(function(r,i){
+      var rang=i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'#'+(i+1)));
+      return '<div class="equipageRow"><span class="emo">'+rang+'</span>'+
+        '<span class="info"><b>'+(r.emoji?r.emoji+' ':'')+echapperHtml(r.pseudo)+'</b>'+
+        '<div class="st">'+r.verif+' vérifiée(s) · '+r.nb+' fiche(s) travaillée(s)</div></span>'+
+        '<span class="pts">'+r.pts+' pts</span></div>';
+    }).join('');
+  }
+  el.innerHTML=html;
+}
+
 /* ===================== Profil \u00e9l\u00e8ve ===================== */
 var EMOJIS=['\u2693','\ud83d\udc2c','\ud83d\udc08','\ud83d\udc19','\ud83e\udd80','\ud83d\udc22','\u26f5','\ud83d\udea4','\ud83e\uddf3','\ud83c\udf0a','\ud83e\udd9e','\ud83d\udc0b','\ud83d\udea5','\ud83e\udd91','\ud83c\udf1e','\ud83e\uddad'];
 var emojiChoisi=null;
