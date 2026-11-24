@@ -19,6 +19,8 @@ function reponse(statut: number, corps: unknown): Response {
 }
 
 function codeValide(code: string): boolean {
+  // insensible à la casse + espaces retirés (évite les « code rejeté » bêtes)
+  if (code.toUpperCase() !== PROF_CODE.toUpperCase()) return false;
   const a = new TextEncoder().encode(code);
   const b = new TextEncoder().encode(PROF_CODE);
   let diff = a.length === b.length ? 0 : 1;
