@@ -279,7 +279,7 @@ section.vue.active{animation:vueIn .25s ease-out}
       <div id="blocEquipage"></div>
     </div>
     <div class="progressWrap" style="margin-top:12px">
-      <h3>🏆 Mon compteur (fiches réalisées, statut et grade)</h3>
+      <h3>🏆 Classement de la classe (individuel + équipes)</h3>
       <div id="blocClassement"></div>
     </div>
   </section>
@@ -933,27 +933,51 @@ function rendreClassementEleves(){
   var el=document.getElementById('blocClassement');
   if(!el)return;
   var pr=profilActif();
-  if(!pr){
-    el.innerHTML='<p style="font-size:.8rem;color:var(--gris)">Crée ton profil élève (menu ☰ → 👤 Élève) pour voir ici ton compteur individuel.</p>';
-    return;
-  }
-  var pts=0,nb=0,verif=0;
+  var eleves={};
   fiches.forEach(function(f){
-    if(f.saisi&&f.auteur===pr.pseudo){nb++;pts+=pointsFiche(f);if(f.statut==='Vérifié'&&f.dte&&f.src)verif++;}
+    if(!f.saisi||!f.auteur)return;
+    var k=f.auteur;
+    if(!eleves[k])eleves[k]={pseudo:k,emoji:'',pts:0,nb:0,verif:0};
+    if(f.emojiFiche)eleves[k].emoji=f.emojiFiche;
+    eleves[k].nb++;
+    eleves[k].pts+=pointsFiche(f);
+    if(f.statut==='Vérifié'&&f.dte&&f.src)eleves[k].verif++;
   });
-  var rang=RANGS[0],suivant=null;
-  for(var i=0;i<RANGS.length;i++)if(pts>=RANGS[i].pts)rang=RANGS[i];
-  for(var j=0;j<RANGS.length;j++)if(RANGS[j].pts>pts){suivant=RANGS[j];break;}
-  var pct=suivant?Math.min(100,Math.round(100*(pts-rang.pts)/(suivant.pts-rang.pts))):100;
-  el.innerHTML='<div class="equipageRow"><span class="emo">'+(pr.emoji||'👤')+'</span>'+
-    '<span class="info"><b>'+echapperHtml(pr.pseudo)+'</b>'+
-    (pr.statut?'<div class="st">'+echapperHtml(pr.statut)+'</div>':'')+
-    '<div class="st">'+verif+' vérifiée(s) · '+nb+' fiche(s) réalisée(s) · grade : <b>'+rang.nom+'</b></div></span>'+
-    '<span class="pts">'+pts+' pts</span></div>'+
-    '<div class="barre" style="margin-top:6px"><div style="width:'+pct+'%"></div></div>'+
-    '<div style="font-size:.72rem;color:var(--gris);margin-top:3px">'+(suivant?('Encore '+(suivant.pts-pts)+' pts pour '+suivant.nom):'Grade maximum atteint 🏆')+'</div>';
-}
-/* ===================== Profil \u00e9l\u00e8ve ===================== */
+  var rows=Object.keys(eleves).map(function(k){return eleves[k];}).sort(function(a,b){return (b.pts-a.pts)||(b.verif-a.verif)||(b.nb-a.nb);});
+  var html='';
+  if(pr){
+    var r0=null;
+    for(var q=0;q<rows.length;q++)if(rows[q].pseudo===pr.pseudo){r0=rows[q];break;}
+    var pts=r0?r0.pts:0,nb=r0?r0.nb:0,verif=r0?r0.verif:0;
+    var monRang=r0?(rows.indexOf(r0)+1):rows.length+1;
+    var rang=RANGS[0],suivant=null;
+    for(var i=0;i<RANGS.length;i++)if(pts>=RANGS[i].pts)rang=RANGS[i];
+    for(var j=0;j<RANGS.length;j++)if(RANGS[j].pts>pts){suivant=RANGS[j];break;}
+    var pct=suivant?Math.min(100,Math.round(100*(pts-rang.pts)/(suivant.pts-rang.pts))):100;
+    html+='<div class="equipageRow" style="outline:2px solid var(--accent)"><span class="emo">'+(pr.emoji||'👤')+'</span>'+
+      '<span class="info"><b>'+echapperHtml(pr.pseudo)+'</b> — <b>toi</b>'+
+      (pr.statut?'<div class="st">'+echapperHtml(pr.statut)+'</div>':'')+
+      '<div class="st">'+verif+' vérifiée(s) · '+nb+' fiche(s) réalisées · grade : <b>'+rang.nom+'</b> · <b>#'+monRang+' / '+rows.length+'</b> dans la classe</div></span>'+
+      '<span class="pts">'+pts+' pts</span></div>'+
+      '<div class="barre" style="margin:6px 0"><div style="width:'+pct+'%"></div></div>'+
+      '<div style="font-size:.72rem;color:var(--gris);margin:3px 0 10px">'+(suivant?('Encore '+(suivant.pts-pts)+' pts pour '+suivant.nom):'Grade maximum 🏆')+'</div>';
+  }else{
+    html+='<p style="font-size:.8rem;color:var(--gris);margin-bottom:8px">Crée ton profil élève (menu ☰ → 👤 Élève) pour apparaître dans le classement de la classe.</p>';
+  }
+  if(!rows.length){
+    html+='<p style="font-size:.8rem;color:var(--gris)">Aucune fiche attribuée pour le moment : enregistre une fiche avec ton profil pour entrer au classement.</p>';
+  }else{
+    html+=rows.map(function(r,i){
+      var rank=i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'#'+(i+1)));
+      var me=pr&&r.pseudo===pr.pseudo;
+      return '<div class="equipageRow"'+(me?' style="outline:2px solid var(--accent);background:var(--grisclair)"':'')+'><span class="emo">'+rank+'</span>'+
+        '<span class="info"><b>'+(r.emoji?r.emoji+' ':'')+echapperHtml(r.pseudo)+'</b>'+(me?' <b>← toi</b>':'')+
+        '<div class="st">'+r.verif+' vérifiée(s) · '+r.nb+' fiche(s)</div></span>'+
+        '<span class="pts">'+r.pts+' pts</span></div>';
+    }).join('');
+  }
+  el.innerHTML=html;
+}/* ===================== Profil \u00e9l\u00e8ve ===================== */
 var EMOJIS=['\u2693','\ud83d\udc2c','\ud83d\udc08','\ud83d\udc19','\ud83e\udd80','\ud83d\udc22','\u26f5','\ud83d\udea4','\ud83e\uddf3','\ud83c\udf0a','\ud83e\udd9e','\ud83d\udc0b','\ud83d\udea5','\ud83e\udd91','\ud83c\udf1e','\ud83e\uddad'];
 var emojiChoisi=null;
 function profilActif(){
@@ -1208,7 +1232,13 @@ function rendreDefisEquipe(){
   h+='<div class="progressBar"><div class="progressFill" style="width:'+p1+'%;background:'+(g.coop===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p1+' %</div></div>';
   h+='<p style="font-size:.8rem;margin:.6em 0 .5em"><b>Objectif \u00e9quipage :</b> <b>12 fiches</b> de la plage v\u00e9rifi\u00e9es aujourd\u2019hui \u2014 '+Math.min(d.verifJour,12)+'/12 \u00b7 r\u00e9compense : <b>+30 pts</b>'+(g.obj===auj?' \u2705':'')+'</p>';
   h+='<div class="progressBar"><div class="progressFill" style="width:'+p2+'%;background:'+(g.obj===auj?'#15803d':'linear-gradient(90deg,#0ea5e9,#38bdf8)')+'">'+p2+' %</div></div>';
-  h+='<p style="font-size:.78rem;margin:.6em 0 0">\u2694\ufe0f <b>Semaine des \u00e9quipages</b> : ton \u00e9quipe a v\u00e9rifi\u00e9 <b>'+monScore+'</b> fiche(s) cette semaine \u2014 rang <b>'+rang+'/6</b>'+(rang===1?' \ud83e\udd47':'')+'</p></div>';
+  h+='<p style="font-size:.78rem;margin:.6em 0 0">\u2694\ufe0f <b>Semaine des \u00e9quipages</b> : ton \u00e9quipe a v\u00e9rifi\u00e9 <b>'+monScore+'</b> fiche(s) cette semaine \u2014 rang <b>'+rang+'/6</b>'+(rang===1?' \ud83e\udd47':'')+'</p>';
+  h+='<div style="font-size:.78rem;margin-top:6px"><b>Classement des 6 \u00e9quipes (fiches v\u00e9rifi\u00e9es cette semaine) :</b><br>'+
+    scores.map(function(sc,q){
+      var me=(q+1)===d.eq;
+      var medal=q===0?'\ud83e\udd47':(q===1?'\ud83e\udd48':(q===2?'\ud83e\udd49':''));
+      return medal+' \u00c9quipe '+(q+1)+' \u2014 '+sc+' fiche(s)'+(me?' <b>\u2190 ton \u00e9quipe</b>':'');
+    }).join('<br>')+'</div></div>';
   el.innerHTML=h;
 }
 function ouvrirModalGenerique(html){
