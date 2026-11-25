@@ -19,7 +19,7 @@ supabase link --project-ref "$PROJECT_REF" 2>/dev/null || echo "(projet déjà l
 
 if [ ! -s "$CODE_FILE" ]; then
   umask 077
-  openssl rand -base64 24 > "$CODE_FILE"
+  openssl rand -hex 4 | tr "a-f" "A-F" | sed 's/^/CMM-PROF-/' > "$CODE_FILE"   # style CMM-PROF-XXXXXXXX
   echo ">> Nouveau code prof généré et enregistré dans $CODE_FILE (chmod 600)."
   echo ">> Donne-le DE VIVE VOIX aux profs uniquement. Ne le colle nulle part."
 fi
