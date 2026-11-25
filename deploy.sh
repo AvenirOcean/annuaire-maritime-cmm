@@ -30,10 +30,17 @@ CODE_HTTP=$(curl -s -o /dev/null -w '%{http_code}' "https://$PROJECT_REF.supabas
 echo ">> Test fonction prof-data : HTTP $CODE_HTTP (attendu 405 ; 404 = déploiement échoué)"
 [ "$CODE_HTTP" = "405" ] || { echo "!! La fonction ne répond pas 405 — vérifie 'supabase functions list' et 'supabase secrets list'."; exit 1; }
 
-echo "== 2/5 SQL (une seule fois, dans Supabase > SQL Editor) =="
-echo ">> Colle le contenu de supabase/apply-all.sql dans SQL Editor puis Run."
-read -r -p "SQL appliqué dans le dashboard ? [o/N] " ans
-[ "$ans" = "o" ] || [ "$ans" = "O" ] || { echo "OK, fais-le plus tard puis relance ./deploy.sh"; }
+echo "== 2/5 SQL (une seule fois) =="
+# Copie le SQL dans le presse-papiers : plus qu'à coller dans Supabase.
+if command -v pbcopy >/dev/null 2>&1; then cat supabase/apply-all.sql | pbcopy;
+elif command -v clip >/dev/null 2>&1; then cat supabase/apply-all.sql | clip;
+elif command -v wl-copy >/dev/null 2>&1; then cat supabase/apply-all.sql | wl-copy;
+elif command -v xclip >/dev/null 2>&1; then cat supabase/apply-all.sql | xclip -selection clipboard;
+else echo ">> Copie MANUELLEMENT le fichier supabase/apply-all.sql"; fi
+echo ">> SQL copié dans le presse-papiers."
+echo ">> Ouvre https://supabase.com/dashboard → projet annuaire-cmm → SQL Editor → New query → Ctrl+V → Run."
+read -r -p ">> SQL exécuté avec succès ? [o/N] " ans
+[ "$ans" = "o" ] || [ "$ans" = "O" ] || { echo "OK — fais-le, puis relance ./deploy.sh"; exit 0; }
 
 echo "== 3/5 Branche de déploiement =="
 git checkout app-online-v2
